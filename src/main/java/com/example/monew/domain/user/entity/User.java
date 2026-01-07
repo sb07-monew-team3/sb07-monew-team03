@@ -29,4 +29,12 @@ public class User extends BaseCreatableEntity {
 
     @Column(name="deleted_at",updatable = false)
     private Instant deletedAt;
+
+    public void deleteLogic(){
+        this.deletedAt = Instant.now();
+    }
+
+    public void updateNickName(String nickName){
+        this.nickName = nickName;
+    }
 }
