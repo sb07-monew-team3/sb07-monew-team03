@@ -8,9 +8,11 @@ import com.example.monew.domain.user.entity.User;
 import com.example.monew.domain.user.mapper.UserMapper;
 import com.example.monew.domain.user.repository.UserRepository;
 import com.example.monew.global.exception.domain.user.UserEmailExistException;
+import com.example.monew.global.exception.domain.user.UserValidationFailException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -30,7 +32,12 @@ public class IUserService implements UserService{
 
     @Override
     public UserDto loginUser(UserLoginRequest request) {
-        return null;
+
+        String email = request.email();
+        String password = request.password();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserValidationFailException(email));
+        if(!user.getPassword().equals(password)) throw new UserValidationFailException(email);
+        return userMapper.toDto(user);
     }
 
     @Override

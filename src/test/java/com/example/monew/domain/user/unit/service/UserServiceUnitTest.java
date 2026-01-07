@@ -84,6 +84,29 @@ public class UserServiceUnitTest {
     }
 
 
+    @Test
+    @DisplayName("[정상 케이스] 유저 로그인")
+    void loginUser_validUser_success() {
+        //given
+        ArgumentCaptor<String> emailArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        UserLoginRequest request = new UserLoginRequest(user.getEmail(),user.getPassword());
+
+        given(userRepository.findByEmail(any(String.class))).willReturn(Optional.of(user));
+        given(userMapper.toDto(any(User.class))).willReturn(userDto);
+
+        //when
+        var actualResult = userService.loginUser(request);
+        var expectResult = userDto;
+
+        //then
+        then(userRepository).should(times(1)).findByEmail(emailArgumentCaptor.capture());
+        then(userMapper).should(times(1)).toDto(any(User.class));
+
+        assertThat(actualResult.id()).isEqualTo(expectResult.id());
+        assertThat(emailArgumentCaptor.getValue()).isEqualTo(user.getEmail());
+
+    }
+
 
 
 }

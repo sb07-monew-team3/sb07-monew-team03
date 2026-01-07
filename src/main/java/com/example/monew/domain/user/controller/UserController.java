@@ -5,6 +5,8 @@ import com.example.monew.domain.user.dto.UserLoginRequest;
 import com.example.monew.domain.user.dto.UserRegisterRequest;
 import com.example.monew.domain.user.dto.UserUpdateRequest;
 import com.example.monew.domain.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
