@@ -8,11 +8,11 @@ import jakarta.validation.constraints.Pattern;
 @Valid
 public record UserLoginRequest(
 
-        @NotBlank
+        @NotBlank(message = "Email is required")
         @Email(message = "Invalid email pattern")
         String email,
 
-        @NotBlank
+        @NotBlank(message = "Password is required")
         String password
 ) {
 }
