@@ -33,4 +33,8 @@ public class User extends BaseCreatableEntity {
     public void deleteLogic(){
         this.deletedAt = Instant.now();
     }
+
+    public void updateNickName(String nickName){
+        this.nickName = nickName;
+    }
 }

@@ -4,6 +4,7 @@ package com.example.monew.domain.user.unit.service;
 import com.example.monew.domain.user.dto.UserDto;
 import com.example.monew.domain.user.dto.UserLoginRequest;
 import com.example.monew.domain.user.dto.UserRegisterRequest;
+import com.example.monew.domain.user.dto.UserUpdateRequest;
 import com.example.monew.domain.user.entity.User;
 import com.example.monew.domain.user.mapper.UserMapper;
 import com.example.monew.domain.user.repository.UserRepository;
@@ -125,6 +126,66 @@ public class UserServiceUnitTest {
 
         assertThat(actualResult).isTrue();
         assertThat(idArgumentCaptor.getValue()).isEqualTo(userId);
+    }
+
+    @Test
+    @DisplayName("[정상 케이스] 유저 논리 삭제 1일 후 물리 삭제")
+    void deleteUserPhysics_deleteUser_batch_success(){
+        //given
+        ArgumentCaptor<UUID> idArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
+        //when
+
+        //then
+
+    }
+
+    @Test
+    @DisplayName("[정상 케이스] 유저 물리 삭제")
+    void deleteUserPhysics_deleteUser_success(){
+
+        //given
+        ArgumentCaptor<UUID> idArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
+        UUID userId = UUID.randomUUID();
+        given(userRepository.findById(any(UUID.class))).willReturn(Optional.of(user));
+        willDoNothing().given(userRepository).deleteById(any(UUID.class));
+        //when
+        userService.deleteUserHard(userId);
+
+        //then
+        then(userRepository).should(times(1)).findById(any(UUID.class));
+        then(userRepository).should(times(1)).deleteById(idArgumentCaptor.capture());
+
+        assertThat(idArgumentCaptor.getValue()).isEqualTo(userId);
+    }
+
+    @Test
+    @DisplayName("[정상 케이스 ] 유저 닉네임 수정")
+    void updateUser_nickname_success(){
+
+        //given
+        ArgumentCaptor<UUID> idArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+
+        UUID userId = UUID.randomUUID();
+        String newNickName ="Siuuu";
+        UserDto expectedDto = new UserDto(user.getId(),user.getEmail(),newNickName,user.getCreatedAt());
+        UserUpdateRequest request = new UserUpdateRequest(newNickName);
+
+        given(userRepository.findById(any(UUID.class))).willReturn(Optional.of(user));
+        given(userMapper.toDto(any(User.class))).willReturn(expectedDto);
+
+        //when
+        userService.updateUser(userId, request);
+
+        var actualResult = user.getNickName();
+
+        //then
+        then(userRepository).should(times(1)).findById(idArgumentCaptor.capture());
+        then(userMapper).should(times(1)).toDto(userArgumentCaptor.capture());
+
+        assertThat(actualResult).isEqualTo(newNickName);
+        assertThat(idArgumentCaptor.getValue()).isEqualTo(userId);
+        assertThat(userArgumentCaptor.getValue().getNickName()).isEqualTo(newNickName);
     }
 
 

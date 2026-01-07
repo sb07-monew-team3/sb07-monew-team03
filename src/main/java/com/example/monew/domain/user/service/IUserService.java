@@ -58,11 +58,15 @@ public class IUserService implements UserService{
 
     @Override
     public UserDto updateUser(UUID userId, UserUpdateRequest request) {
-        return null;
+        String newNickName = request.nickname();
+        User user = userRepository.findById(userId).orElseThrow(()-> new UserNotExistException(userId));
+        user.updateNickName(newNickName);
+        return userMapper.toDto(user);
     }
 
     @Override
     public void deleteUserHard(UUID userId) {
-
+        User user = userRepository.findById(userId).orElseThrow(()-> new UserNotExistException(userId));
+        userRepository.deleteById(userId);
     }
 }
