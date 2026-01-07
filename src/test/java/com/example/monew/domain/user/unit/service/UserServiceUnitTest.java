@@ -1,0 +1,89 @@
+package com.example.monew.domain.user.unit.service;
+
+
+import com.example.monew.domain.user.dto.UserDto;
+import com.example.monew.domain.user.dto.UserLoginRequest;
+import com.example.monew.domain.user.dto.UserRegisterRequest;
+import com.example.monew.domain.user.entity.User;
+import com.example.monew.domain.user.mapper.UserMapper;
+import com.example.monew.domain.user.repository.UserRepository;
+import com.example.monew.domain.user.service.IUserService;
+import com.example.monew.domain.user.service.UserService;
+import com.example.monew.domain.user.util.TestFixture;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.BDDMockito.*;
+
+@ExtendWith(MockitoExtension.class)
+@DisplayName("UserService Unit Test")
+
+public class UserServiceUnitTest {
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private UserMapper userMapper;
+
+    @InjectMocks
+    private IUserService userService;
+
+    private final TestFixture testFixture = new TestFixture();
+    private User user;
+    private UserDto userDto;
+    @BeforeEach
+    void setUp() {
+        user = testFixture.userFactory();
+        userDto = new UserDto(user.getId(),user.getEmail(),user.getNickName(),user.getCreatedAt());
+
+    }
+
+    @Test
+    @DisplayName("[정상 케이스] 유저 등록")
+    void createUser_validUser_success() {
+
+
+        //given
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        ArgumentCaptor<String> emailArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        given(userRepository.save(any(User.class))).willAnswer(invocation -> invocation.getArgument(0));
+        given(userRepository.isEmailExist(any(String.class))).willReturn(false);
+        given(userMapper.toDto(any(User.class))).willReturn(userDto);
+
+        UserRegisterRequest request = new UserRegisterRequest(user.getEmail(),user.getNickName(),user.getPassword());
+
+        //when
+
+        var actualResult = userService.createUser(request);
+        var expectResult = userDto;
+
+        //then
+        then(userRepository).should(times(1)).save(userArgumentCaptor.capture());
+        then(userRepository).should(times(1)).isEmailExist(emailArgumentCaptor.capture());
+        then(userMapper).should(times(1)).toDto(any(User.class));
+
+        var isEmailExist = emailArgumentCaptor.getValue();
+        var saveUser = userArgumentCaptor.getValue();
+        var expectSaveUser = user;
+
+        assertThat(saveUser.getId()).isEqualTo(expectSaveUser.getId());
+        assertThat(actualResult.id()).isEqualTo(expectResult.id());
+        assertThat(isEmailExist).isEqualTo(user.getEmail());
+
+    }
+
+
+
+
+}
