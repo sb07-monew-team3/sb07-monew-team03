@@ -5,14 +5,18 @@ import com.example.monew.domain.interest.dto.InterestRegisterRequest;
 import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
+import com.example.monew.domain.interest.service.InterestService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,9 +44,15 @@ public class InterestServiceTest {
                 List.of("손흥민", "인테르")
         );
 
+        Interest interest = new Interest("축구");
+        ReflectionTestUtils.setField(interest, "id", UUID.randomUUID());
+        ReflectionTestUtils.setField(interest, "createdAt", Instant.now());
+
+        when(interestRepository.save(any(Interest.class)))
+                .thenReturn(interest);
+
         // when
         InterestDto result = interestService.create(request);
-
 
         // then
         assertThat(result.id()).isNotNull();
