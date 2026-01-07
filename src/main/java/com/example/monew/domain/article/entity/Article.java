@@ -41,6 +41,7 @@ public class Article extends BaseCreatableEntity {
     @ColumnDefault( "false")
     private boolean isDeleted ;
 
+    @OneToMany
     @JoinTable(
             name = "articles_interests",
             joinColumns = @JoinColumn(name = "article_id"),
