@@ -8,10 +8,14 @@ import com.example.monew.domain.user.entity.User;
 import com.example.monew.domain.user.mapper.UserMapper;
 import com.example.monew.domain.user.repository.UserRepository;
 import com.example.monew.global.exception.domain.user.UserEmailExistException;
+import com.example.monew.global.exception.domain.user.UserNotExistException;
 import com.example.monew.global.exception.domain.user.UserValidationFailException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,13 +40,20 @@ public class IUserService implements UserService{
         String email = request.email();
         String password = request.password();
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UserValidationFailException(email));
-        if(!user.getPassword().equals(password)) throw new UserValidationFailException(email);
+        if(!user.getPassword().equals(password)||
+                user.getDeletedAt()!=null
+        ) throw new UserValidationFailException(email);
+
         return userMapper.toDto(user);
     }
 
     @Override
+    @Transactional
     public void deleteUserLogic(UUID userId) {
 
+        User user = userRepository.findById(userId).orElseThrow(()-> new UserNotExistException(userId));
+        user.deleteLogic();
+        return;
     }
 
     @Override

@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
@@ -106,6 +107,26 @@ public class UserServiceUnitTest {
         assertThat(emailArgumentCaptor.getValue()).isEqualTo(user.getEmail());
 
     }
+
+    @Test
+    @DisplayName("[정상 케이스] 유저 논리 삭제")
+    void deleteUserLogic_deleteUser_success(){
+        //given
+        ArgumentCaptor<UUID> idArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
+        UUID userId = UUID.randomUUID();
+        given(userRepository.findById(any(UUID.class))).willReturn(Optional.of(user));
+
+        //when
+        userService.deleteUserLogic(userId);
+        var actualResult = user.getDeletedAt()!=null;
+
+        //then
+        then(userRepository).should(times(1)).findById(idArgumentCaptor.capture());
+
+        assertThat(actualResult).isTrue();
+        assertThat(idArgumentCaptor.getValue()).isEqualTo(userId);
+    }
+
 
 
 
