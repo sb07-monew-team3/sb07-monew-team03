@@ -16,15 +16,16 @@ public class CommonExceptionHandler {
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ErrorResponse> customExceptionHandler(CustomException e){
 
+        int statusCode = e.errorCode.getStatusCode();
         ErrorResponse errorResponse = new ErrorResponse(
                 e.timestamp,
                 e.errorCode.name(),
                 e.errorCode.getMessage(),
                 e.details,
                 e.getClass().getSimpleName(),
-                HttpStatus.BAD_REQUEST.value()
+                e.errorCode.getStatusCode()
         );
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(statusCode).body(errorResponse);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -34,20 +35,21 @@ public class CommonExceptionHandler {
         e.getBindingResult().getFieldErrors().forEach(
                 fieldError -> details.put(fieldError.getField(), fieldError.getDefaultMessage())
         );
+        int statusCode = ErrorCode.ARGUMENT_VALID_FAIL.getStatusCode();
         ErrorResponse errorResponse = new ErrorResponse(
                 Instant.now(),
                 ErrorCode.ARGUMENT_VALID_FAIL.name(),
                 ErrorCode.ARGUMENT_VALID_FAIL.getMessage(),
                 details,
                 e.getClass().getSimpleName(),
-                HttpStatus.BAD_REQUEST.value()
+                statusCode
         );
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(statusCode).body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> restExceptionHandler(Exception e){
-
+        int statusCode = ErrorCode.INTERNAL_SERVER_ERROR.getStatusCode();
         ErrorResponse errorResponse = new ErrorResponse(
 
                 Instant.now(),
@@ -55,8 +57,8 @@ public class CommonExceptionHandler {
                 ErrorCode.INTERNAL_SERVER_ERROR.getMessage(),
                 null,
                 e.getClass().getSimpleName(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value()
+                statusCode
         );
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.status(statusCode).body(errorResponse);
     }
 }
