@@ -3,6 +3,7 @@ package com.example.monew.domain.interest.unit.service;
 import com.example.monew.domain.interest.dto.InterestDto;
 import com.example.monew.domain.interest.dto.InterestRegisterRequest;
 import com.example.monew.domain.interest.entity.Interest;
+import com.example.monew.domain.interest.mapper.InterestMapper;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
 import com.example.monew.domain.interest.service.InterestService;
@@ -31,6 +32,9 @@ public class InterestServiceTest {
     @Mock
     private KeywordRepository keywordRepository;
 
+    @Mock
+    private InterestMapper interestMapper;
+
     @InjectMocks
     private InterestService interestService;
 
@@ -50,6 +54,17 @@ public class InterestServiceTest {
 
         when(interestRepository.save(any(Interest.class)))
                 .thenReturn(interest);
+
+        InterestDto interestDto = new InterestDto(
+                interest.getId(),
+                "축구",
+                List.of("손흥민", "인테르"),
+                0L,
+                false
+        );
+
+        when(interestMapper.toDto(any(Interest.class), any(List.class)))
+                .thenReturn(interestDto);
 
         // when
         InterestDto result = interestService.create(request);

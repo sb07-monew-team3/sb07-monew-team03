@@ -4,6 +4,7 @@ import com.example.monew.domain.interest.dto.InterestDto;
 import com.example.monew.domain.interest.dto.InterestRegisterRequest;
 import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.entity.Keyword;
+import com.example.monew.domain.interest.mapper.InterestMapper;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ public class InterestService {
 
     private final InterestRepository interestRepository;
     private final KeywordRepository keywordRepository;
+    private final InterestMapper interestMapper;
 
     public InterestDto create(InterestRegisterRequest request) {
 
@@ -24,17 +26,11 @@ public class InterestService {
         Interest saved = interestRepository.save(interest);
 
         List<Keyword> keywords = request.keywords().stream()
-                .map(key -> new Keyword(key, interest))
+                .map(key -> new Keyword(key, saved))
                 .toList();
 
         keywordRepository.saveAll(keywords);
 
-        return new InterestDto(
-                saved.getId(),
-                saved.getName(),
-                keywords.stream().map(Keyword::getKeyword).toList(),
-                0L,
-                false
-        );
+        return interestMapper.toDto(saved, request.keywords());
     }
 }
