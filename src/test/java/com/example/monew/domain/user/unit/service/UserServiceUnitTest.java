@@ -128,16 +128,6 @@ public class UserServiceUnitTest {
         assertThat(idArgumentCaptor.getValue()).isEqualTo(userId);
     }
 
-    @Test
-    @DisplayName("[정상 케이스] 유저 논리 삭제 1일 후 물리 삭제")
-    void deleteUserPhysics_deleteUser_batch_success(){
-        //given
-        ArgumentCaptor<UUID> idArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
-        //when
-
-        //then
-
-    }
 
     @Test
     @DisplayName("[정상 케이스] 유저 물리 삭제")

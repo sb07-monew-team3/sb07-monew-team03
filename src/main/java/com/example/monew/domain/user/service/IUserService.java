@@ -52,6 +52,7 @@ public class IUserService implements UserService{
     public void deleteUserLogic(UUID userId) {
 
         User user = userRepository.findById(userId).orElseThrow(()-> new UserNotExistException(userId));
+        if(user.getDeletedAt()!=null) throw new UserNotExistException(userId);
         user.deleteLogic();
         return;
     }
@@ -60,6 +61,7 @@ public class IUserService implements UserService{
     public UserDto updateUser(UUID userId, UserUpdateRequest request) {
         String newNickName = request.nickname();
         User user = userRepository.findById(userId).orElseThrow(()-> new UserNotExistException(userId));
+        if(user.getDeletedAt()!=null) throw new UserNotExistException(userId);
         user.updateNickName(newNickName);
         return userMapper.toDto(user);
     }
@@ -69,4 +71,6 @@ public class IUserService implements UserService{
         User user = userRepository.findById(userId).orElseThrow(()-> new UserNotExistException(userId));
         userRepository.deleteById(userId);
     }
+
+
 }
