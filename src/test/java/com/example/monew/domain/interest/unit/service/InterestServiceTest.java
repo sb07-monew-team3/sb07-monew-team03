@@ -17,9 +17,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -40,7 +42,7 @@ public class InterestServiceTest {
 
     @Test
     @DisplayName("관심사와 키워드를 등록한다")
-    void create_interestOrKeyword() {
+    void create_interestOrKeyword_success() {
 
         // given
         InterestRegisterRequest request = new InterestRegisterRequest(
@@ -75,5 +77,58 @@ public class InterestServiceTest {
         assertThat(result.keywords()).containsExactly("손흥민", "인테르");
         assertThat(result.subscriberCount()).isZero();
         assertThat(result.subscribedByMe()).isFalse();
+    }
+    
+    @Test
+    @DisplayName("관심사 이름이 없으면 예외 발생")
+    void create_nullName_throwsException() {
+
+        // given
+        InterestRegisterRequest request = new InterestRegisterRequest(
+                null,
+                List.of("아토", "최고")
+        );
+
+        // when && then
+        assertThatThrownBy(() -> interestService.create(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("관심사 이름은 필수입니다.");
+    }
+
+    @Test
+    @DisplayName("관심사 이름이 빈 문자열이면 예외 발생")
+    void create_blankName_throwsException() {
+
+        // given
+        InterestRegisterRequest request = new InterestRegisterRequest(
+                "",
+                List.of("아토", "최고")
+        );
+
+        // when && then
+        assertThatThrownBy(() -> interestService.create(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("관심사 이름은 필수입니다.");
+    }
+
+    @Test
+    @DisplayName("관심사 이름이 완전 동일하면 중복 예외 발생")
+    void create_duplicateName_throwsException() {
+
+        // given
+        InterestRegisterRequest request = new InterestRegisterRequest(
+                "축구",
+                List.of("손흥민", "인테르")
+        );
+
+        when(interestRepository.existsByName(request.name()))
+                .thenReturn(true);
+
+
+        // when && then
+        assertThatThrownBy(() -> interestService.create(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이미 존재하는 관심사입니다.");
+
     }
 }
