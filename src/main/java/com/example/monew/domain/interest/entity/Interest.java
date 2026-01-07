@@ -17,9 +17,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "interests")
 public class Interest extends BaseEntity {
 
-    @Column(name="name",nullable = false, updatable = false)
+    @Column(name="name", nullable = false, updatable = false, unique = true)
     private String name;
-
-
 
 }
