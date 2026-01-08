@@ -2,6 +2,7 @@ package com.example.monew.domain.interest.service;
 
 import com.example.monew.domain.interest.dto.InterestDto;
 import com.example.monew.domain.interest.dto.InterestRegisterRequest;
+import com.example.monew.domain.interest.dto.InterestUpdateRequest;
 import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.entity.Keyword;
 import com.example.monew.domain.interest.mapper.InterestMapper;
@@ -9,19 +10,25 @@ import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.similarity.LevenshteinDistance;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class InterestServiceImpl implements InterestService {
 
     private final InterestRepository interestRepository;
     private final KeywordRepository keywordRepository;
     private final InterestMapper interestMapper;
 
+    @Override
     public InterestDto create(InterestRegisterRequest request) {
 
         validInterestName(request.name());
@@ -37,6 +44,22 @@ public class InterestServiceImpl implements InterestService {
         keywordRepository.saveAll(keywords);
 
         return interestMapper.toDto(saved, request.keywords());
+    }
+
+    @Override
+    public InterestDto update(UUID interestId, InterestUpdateRequest request) {
+        Interest interest = interestRepository.findById(interestId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "관심사가 없습니다."));
+
+        keywordRepository.deleteByInterestId(interestId);
+
+        List<Keyword> keywords = request.keywords().stream()
+                .map(key -> new Keyword(key, interest))
+                .toList();
+
+        keywordRepository.saveAll(keywords);
+
+        return interestMapper.toDto(interest, request.keywords());
     }
 
     private void validInterestName(String name) {
