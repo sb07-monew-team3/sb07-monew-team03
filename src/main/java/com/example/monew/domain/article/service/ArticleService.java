@@ -20,8 +20,12 @@ public class ArticleService {
 
         article.deleteLogic();
         articleRepository.save(article);
+    }
+
+    public void deleteArticleHard(UUID articleId) {
+        articleRepository.findById(articleId)
+                .orElseThrow(() -> new ArticleNotExistException(articleId));
 
         articleRepository.deleteById(articleId);
     }
-
 }
