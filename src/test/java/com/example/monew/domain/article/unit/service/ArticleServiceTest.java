@@ -6,12 +6,10 @@ import com.example.monew.domain.article.entity.Article;
 import com.example.monew.domain.article.mapper.NaverArticleMapper;
 import com.example.monew.domain.article.repository.ArticleRepository;
 import com.example.monew.domain.article.service.ArticleCollectionScheduler;
-import com.example.monew.domain.article.service.ArticleService;
 import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.entity.Keyword;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,14 +17,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -108,4 +102,32 @@ class ArticleServiceTest {
             verify(articleRepository, times(1)).saveAll(anyList());
         }
     }
+
+    @Nested
+    @DisplayName("기사 삭제 테스트")
+    class DeleteArticlesTest {
+
+        @Test
+        @DisplayName("정상적으로 기사를 논리 삭제할 수 있다")
+        void softDeleteArticles_success() {
+            // given
+            UUID articleId = UUID.randomUUID();
+            Article article = mock(Article.class);
+
+            when(articleRepository.findById(articleId))
+                    .thenReturn(Optional.of(article));
+
+            when(articleRepository.save(any(Article.class)))
+                    .thenReturn(mock(Article.class));
+
+            // when
+            articleService.deleteArticleLogic(articleId);
+
+            // then
+            verify(articleRepository, times(1)).findById(articleId);
+            verify(articleRepository, times(1)).save(article);
+        }
+    }
+
+
 }
