@@ -2,8 +2,7 @@ package com.example.monew.domain.article.unit.service;
 
 import com.example.monew.domain.article.client.naver.NaverNewsClient;
 import com.example.monew.domain.article.client.naver.NaverNewsResponse;
-import com.example.monew.domain.article.dto.ArticleDto;
-import com.example.monew.domain.article.dto.Source;
+import com.example.monew.domain.article.dto.*;
 import com.example.monew.domain.article.entity.Article;
 import com.example.monew.domain.article.mapper.ArticleMapper;
 import com.example.monew.domain.article.mapper.NaverArticleMapper;
@@ -225,6 +224,33 @@ class ArticleServiceTest {
             assertThat(response).isNotNull();
 
             verify(articleRepository, times(1)).findById(articleId);
+        }
+        
+        @Test
+        @DisplayName("정상적으로 기사 목록을 조회할 수 있다")
+        void findArticleList_success() {
+            // given
+            UUID userId = UUID.randomUUID();
+
+            ArticleRequestDto articleRequestDto = new ArticleRequestDto(
+                    null,
+                    null,
+                    List.of(Source.NAVER),
+                    null,
+                    null,
+                    Order.PUBLISH_DATE,
+                    Direction.DESC,
+                    null,
+                    null,
+                    10
+            );
+
+            // when
+            CursorPageResponseArticleDto response = articleService.getArticleList(articleRequestDto, userId);
+
+            
+            // then
+            assertThat(response).isNotNull();
         }
     }
 }
