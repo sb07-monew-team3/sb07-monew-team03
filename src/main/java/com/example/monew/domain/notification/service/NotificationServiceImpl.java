@@ -40,14 +40,9 @@ public class NotificationServiceImpl implements NotificationService {
             nextCursorUUIDString = notificationDto.id().toString();
         }
 
-        CursorResponse<NotificationDto> notiDto = new CursorResponse<>(sliceDto.getContent(),
-                nextCursorUUIDString,
-                nextAfterCreatedAt,
-                sliceDto.getSize(),
-                null,
-                sliceDto.hasNext());
+        CursorResponse<NotificationDto> notiDto = NotificationDto.from(sliceDto, nextCursorUUIDString, nextAfterCreatedAt);
 
-        log.info("✅ findAllNotificationByUserId.notiDto = " + notiDto.toString());
+        log.info("✅ findAllNotificationByUserId.notiDto = " + notiDto);
 
         return notiDto;
     }

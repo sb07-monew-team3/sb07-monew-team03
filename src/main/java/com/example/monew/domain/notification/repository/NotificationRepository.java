@@ -3,7 +3,6 @@ package com.example.monew.domain.notification.repository;
 import com.example.monew.domain.notification.dto.NotificationDto;
 import com.example.monew.domain.notification.entity.Notifications;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
