@@ -12,6 +12,7 @@ import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.entity.Keyword;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
+import com.example.monew.global.exception.domain.article.ArticleNotExistException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -113,7 +115,7 @@ class ArticleServiceTest {
 
         @Test
         @DisplayName("정상적으로 기사를 논리 삭제할 수 있다")
-        void deleteArticleLogic_success() {
+        void deleteArticleSoft_success() {
             // given
             UUID articleId = UUID.randomUUID();
             Article article = new Article(
@@ -145,7 +147,7 @@ class ArticleServiceTest {
 
         @Test
         @DisplayName("정상적으로 기사를 물리 삭제할 수 있다")
-        void deleteArticle() {
+        void deleteArticleHard_success() {
             // given
             UUID articleId = UUID.randomUUID();
 
@@ -158,6 +160,22 @@ class ArticleServiceTest {
             // then
             verify(articleRepository, times(1)).findById(articleId);
             verify(articleRepository, times(1)).deleteById(articleId);
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 기사는 논리/물리 삭제할 수 없다")
+        void deleteArticle_validId_fail() {
+            // given
+            UUID articleId = UUID.randomUUID();
+
+            when(articleRepository.findById(articleId))
+                    .thenReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> articleService.deleteArticleSoft(articleId))
+                    .isInstanceOf(ArticleNotExistException.class);
+            assertThatThrownBy(() -> articleService.deleteArticleHard(articleId))
+                    .isInstanceOf(ArticleNotExistException.class);
         }
     }
 }
