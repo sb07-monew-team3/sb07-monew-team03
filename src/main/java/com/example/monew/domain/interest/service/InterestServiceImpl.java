@@ -24,14 +24,7 @@ public class InterestServiceImpl implements InterestService {
 
     public InterestDto create(InterestRegisterRequest request) {
 
-        if (request.name() == null || request.name().isBlank()) {
-            throw new IllegalArgumentException("관심사 이름은 필수입니다.");
-        }
-
-        if(interestRepository.existsByName(request.name())) {
-            throw new IllegalArgumentException("유사한 이름의 관심사가 이미 존재합니다.");
-        }
-
+        validInterestName(request.name());
         checkDuplicateName(request.name());
 
         Interest interest = new Interest(request.name());
@@ -44,6 +37,16 @@ public class InterestServiceImpl implements InterestService {
         keywordRepository.saveAll(keywords);
 
         return interestMapper.toDto(saved, request.keywords());
+    }
+
+    private void validInterestName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("관심사 이름은 필수입니다.");
+        }
+
+        if(interestRepository.existsByName(name)) {
+            throw new IllegalArgumentException("유사한 이름의 관심사가 이미 존재합니다.");
+        }
     }
 
     private void checkDuplicateName(String newName) {
