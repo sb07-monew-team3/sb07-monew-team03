@@ -2,10 +2,12 @@ package com.example.monew.domain.article.unit.service;
 
 import com.example.monew.domain.article.client.naver.NaverNewsClient;
 import com.example.monew.domain.article.client.naver.NaverNewsResponse;
+import com.example.monew.domain.article.dto.Source;
 import com.example.monew.domain.article.entity.Article;
 import com.example.monew.domain.article.mapper.NaverArticleMapper;
 import com.example.monew.domain.article.repository.ArticleRepository;
 import com.example.monew.domain.article.service.ArticleCollectionScheduler;
+import com.example.monew.domain.article.service.ArticleService;
 import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.entity.Keyword;
 import com.example.monew.domain.interest.repository.InterestRepository;
@@ -19,6 +21,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -109,10 +113,19 @@ class ArticleServiceTest {
 
         @Test
         @DisplayName("정상적으로 기사를 논리 삭제할 수 있다")
-        void softDeleteArticles_success() {
+        void deleteArticleLogic_success() {
             // given
             UUID articleId = UUID.randomUUID();
-            Article article = mock(Article.class);
+            Article article = new Article(
+                    Source.NAVER.getValue(),
+                    "",
+                    "",
+                    LocalDateTime.now(),
+                    "",
+                    false,
+                    new ArrayList<>()
+            );
+            ReflectionTestUtils.setField(article, "id", articleId);
 
             when(articleRepository.findById(articleId))
                     .thenReturn(Optional.of(article));
@@ -121,13 +134,13 @@ class ArticleServiceTest {
                     .thenReturn(mock(Article.class));
 
             // when
-            articleService.deleteArticleLogic(articleId);
+            articleService.deleteArticleSoft(articleId);
 
             // then
+            assertThat(article.isDeleted()).isTrue();
+
             verify(articleRepository, times(1)).findById(articleId);
             verify(articleRepository, times(1)).save(article);
         }
     }
-
-
 }

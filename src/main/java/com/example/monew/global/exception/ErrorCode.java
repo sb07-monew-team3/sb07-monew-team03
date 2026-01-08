@@ -6,7 +6,9 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR("Internal Server Error",500),
     USER_VALID_FAIL("User validation fail",401),
     ARGUMENT_VALID_FAIL ("Invalid argument",400),
-    USER_NOT_EXIST("User is not exist",404);
+    USER_NOT_EXIST("User is not exist",404),
+
+    ARTICLE_NOT_EXIST("Article is not exist",404),;
 
     String message;
     int statusCode;
