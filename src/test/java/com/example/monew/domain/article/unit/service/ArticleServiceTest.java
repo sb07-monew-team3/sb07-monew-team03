@@ -2,6 +2,7 @@ package com.example.monew.domain.article.unit.service;
 
 import com.example.monew.domain.article.client.naver.NaverNewsClient;
 import com.example.monew.domain.article.client.naver.NaverNewsResponse;
+import com.example.monew.domain.article.dto.ArticleDto;
 import com.example.monew.domain.article.dto.Source;
 import com.example.monew.domain.article.entity.Article;
 import com.example.monew.domain.article.mapper.NaverArticleMapper;
@@ -176,6 +177,39 @@ class ArticleServiceTest {
                     .isInstanceOf(ArticleNotExistException.class);
             assertThatThrownBy(() -> articleService.deleteArticleHard(articleId))
                     .isInstanceOf(ArticleNotExistException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("기사 조회 테스트")
+    class FindArticleTest {
+        @Test
+        @DisplayName("정상적으로 기사 단건을 조회할 수 있다")
+        void findArticle_success() {
+            // given
+            UUID userId = UUID.randomUUID();
+            UUID articleId = UUID.randomUUID();
+            Article article = new Article(
+                    Source.NAVER.getValue(),
+                    "",
+                    "",
+                    LocalDateTime.now(),
+                    "",
+                    false,
+                    new ArrayList<>()
+            );
+            ReflectionTestUtils.setField(article, "id", articleId);
+
+            when(articleRepository.findById(articleId))
+                    .thenReturn(Optional.of(article));
+
+            // when
+            ArticleDto response = articleService.getArticle(articleId, userId);
+
+            // then
+            assertThat(response).isNotNull();
+
+            verify(articleRepository, times(1)).findById(articleId);
         }
     }
 }
