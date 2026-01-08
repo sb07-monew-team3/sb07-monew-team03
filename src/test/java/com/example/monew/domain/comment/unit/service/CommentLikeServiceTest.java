@@ -42,7 +42,7 @@ class CommentLikeServiceTest {
     CommentLikeService commentLikeService;
 
     @Test
-    @DisplayName("좋아요 취소: 댓글이 없으면 404(Comment not found)")
+    @DisplayName("좋아요 취소: 댓글이 없으면 404")
     void unlike_throws404_whenCommentNotFound() {
         UUID userId = UUID.randomUUID();
         UUID commentId = UUID.randomUUID();
@@ -59,8 +59,8 @@ class CommentLikeServiceTest {
 
         verify(commentLikesRepository, never()).deleteByUserIdAndCommentId(any(), any());
     }
-    /*@Test
-    @DisplayName("좋아요: 유저가 없으면 404(User not found)")
+    @Test
+    @DisplayName("좋아요: 유저가 없으면 404")
     void like_throws404_whenUserNotFound() {
         UUID userId = UUID.randomUUID();
         UUID commentId = UUID.randomUUID();
@@ -81,7 +81,7 @@ class CommentLikeServiceTest {
     }
 
     @Test
-    @DisplayName("좋아요: 이미 좋아요가 있으면 저장하지 않는다(멱등)")
+    @DisplayName("좋아요: 이미 좋아요가 있으면 저장하지 않는다")
     void like_doesNothing_whenAlreadyLiked() {
         UUID userId = UUID.randomUUID();
         UUID commentId = UUID.randomUUID();
@@ -99,7 +99,7 @@ class CommentLikeServiceTest {
     }
 
     @Test
-    @DisplayName("좋아요: 좋아요가 없으면 새 좋아요를 저장한다")
+    @DisplayName("좋아요: 좋아요가 없으면 새 좋아요를 저장")
     void like_saves_whenNotExists() {
         UUID userId = UUID.randomUUID();
         UUID commentId = UUID.randomUUID();
@@ -122,11 +122,16 @@ class CommentLikeServiceTest {
     }
 
     @Test
-    @DisplayName("좋아요 취소: 좋아요가 없으면 삭제하지 않는다(멱등)")
+    @DisplayName("좋아요 취소: 좋아요 없으면 삭제하지 않는다")
     void unlike_doesNothing_whenNotExists() {
         UUID userId = UUID.randomUUID();
         UUID commentId = UUID.randomUUID();
 
+        Comment comment = mock(Comment.class);
+        User user = mock(User.class);
+
+        when(commentRepository.findByIdAndIsDeletedFalse(commentId)).thenReturn(Optional.of(comment));
+        when(entityManager.find(User.class, userId)).thenReturn(user);
         when(commentLikesRepository.existsByUserIdAndCommentId(userId, commentId)).thenReturn(false);
 
         commentLikeService.unlike(userId, commentId);
@@ -140,12 +145,18 @@ class CommentLikeServiceTest {
         UUID userId = UUID.randomUUID();
         UUID commentId = UUID.randomUUID();
 
+        Comment comment = mock(Comment.class);
+        User user = mock(User.class);
+
+        when(commentRepository.findByIdAndIsDeletedFalse(commentId)).thenReturn(Optional.of(comment));
+        when(entityManager.find(User.class, userId)).thenReturn(user);
         when(commentLikesRepository.existsByUserIdAndCommentId(userId, commentId)).thenReturn(true);
 
         commentLikeService.unlike(userId, commentId);
 
         verify(commentLikesRepository).deleteByUserIdAndCommentId(userId, commentId);
     }
+
 
     @Test
     @DisplayName("좋아요: 댓글/유저 조회 후 exists 체크 순서대로 호출된다")
@@ -167,5 +178,5 @@ class CommentLikeServiceTest {
         inOrder.verify(entityManager).find(User.class, userId);
         inOrder.verify(commentLikesRepository).existsByUserIdAndCommentId(userId, commentId);
         inOrder.verify(commentLikesRepository).save(any(CommentLikes.class));
-    }*/
+    }
 }
