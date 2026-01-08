@@ -259,4 +259,28 @@ public class InterestServiceTest {
                     .hasMessageContaining("관심사가 없습니다.");
         }
     }
+
+    @Nested
+    @DisplayName("관심사 삭제")
+    class DeleteInterest {
+
+        @Test
+        @DisplayName("관심사를 삭제할 수 있다")
+        void delete_interest_success() {
+
+            // given
+            Interest interest = new Interest("동물");
+            ReflectionTestUtils.setField(interest, "id", UUID.randomUUID());
+            ReflectionTestUtils.setField(interest, "createdAt", Instant.now());
+
+            when(interestRepository.findById(interest.getId()))
+                    .thenReturn(Optional.of(interest));
+            // when
+            interestService.delete(interest.getId());
+
+            // then
+            verify(interestRepository).findById(interest.getId());
+            verify(interestRepository).deleteById(interest.getId());
+        }
+    }
 }
