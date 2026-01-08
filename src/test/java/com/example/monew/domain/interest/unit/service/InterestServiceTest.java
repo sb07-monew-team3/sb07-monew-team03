@@ -2,6 +2,7 @@ package com.example.monew.domain.interest.unit.service;
 
 import com.example.monew.domain.interest.dto.InterestDto;
 import com.example.monew.domain.interest.dto.InterestRegisterRequest;
+import com.example.monew.domain.interest.dto.InterestUpdateRequest;
 import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.mapper.InterestMapper;
 import com.example.monew.domain.interest.repository.InterestRepository;
@@ -24,7 +25,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class InterestServiceTest {
@@ -215,15 +216,15 @@ public class InterestServiceTest {
 
             when(interestRepository.findById(interest.getId()))
                     .thenReturn(Optional.of(interest));
+            doNothing().when(keywordRepository).deleteByInterestId(interest.getId());
 
             InterestDto interestDto = new InterestDto(
                     interest.getId(),
-                    "강아지",
+                    "축구",
                     newKeywords,
                     0L,
                     false
             );
-
 
             when(interestMapper.toDto(any(Interest.class), any(List.class)))
                     .thenReturn(interestDto);
@@ -231,11 +232,12 @@ public class InterestServiceTest {
             // when
             InterestDto result = interestService.update(interest.getId(), request);
 
-
             // then
             assertThat(result.id()).isNotNull();
             assertThat(result.keywords()).containsExactly("손흥민", "인테르", "챔스");
 
+            verify(keywordRepository).deleteByInterestId(interest.getId());
+            verify(keywordRepository).saveAll(anyList());
         }
     }
 }
