@@ -27,7 +27,7 @@ public class User extends BaseCreatableEntity {
     @Column(name="password",nullable = false,updatable = false,length = 100)
     private String password;
 
-    @Column(name="deleted_at",updatable = false)
+    @Column(name="deleted_at")
     private Instant deletedAt;
 
     public void deleteLogic(){
