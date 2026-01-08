@@ -4,6 +4,7 @@ import com.example.monew.domain.notification.dto.NotificationDto;
 import com.example.monew.domain.notification.entity.Notifications;
 import com.example.monew.domain.notification.repository.NotificationRepository;
 import com.example.monew.domain.notification.response.CursorResponse;
+import com.example.monew.global.exception.domain.notification.NotificationNotExistException;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -31,16 +32,16 @@ public class NotificationServiceImpl implements NotificationService {
         Slice<NotificationDto> sliceDto = notiRepository.findAllNotificationByUserId(userId, createdAt, pageable);
 
         Instant nextAfterCreatedAt = null;
-        UUID nextCursorUUID = null;
+        String nextCursorUUIDString = null;
 
         if (!sliceDto.getContent().isEmpty()) {
             NotificationDto notificationDto = sliceDto.getContent().get(sliceDto.getContent().size() - 1);
             nextAfterCreatedAt = notificationDto.createdAt();
-            nextCursorUUID = notificationDto.id();
+            nextCursorUUIDString = notificationDto.id().toString();
         }
 
         CursorResponse<NotificationDto> notiDto = new CursorResponse<>(sliceDto.getContent(),
-                nextCursorUUID.toString(),
+                nextCursorUUIDString,
                 nextAfterCreatedAt,
                 sliceDto.getSize(),
                 null,
@@ -63,10 +64,8 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     @Override
     public void checkNotification(UUID notificationId, UUID userId) {
-        Notifications notifications = notiRepository.findAllByIdAndUserId(notificationId, userId)
-            .orElseThrow(() -> new IllegalArgumentException(
-                "🚨 checkNotification.notificationId = " + notificationId.toString() + "/ userId = "
-                    + userId.toString()));
+        Notifications notifications = notiRepository.findByIdAndUserId(notificationId, userId)
+            .orElseThrow(() -> new NotificationNotExistException(notificationId, userId));
 
         notifications.checkNotificationRead(userId);
 

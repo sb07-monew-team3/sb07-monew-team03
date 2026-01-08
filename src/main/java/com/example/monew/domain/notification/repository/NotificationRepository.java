@@ -30,5 +30,5 @@ public interface NotificationRepository extends JpaRepository<Notifications, UUI
         Pageable pageable);
 
     List<Notifications> findAllByUserId(UUID userId);
-    Optional<Notifications> findAllByIdAndUserId(UUID notificationId, UUID userId);
+    Optional<Notifications> findByIdAndUserId(UUID notificationId, UUID userId);
 }

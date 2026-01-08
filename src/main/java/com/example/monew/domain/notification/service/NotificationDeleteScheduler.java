@@ -26,7 +26,7 @@ public class NotificationDeleteScheduler {
 
         if (!notificationsList.isEmpty()) {
             notificationRepository.deleteAll(notificationsList);
-            log.info("⏰ NotificationDeleteScheduler ⭕️");
+            log.info("⏰ NotificationDeleteScheduler ⭕️ - 노티 배치 삭제 완료");
         }
         else {
             log.info("⏰ NotificationDeleteScheduler ❌️ -  삭제할 노티 없음");
