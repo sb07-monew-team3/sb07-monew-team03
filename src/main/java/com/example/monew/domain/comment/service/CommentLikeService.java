@@ -24,15 +24,10 @@ public class CommentLikeService {
     private final EntityManager entityManager;
 
     public void like(UUID userId, UUID commentId) {
-        Comment comment = commentRepository.findByIdAndIsDeletedFalse(commentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+        Comment comment = getCommentOrThrow(commentId);
+        User user = getUserOrThrow(userId);
 
-        User user = entityManager.find(User.class, userId);
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
-
-        if (commentLikesRepository.existsByUser_IdAndComment_Id(userId, commentId)) {
+        if (commentLikesRepository.existsByUserIdAndCommentId(userId, commentId)) {
             return;
         }
 
@@ -40,9 +35,26 @@ public class CommentLikeService {
     }
 
     public void unlike(UUID userId, UUID commentId) {
-        if (!commentLikesRepository.existsByUser_IdAndComment_Id(userId, commentId)) {
+        getCommentOrThrow(commentId);
+        getUserOrThrow(userId);
+
+        if (!commentLikesRepository.existsByUserIdAndCommentId(userId, commentId)) {
             return;
         }
-        commentLikesRepository.deleteByUser_IdAndComment_Id(userId, commentId);
+
+        commentLikesRepository.deleteByUserIdAndCommentId(userId, commentId);
+    }
+
+    private Comment getCommentOrThrow(UUID commentId) {
+        return commentRepository.findByIdAndIsDeletedFalse(commentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+    }
+
+    private User getUserOrThrow(UUID userId) {
+        User user = entityManager.find(User.class, userId);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+        return user;
     }
 }
