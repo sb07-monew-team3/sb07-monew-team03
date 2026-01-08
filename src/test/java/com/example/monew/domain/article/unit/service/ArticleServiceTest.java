@@ -142,5 +142,22 @@ class ArticleServiceTest {
             verify(articleRepository, times(1)).findById(articleId);
             verify(articleRepository, times(1)).save(article);
         }
+
+        @Test
+        @DisplayName("정상적으로 기사를 물리 삭제할 수 있다")
+        void deleteArticle() {
+            // given
+            UUID articleId = UUID.randomUUID();
+
+            when(articleRepository.findById(articleId))
+                    .thenReturn(Optional.of(mock(Article.class)));
+
+            // when
+            articleService.deleteArticleHard(articleId);
+
+            // then
+            verify(articleRepository, times(1)).findById(articleId);
+            verify(articleRepository, times(1)).deleteById(articleId);
+        }
     }
 }
