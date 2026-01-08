@@ -62,6 +62,14 @@ public class InterestServiceImpl implements InterestService {
         return interestMapper.toDto(interest, request.keywords());
     }
 
+    @Override
+    public void delete(UUID interestId) {
+        interestRepository.findById(interestId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "관심사가 없습니다."));
+
+        interestRepository.deleteById(interestId);
+    }
+
     private void validInterestName(String name) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("관심사 이름은 필수입니다.");
