@@ -1,8 +1,11 @@
 package com.example.monew.domain.user.repository;
 
 import com.example.monew.domain.user.entity.QUser;
+import com.example.monew.domain.user.entity.User;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepositoryCustom {
@@ -15,5 +18,12 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
                 .from(QUser.user)
                 .where(QUser.user.email.eq(email))
                 .fetchOne() != null;
+    }
+
+    @Override
+    public List<User> findLogicDeleteUser() {
+        return jpaQueryFactory.selectFrom(QUser.user)
+                .where(QUser.user.deletedAt.isNotNull())
+                .fetch();
     }
 }
