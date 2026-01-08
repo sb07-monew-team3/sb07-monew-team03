@@ -40,4 +40,10 @@ public class Comment  extends BaseCreatableEntity {
     @Column(name="is_deleted",nullable = false)
     private boolean isDeleted;
 
+    public void delete(){
+        this.isDeleted = true;
+    }
+    public void updateContent(String content) {
+        this.content = content;
+    }
 }
