@@ -48,6 +48,9 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     developmentOnly 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
 
+    // levenshteinDistance (문자열 간 유사도 알고리즘)
+    implementation 'org.apache.commons:commons-text:1.10.0'
+
     // querydsl generated 경로 설정
     def querydslDir = "build/generated/querydsl"
 
