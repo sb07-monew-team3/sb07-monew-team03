@@ -1,7 +1,7 @@
 package com.example.monew.domain.notification.service;
 
 import com.example.monew.domain.notification.dto.NotificationDto;
-import com.example.monew.domain.notification.entity.Notification;
+import com.example.monew.domain.notification.entity.Notifications;
 import com.example.monew.domain.notification.repository.NotificationRepository;
 import com.example.monew.domain.notification.response.CursorResponse;
 import java.time.Instant;
@@ -63,12 +63,12 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     @Override
     public void checkNotification(UUID notificationId, UUID userId) {
-        Notification notification = notiRepository.findAllByIdAndUserId(notificationId, userId)
+        Notifications notifications = notiRepository.findAllByIdAndUserId(notificationId, userId)
             .orElseThrow(() -> new IllegalArgumentException(
                 "🚨 checkNotification.notificationId = " + notificationId.toString() + "/ userId = "
                     + userId.toString()));
 
-        notification.checkNotificationRead(userId);
+        notifications.checkNotificationRead(userId);
 
         log.info("✅ allCheckNotification.userId = " + userId.toString());
     }

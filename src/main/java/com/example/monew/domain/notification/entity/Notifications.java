@@ -18,7 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Table(name = "notifications")
-public class Notification extends BaseCreatableEntity {
+public class Notifications extends BaseCreatableEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

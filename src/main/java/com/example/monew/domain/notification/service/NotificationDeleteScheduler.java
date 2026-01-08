@@ -1,8 +1,9 @@
 package com.example.monew.domain.notification.service;
 
-import com.example.monew.domain.notification.entity.Notification;
+import com.example.monew.domain.notification.entity.Notifications;
 import com.example.monew.domain.notification.repository.NotificationRepository;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,11 +21,11 @@ public class NotificationDeleteScheduler {
     @Scheduled(fixedRate = BATCH_INTERVAL)
     public void deleteNotification() {
         // 확인한 알림 중 1주일이 경과된 알림은 자동으로 삭제됩니다.
-        LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
-        List<Notification> notificationList = notificationRepository.findBatchDeleteNotification(oneWeekAgo);
+        Instant oneWeekAgo = Instant.now().minus(7, ChronoUnit.DAYS);
+        List<Notifications> notificationsList = notificationRepository.findBatchDeleteNotification(oneWeekAgo);
 
-        if (!notificationList.isEmpty()) {
-            notificationRepository.deleteAll(notificationList);
+        if (!notificationsList.isEmpty()) {
+            notificationRepository.deleteAll(notificationsList);
             log.info("⏰ NotificationDeleteScheduler ⭕️");
         }
         else {
