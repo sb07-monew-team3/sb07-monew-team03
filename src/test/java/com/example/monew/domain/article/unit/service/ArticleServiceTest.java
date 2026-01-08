@@ -5,10 +5,13 @@ import com.example.monew.domain.article.client.naver.NaverNewsResponse;
 import com.example.monew.domain.article.dto.ArticleDto;
 import com.example.monew.domain.article.dto.Source;
 import com.example.monew.domain.article.entity.Article;
+import com.example.monew.domain.article.mapper.ArticleMapper;
 import com.example.monew.domain.article.mapper.NaverArticleMapper;
 import com.example.monew.domain.article.repository.ArticleRepository;
+import com.example.monew.domain.article.repository.ArticleViewRepository;
 import com.example.monew.domain.article.service.ArticleCollectionScheduler;
 import com.example.monew.domain.article.service.ArticleService;
+import com.example.monew.domain.comment.repository.CommentRepository;
 import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.entity.Keyword;
 import com.example.monew.domain.interest.repository.InterestRepository;
@@ -41,16 +44,25 @@ class ArticleServiceTest {
     private ArticleRepository articleRepository;
 
     @Mock
+    private ArticleViewRepository articleViewRepository;
+
+    @Mock
     private InterestRepository interestRepository;
 
     @Mock
     private KeywordRepository keywordRepository;
 
     @Mock
+    private CommentRepository commentRepository;
+
+    @Mock
     private NaverNewsClient naverNewsClient;
 
     @Mock
     private NaverArticleMapper naverArticleMapper;
+
+    @Mock
+    private ArticleMapper articleMapper;
 
     @InjectMocks
     private ArticleService articleService;
@@ -202,6 +214,9 @@ class ArticleServiceTest {
 
             when(articleRepository.findById(articleId))
                     .thenReturn(Optional.of(article));
+
+            when(articleMapper.toDto(article, userId))
+                    .thenReturn(mock(ArticleDto.class));
 
             // when
             ArticleDto response = articleService.getArticle(articleId, userId);
