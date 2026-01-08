@@ -27,6 +27,7 @@ public class IUserService implements UserService{
     private final UserMapper userMapper;
 
     @Override
+    @Transactional
     public UserDto createUser(UserRegisterRequest request) {
         String email = request.email();
         if( userRepository.isEmailExist(email)) throw new UserEmailExistException(email);
@@ -35,6 +36,7 @@ public class IUserService implements UserService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto loginUser(UserLoginRequest request) {
 
         String email = request.email();
@@ -58,6 +60,7 @@ public class IUserService implements UserService{
     }
 
     @Override
+    @Transactional
     public UserDto updateUser(UUID userId, UserUpdateRequest request) {
         String newNickName = request.nickname();
         User user = userRepository.findById(userId).orElseThrow(()-> new UserNotExistException(userId));
@@ -67,6 +70,7 @@ public class IUserService implements UserService{
     }
 
     @Override
+    @Transactional
     public void deleteUserHard(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow(()-> new UserNotExistException(userId));
         userRepository.deleteById(userId);
