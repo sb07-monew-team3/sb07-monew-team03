@@ -1,10 +1,14 @@
 package com.example.monew.domain.article.unit.service;
 
 import com.example.monew.domain.article.client.naver.NaverNewsClient;
+import com.example.monew.domain.article.client.naver.NaverNewsResponse;
+import com.example.monew.domain.article.entity.Article;
 import com.example.monew.domain.article.mapper.NaverArticleMapper;
 import com.example.monew.domain.article.repository.ArticleRepository;
 import com.example.monew.domain.article.service.ArticleCollectionScheduler;
 import com.example.monew.domain.article.service.ArticleService;
+import com.example.monew.domain.interest.entity.Interest;
+import com.example.monew.domain.interest.entity.Keyword;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
 import org.assertj.core.api.Assertions;
@@ -67,8 +71,10 @@ class ArticleServiceTest {
             Keyword keyword = new Keyword("비트코인", interest);
             ReflectionTestUtils.setField(keyword, "id", UUID.randomUUID());
 
-            Article article = new Article();
-            ReflectionTestUtils.setField(article, "id", UUID.randomUUID());
+            Article article = mock(Article.class);
+            Article article2 = mock(Article.class);
+
+            NaverNewsResponse response = mock(NaverNewsResponse.class);
 
             when(interestRepository.findAll())
                     .thenReturn(List.of(interest));
@@ -76,18 +82,17 @@ class ArticleServiceTest {
             when(keywordRepository.findAllByInterestId(interest.getId()))
                     .thenReturn(List.of(keyword));
 
-            NaverNewsResponse response = mock(NaverNewsResponse.class);
-            when(naverNewsClient.search("금리"))
+            when(naverNewsClient.search("비트코인"))
                     .thenReturn(response);
 
             when(naverArticleMapper.toArticleList(any(), anyList()))
-                    .thenReturn(mock(Article.class));
+                    .thenReturn(List.of(article, article2));
 
-            when(articleRepository.findAllBySourceUrlIn(anySet())
-                    .thenReturn(List.of(article));
+            when(articleRepository.findAllBySourceUrlIn(anySet()))
+                    .thenReturn(List.of());
 
             when(articleRepository.saveAll(anyList()))
-                    .thenReturn(List.of(article));
+                    .thenReturn(List.of(article, article2));
 
             //when
             articleCollectionScheduler.collectArticles();
