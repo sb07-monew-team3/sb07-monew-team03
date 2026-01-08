@@ -1,4 +1,19 @@
 package com.example.monew.domain.interest.repository;
 
-public interface InterestRepository {
+import com.example.monew.domain.interest.entity.Interest;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public interface InterestRepository extends JpaRepository<Interest, UUID> {
+
+    Optional<Interest> findByName(String name);
+
+    boolean existsByName(String name);
+
+    @Query("SELECT i.name FROM Interest i")
+    List<String> findAllNames();
 }
