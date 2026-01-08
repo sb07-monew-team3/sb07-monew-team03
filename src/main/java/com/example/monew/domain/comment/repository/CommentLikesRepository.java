@@ -7,9 +7,9 @@ import java.util.UUID;
 
 public interface CommentLikesRepository extends JpaRepository<CommentLikes, UUID> {
 
-    boolean existsByUser_IdAndComment_Id(UUID userId, UUID commentId);
+    boolean existsByUserIdAndCommentId(UUID userId, UUID commentId);
 
     long countByComment_Id(UUID commentId);
 
-    void deleteByUser_IdAndComment_Id(UUID userId, UUID commentId);
+    void deleteByUserIdAndCommentId(UUID userId, UUID commentId);
 }

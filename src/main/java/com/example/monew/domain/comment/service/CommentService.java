@@ -84,7 +84,7 @@ public class CommentService {
 
     private CommentResponse toResponse(Comment comment, UUID requesterUserId) {
         long likeCount = commentLikesRepository.countByComment_Id(comment.getId());
-        boolean likedByMe = commentLikesRepository.existsByUser_IdAndComment_Id(requesterUserId, comment.getId());
+        boolean likedByMe = commentLikesRepository.existsByUserIdAndCommentId(requesterUserId, comment.getId());
 
         return new CommentResponse(
                 comment.getId(),
