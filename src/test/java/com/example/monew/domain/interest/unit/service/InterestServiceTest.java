@@ -15,7 +15,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.List;
@@ -238,6 +240,23 @@ public class InterestServiceTest {
 
             verify(keywordRepository).deleteByInterestId(interest.getId());
             verify(keywordRepository).saveAll(anyList());
+        }
+        @Test
+        @DisplayName("존재하지 않는 관심사로 수정 시 예외 발생")
+        void update_notFoundInterest_throwsException() {
+
+            // given
+            UUID interestId = UUID.randomUUID();
+            List<String> keywords = List.of("산책", "날씨");
+            InterestUpdateRequest request = new InterestUpdateRequest(keywords);
+
+            when(interestRepository.findById(interestId))
+                    .thenReturn(Optional.empty());
+
+            // when && then
+            assertThatThrownBy(() -> interestService.update(interestId, request))
+                    .isInstanceOf(ResponseStatusException.class)
+                    .hasMessageContaining("관심사가 없습니다.");
         }
     }
 }
