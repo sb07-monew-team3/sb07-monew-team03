@@ -18,6 +18,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -195,5 +196,46 @@ public class InterestServiceTest {
             // then
             assertThat(result).isNotNull();
         }    
+    }
+    @Nested
+    @DisplayName("관심사 키워드 수정")
+    class UpdateInterestKeywords {
+
+        @Test
+        @DisplayName("키워드를 수정할 수 있다")
+        void update_keywords_success() {
+
+            // given
+            Interest interest = new Interest("축구");
+            ReflectionTestUtils.setField(interest, "id", UUID.randomUUID());
+
+            List<String> newKeywords = List.of("손흥민", "인테르", "챔스");
+
+            InterestUpdateRequest request = new InterestUpdateRequest(newKeywords);
+
+            when(interestRepository.findById(interest.getId()))
+                    .thenReturn(Optional.of(interest));
+
+            InterestDto interestDto = new InterestDto(
+                    interest.getId(),
+                    "강아지",
+                    newKeywords,
+                    0L,
+                    false
+            );
+
+
+            when(interestMapper.toDto(any(Interest.class), any(List.class)))
+                    .thenReturn(interestDto);
+
+            // when
+            InterestDto result = interestService.update(interest.getId(), request);
+
+
+            // then
+            assertThat(result.id()).isNotNull();
+            assertThat(result.keywords()).containsExactly("손흥민", "인테르", "챔스");
+
+        }
     }
 }
