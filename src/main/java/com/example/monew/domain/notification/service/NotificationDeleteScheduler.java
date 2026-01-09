@@ -16,20 +16,10 @@ import org.springframework.stereotype.Service;
 public class NotificationDeleteScheduler {
     static final long BATCH_INTERVAL = 1000 * 60 * 60 * 24; // 매일 호출
 
-    private final NotificationRepository notificationRepository;
+    private final NotificationService notiService;
 
     @Scheduled(fixedRate = BATCH_INTERVAL)
-    public void deleteNotification() {
-        // 확인한 알림 중 1주일이 경과된 알림은 자동으로 삭제됩니다.
-        Instant oneWeekAgo = Instant.now().minus(7, ChronoUnit.DAYS);
-        List<Notifications> notificationsList = notificationRepository.findBatchDeleteNotification(oneWeekAgo);
-
-        if (!notificationsList.isEmpty()) {
-            notificationRepository.deleteAll(notificationsList);
-            log.info("⏰ NotificationDeleteScheduler ⭕️ - 노티 배치 삭제 완료");
-        }
-        else {
-            log.info("⏰ NotificationDeleteScheduler ❌️ -  삭제할 노티 없음");
-        }
+    public void deleteNotificationInBatch() {
+        notiService.deleteNotificationInBatch();
     }
 }

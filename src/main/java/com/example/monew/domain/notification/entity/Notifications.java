@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -38,6 +39,7 @@ public class Notifications extends BaseCreatableEntity {
     @ColumnDefault( "false")
     private boolean isRead;
 
+    @Setter(AccessLevel.PROTECTED)
     @LastModifiedDate
     @Column(columnDefinition = "timestamp with time zone")
     private Instant updatedAt;
@@ -46,5 +48,15 @@ public class Notifications extends BaseCreatableEntity {
         if(this.user.getId().equals(userId)) {
             this.isRead = true;
         }
+    }
+
+    public String toString(){
+        return "\n📮Notifications{" +
+//                "id =" + getId() +
+//                ", updatedAt=" + updatedAt +
+                ", createdAt=" + super.getCreatedAt() +
+                ", content='" + content + '\'' +
+                ", isRead=" + isRead +
+                '}';
     }
 }

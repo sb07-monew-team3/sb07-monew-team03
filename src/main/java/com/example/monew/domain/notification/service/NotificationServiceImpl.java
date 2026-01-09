@@ -6,6 +6,8 @@ import com.example.monew.domain.notification.repository.NotificationRepository;
 import com.example.monew.domain.notification.response.CursorResponse;
 import com.example.monew.global.exception.domain.notification.NotificationNotExistException;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notiRepository;
@@ -65,5 +66,23 @@ public class NotificationServiceImpl implements NotificationService {
         notifications.checkNotificationRead(userId);
 
         log.info("✅ allCheckNotification.userId = " + userId.toString());
+    }
+
+    @Transactional
+    @Override
+    public void deleteNotificationInBatch() {
+        // 확인한 알림 중 1주일이 경과된 알림은 자동으로 삭제됩니다.
+        Instant oneWeekAgo = Instant.now().minus(7, ChronoUnit.DAYS);
+
+        List<Notifications> notificationsList = notiRepository.findBatchDeleteNotification(oneWeekAgo);
+        System.out.println("notificationsList = " + notificationsList);
+
+        if (!notificationsList.isEmpty()) {
+            notiRepository.deleteAll(notificationsList);
+            log.info("⏰ NotificationDeleteScheduler ⭕️ - 노티 배치 삭제 완료");
+        }
+        else {
+            log.info("⏰ NotificationDeleteScheduler ❌️ -  삭제할 노티 없음");
+        }
     }
 }

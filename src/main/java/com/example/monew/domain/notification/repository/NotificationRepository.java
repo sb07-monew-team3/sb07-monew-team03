@@ -15,7 +15,7 @@ import org.springframework.data.repository.query.Param;
 public interface NotificationRepository extends JpaRepository<Notifications, UUID> {
     // 확인한 알림 중 1주일이 경과된 알림은 자동으로 삭제됩니다
     @Query("SELECT n FROM Notifications n "
-        + "WHERE n.isRead = true AND n.createdAt < :oneWeekAgoDate")
+        + "WHERE n.isRead = true AND n.createdAt <= :oneWeekAgoDate")
     List<Notifications> findBatchDeleteNotification(@Param("oneWeekAgoDate") Instant oneWeekAgoDate);
 
     // 확인하지 않은 알림만 조회합니다.

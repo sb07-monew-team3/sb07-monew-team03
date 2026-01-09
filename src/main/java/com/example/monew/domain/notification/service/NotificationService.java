@@ -9,4 +9,6 @@ public interface NotificationService {
     CursorResponse<NotificationDto> findAllNotificationByUserId( UUID userId, String cursor, Instant after, int limit);
     void allCheckNotification( UUID userId);
     void checkNotification( UUID notificationId, UUID userId);
+
+    void deleteNotificationInBatch();
 }
