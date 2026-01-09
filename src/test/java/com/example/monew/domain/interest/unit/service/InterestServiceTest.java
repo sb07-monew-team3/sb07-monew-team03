@@ -306,8 +306,8 @@ public class InterestServiceTest {
     class searchInterest {
         
         @Test
-        @DisplayName("관심사 이름과 키워드로 조회할 수 있다")
-        void search_interestNameOrKeyword_success() {
+        @DisplayName("관심사 이름으로 조회할 수 있다")
+        void search_interestName_success() {
 
             // given
             String searchKeyword = "동물";
@@ -340,5 +340,58 @@ public class InterestServiceTest {
             assertThat(result.get(0).keywords()).containsExactly("강아지", "고양이");
         }
 
+        @Test
+        @DisplayName("키워드 이름으로 조회할 수 있다")
+        void search_keywordName_success() {
+
+            // given
+            String searchKeyword = "축구";
+            Interest interest = new Interest("스포츠");
+            ReflectionTestUtils.setField(interest, "id", UUID.randomUUID());
+            ReflectionTestUtils.setField(interest, "createdAt", Instant.now());
+            List<String> keywords = List.of("축구", "야구");
+
+            when(interestRepository.searchByInterestOrKeyword(("축구")))
+                    .thenReturn(List.of(interest));
+
+            InterestDto interestDto = new InterestDto(
+                    interest.getId(),
+                    "스포츠",
+                    keywords,
+                    0L,
+                    false
+            );
+
+            when(interestMapper.toDto(any(Interest.class), any(List.class)))
+                    .thenReturn(interestDto);
+
+            // when
+            List<InterestDto> result = interestService.search(searchKeyword);
+
+
+            // then
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).name()).isEqualTo("스포츠");
+            assertThat(result.get(0).keywords()).containsExactly("축구", "야구");
+
+        }
+        
+        @Test
+        @DisplayName("조회 결과가 없으면 빈 리스트 반환한다")
+        void search_emptyResult_returnEmptyList() {
+
+            // given
+            String keyword = "동물";
+
+            when(interestRepository.searchByInterestOrKeyword(keyword))
+                    .thenReturn(List.of());
+
+            // when
+            List<InterestDto> search = interestService.search(keyword);
+
+            // then
+            assertThat(search).isEmpty();
+            assertThat(search).hasSize(0);
+        }
     }
 }
