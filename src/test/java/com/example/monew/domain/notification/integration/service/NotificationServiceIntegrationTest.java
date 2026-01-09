@@ -52,9 +52,9 @@ public class NotificationServiceIntegrationTest {
 
         //then
         List<Notifications> results = notiRepository.findAllByUserId(user.getId())
-                                        .stream()
-                                            .peek(noti -> noti.toString())
-                                                .toList();
+            .stream()
+            .peek(noti -> noti.toString())
+            .toList();
 
         assertThat(results).hasSize(1);
         assertThat(results.get(0).getContent()).isEqualTo("💌noti 1");
