@@ -33,17 +33,17 @@ public class NotificationServiceIntegrationTest {
     NotiFactory notiFactory;
 
     @Test
-    @DisplayName("case ⭕️ - 배치 처리 확인 > 확인한 알림 중 1주일이 경과된 알림은 자동으로 삭제됩니다")
+    @DisplayName("case  - 배치 처리 확인 > 확인한 알림 중 1주일이 경과된 알림은 자동으로 삭제됩니다")
     void deleteNotificationInBatch() {
         //given
         User user = notiFactory.newUser();
         userRepository.save(user);
 
-        notiFactory.newNoti(user, "💌noti 1", 3, false);  // 미확인 + 3일 경과 - ❌
-        notiFactory.newNoti(user, "💌noti 2", 7, false);  // 미확인 + 1주일 경과 - ❌
-        notiFactory.newNoti(user, "💌noti 3", 3, true);   // 확인 + 3일 경과 - ❌
-        notiFactory.newNoti(user, "💌noti 4", 7, true);   // 확인 + 1주일 경과  -  ⭕️
-        notiFactory.newNoti(user, "💌noti 5", 7, true);   // 확인 + 1주일 경과  -  ⭕️
+        notiFactory.newNoti(user, "noti 1", 3, false);  // 미확인 + 3일 경과 - X
+        notiFactory.newNoti(user, "noti 2", 7, false);  // 미확인 + 1주일 경과 - X
+        notiFactory.newNoti(user, "noti 3", 3, true);   // 확인 + 3일 경과 - X
+        notiFactory.newNoti(user, "noti 4", 7, true);   // 확인 + 1주일 경과  -  o
+        notiFactory.newNoti(user, "noti 5", 7, true);   // 확인 + 1주일 경과  -  o
 
         //when
         notiService.deleteNotificationInBatch();
@@ -54,12 +54,12 @@ public class NotificationServiceIntegrationTest {
         //then
         List<Notifications> results = notiRepository.findAllByUserId(user.getId())
             .stream()
-            .peek(noti -> System.out.println("✅ 배치 삭제 후 남은 노티 : " + noti.toString()))
+            .peek(noti -> System.out.println(" 배치 삭제 후 남은 노티 : " + noti.toString()))
             .toList();
 
         assertThat(results).hasSize(3);
-        assertThat(results.get(0).getContent()).isEqualTo("💌noti 1");
-        assertThat(results.get(1).getContent()).isEqualTo("💌noti 2");
-        assertThat(results.get(2).getContent()).isEqualTo("💌noti 3");
+        assertThat(results.get(0).getContent()).isEqualTo("noti 1");
+        assertThat(results.get(1).getContent()).isEqualTo("noti 2");
+        assertThat(results.get(2).getContent()).isEqualTo("noti 3");
     }
 }

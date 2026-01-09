@@ -41,7 +41,7 @@ public class NotificationController {
 ) {
         // 알림 목록을 조회합니다.
 
-        log.info("✅ findAllNotificationByUserId.cursor = " + cursor
+        log.info(" findAllNotificationByUserId.cursor = " + cursor
             + " / after = " + after.toString()
             + " / limit = " + limit
             + " / userId = " + userId.toString());
@@ -59,7 +59,7 @@ public class NotificationController {
         @NotNull UUID userId) {
         // 전체 알림을 한번에 확인합니다.
 
-        log.info("✅ allCheckNotification.userId = " + userId.toString());
+        log.info(" allCheckNotification.userId = " + userId.toString());
 
         service.allCheckNotification(userId);
 
@@ -76,7 +76,7 @@ public class NotificationController {
         @NotNull UUID userId) {
         // 알림을 확인합니다.
 
-        log.info("✅ checkNotification.notificationId = " + notificationId.toString()
+        log.info(" checkNotification.notificationId = " + notificationId.toString()
             + " / userId = " + userId.toString());
 
          service.checkNotification(notificationId, userId);

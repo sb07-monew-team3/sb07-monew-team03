@@ -47,9 +47,9 @@ class NotificationServiceUnitTest {
         user = testFixture.userFactory();
 
         Instant oneWeekAgo = Instant.now().minus(7, ChronoUnit.DAYS);
-        noti_I = new Notifications(user, "✅noti 1", ResourceType.INTEREST, UUID.randomUUID(), false, Instant.now());
-        noti_II = new Notifications(user, "✅noti 2", ResourceType.INTEREST, UUID.randomUUID(), false, oneWeekAgo);
-        noti_III = new Notifications(user, "✅noti 3", ResourceType.INTEREST, UUID.randomUUID(), false, oneWeekAgo);
+        noti_I = new Notifications(user, "noti 1", ResourceType.INTEREST, UUID.randomUUID(), false, Instant.now());
+        noti_II = new Notifications(user, "noti 2", ResourceType.INTEREST, UUID.randomUUID(), false, oneWeekAgo);
+        noti_III = new Notifications(user, "noti 3", ResourceType.INTEREST, UUID.randomUUID(), false, oneWeekAgo);
     }
 
     @AfterEach
@@ -57,23 +57,23 @@ class NotificationServiceUnitTest {
     }
 
     @Test
-    @DisplayName("case ⭕️ - 알림 목록을 조회")
+    @DisplayName("case  - 알림 목록을 조회")
     void findAllNotificationByUserId() {
     }
 
     @Test
-    @DisplayName("case ⭕️ - user의 전체 알림을 한번에 확인")
+    @DisplayName("case  - user의 전체 알림을 한번에 확인")
     void allCheckNotification() {
     }
 
     @Test
-    @DisplayName("case ⭕️ - user의 특정 알림 확인")
+    @DisplayName("case  - user의 특정 알림 확인")
     void checkNotification() {
     }
 
 //    ‼️통합테스트로 넘김‼️
 //    @Test
-//    @DisplayName("case ⭕️ - 배치 처리 확인")
+//    @DisplayName("case  - 배치 처리 확인")
 //    void deleteNotificationInBatch() {
 //        //given
 //
