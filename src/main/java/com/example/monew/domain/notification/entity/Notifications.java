@@ -51,7 +51,7 @@ public class Notifications extends BaseCreatableEntity {
     }
 
     public String toString(){
-        return "Notifications{" +
+        return "##### Notifications{" +
 //                "id =" + getId() +
 //                ", updatedAt=" + updatedAt +
                 ", content='" + content + '\'' +

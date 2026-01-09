@@ -53,7 +53,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void allCheckNotification(UUID userId) {
         notiRepository.findAllByUserId(userId)
             .stream()
-            .peek(noti -> log.info(" allCheckNotification.userId = " + userId.toString()))
+            .peek(noti -> log.info("##### allCheckNotification.userId = " + userId.toString()))
             .forEach(noti -> noti.checkNotificationRead(userId));
     }
 
@@ -65,7 +65,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         notifications.checkNotificationRead(userId);
 
-        log.info(" allCheckNotification.userId = " + userId.toString());
+        log.info("##### allCheckNotification.userId = " + userId.toString());
     }
 
     @Transactional
@@ -76,15 +76,15 @@ public class NotificationServiceImpl implements NotificationService {
 
         List<Notifications> notificationsList = notiRepository.findBatchDeleteNotification(oneWeekAgo)
             .stream()
-            .peek(noti -> log.info("" + noti.toString()))
+            .peek(noti -> log.info("#####" + noti.toString()))
             .toList();
 
         if (!notificationsList.isEmpty()) {
             notiRepository.deleteAll(notificationsList);
-            log.info(" NotificationDeleteScheduler  - 노티 배치 삭제 완료");
+            log.info("##### NotificationDeleteScheduler  - 노티 배치 삭제 완료");
         }
         else {
-            log.info(" NotificationDeleteScheduler  -  삭제할 노티 없음");
+            log.info("##### NotificationDeleteScheduler  -  삭제할 노티 없음");
         }
     }
 }
