@@ -76,7 +76,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         List<Notifications> notificationsList = notiRepository.findBatchDeleteNotification(oneWeekAgo)
             .stream()
-            .peek(noti -> log.info("✅" + noti.toString()))
+            .peek(noti -> log.info("🗑️" + noti.toString()))
             .toList();
 
         if (!notificationsList.isEmpty()) {

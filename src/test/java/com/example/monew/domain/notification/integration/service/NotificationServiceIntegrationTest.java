@@ -10,14 +10,13 @@ import com.example.monew.domain.user.repository.UserRepository;
 import com.example.monew.domain.user.util.NotiFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+//@Slf4j
 @SpringBootTest
 @Transactional
 public class NotificationServiceIntegrationTest {
