@@ -34,7 +34,7 @@ public class NotificationServiceIntegrationTest {
     NotiFactory notiFactory;
 
     @Test
-    @DisplayName("case ⭕️ - 배치 처리 확인 > 확인한 알림 중 1주일이 경과된 알림은 자동으로 삭제됩니다")
+    @DisplayName("case ⭕️ - 배치 처리 확인 > 확인한 알림 중 1주일이 경과된 알림은 자동으로 삭제됩니다 ")
     void deleteNotificationInBatch() {
         //given
         User user = notiFactory.newUser();
