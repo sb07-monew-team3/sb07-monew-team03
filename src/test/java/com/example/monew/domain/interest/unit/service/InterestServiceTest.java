@@ -316,7 +316,7 @@ public class InterestServiceTest {
             ReflectionTestUtils.setField(interest, "createdAt", Instant.now());
             List<String> keywords = List.of("강아지", "고양이");
 
-            when(interestRepository.searchByInterestOrKeyword("동물"))
+            when(interestRepository.searchByInterestOrKeyword(("동물")))
                     .thenReturn(List.of(interest));
 
             InterestDto interestDto = new InterestDto(
