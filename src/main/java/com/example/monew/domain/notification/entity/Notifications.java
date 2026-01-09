@@ -51,11 +51,11 @@ public class Notifications extends BaseCreatableEntity {
     }
 
     public String toString(){
-        return "\n📮Notifications{" +
+        return "📮Notifications{" +
 //                "id =" + getId() +
 //                ", updatedAt=" + updatedAt +
-                ", createdAt=" + super.getCreatedAt() +
                 ", content='" + content + '\'' +
+                ", createdAt=" + super.getCreatedAt() +
                 ", isRead=" + isRead +
                 '}';
     }

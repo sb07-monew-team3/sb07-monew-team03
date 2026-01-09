@@ -74,8 +74,10 @@ public class NotificationServiceImpl implements NotificationService {
         // 확인한 알림 중 1주일이 경과된 알림은 자동으로 삭제됩니다.
         Instant oneWeekAgo = Instant.now().minus(7, ChronoUnit.DAYS);
 
-        List<Notifications> notificationsList = notiRepository.findBatchDeleteNotification(oneWeekAgo);
-        System.out.println("notificationsList = " + notificationsList);
+        List<Notifications> notificationsList = notiRepository.findBatchDeleteNotification(oneWeekAgo)
+            .stream()
+            .peek(noti -> log.info("✅" + noti.toString()))
+            .toList();
 
         if (!notificationsList.isEmpty()) {
             notiRepository.deleteAll(notificationsList);

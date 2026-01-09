@@ -55,7 +55,7 @@ public class NotificationServiceIntegrationTest {
         //then
         List<Notifications> results = notiRepository.findAllByUserId(user.getId())
             .stream()
-            .peek(noti -> noti.toString())
+            .peek(noti -> System.out.println("✅ 배치 삭제 후 남은 노티 : " + noti.toString()))
             .toList();
 
         assertThat(results).hasSize(3);
