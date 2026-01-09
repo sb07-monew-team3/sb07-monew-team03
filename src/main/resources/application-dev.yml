@@ -31,7 +31,7 @@ springdoc:
 
 decorator:
   datasource:
-    enabled: false                  # P6Spy 및 데이터소스 데코레이터 전체 활성화 여부 (기본값: true)
+    enabled: true                  # P6Spy 및 데이터소스 데코레이터 전체 활성화 여부 (기본값: true)
     p6spy:
       enable-logging: true         # SQL 로깅 기능 자체를 켤지 끄를지 결정
       multiline: true              # 쿼리를 여러 줄로 포맷팅하여 출력 (가독성 매우 향상됨)
