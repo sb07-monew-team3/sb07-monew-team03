@@ -68,11 +68,11 @@ public class ArticleService {
         }
 
         // TODO: pageable은 서비스에서 하면 안되는가? 고민
-        Pageable pageable = PageRequest.of(0, request.limit(),
-                Sort.by(request.direction(), request.orderBy().getValue()));
+        Pageable pageable = PageRequest.of(0, request.limit());
 
-        Page<ArticleDto> response = articleRepository.findArticleSlice(request, userId, keywords, pageable);
+        Slice<ArticleDto> response = articleRepository.findArticleSlice(request, userId, keywords, pageable);
+        long totalElements = articleRepository.countArticleSlice(request, keywords);
 
-        return cursorPageMapper.toResponseDto(response, request.orderBy().getValue());
+        return cursorPageMapper.toResponseDto(response, request.orderBy(), totalElements);
     }
 }

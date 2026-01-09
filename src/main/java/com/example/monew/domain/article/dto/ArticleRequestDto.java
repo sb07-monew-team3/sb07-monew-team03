@@ -12,9 +12,18 @@ public record ArticleRequestDto(
         List<Source> sourceIn,
         LocalDateTime publishDateFrom,
         LocalDateTime publishDateTo,
-        Order orderBy,
-        Direction direction,
+        String orderBy,
+        String direction,
         String cursor,
         Instant after,
         Integer limit
-) {}
+) {
+    public Order getOrder() {
+        return Order.forValue(orderBy);
+    }
+
+    public Direction getDirection() {
+        return Direction.fromString(direction);
+    }
+
+}

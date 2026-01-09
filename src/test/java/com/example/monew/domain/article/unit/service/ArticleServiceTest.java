@@ -244,14 +244,14 @@ class ArticleServiceTest {
                     List.of(Source.NAVER),
                     null,
                     null,
-                    Order.PUBLISH_DATE,
-                    Direction.DESC,
+                    "publishDate",
+                    "DESC",
                     null,
                     null,
                     10
             );
 
-            when(cursorPageMapper.toResponseDto(any(), anyString()))
+            when(cursorPageMapper.toResponseDto(any(), anyString(), anyLong()))
                     .thenReturn(mock(CursorPageResponseArticleDto.class));
 
             // when

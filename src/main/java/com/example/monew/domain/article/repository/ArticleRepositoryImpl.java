@@ -14,9 +14,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.data.domain.Sort.Direction;
 
 import java.time.LocalDateTime;
@@ -33,11 +31,15 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
     private final QComment comment = QComment.comment;
 
     @Override
-    public Page<ArticleDto> findArticleSlice(ArticleRequestDto request, UUID userId, List<String> keywords, Pageable pageable) {
+    public Slice<ArticleDto> findArticleSlice(ArticleRequestDto request, UUID userId, List<String> keywords, Pageable pageable) {
 
         Expression<Boolean> viewedByMe = JPAExpressions
-                .select(articleView)
-                .where(articleView.user.id.eq(userId))
+                .selectOne()
+                .from(articleView)
+                .where(
+                        articleView.user.id.eq(userId),
+                        articleView.article.id.eq(article.id)
+                )
                 .exists();
 
         List<ArticleDto> content = queryFactory
@@ -57,28 +59,20 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                 .where(
                         keywordOrSummaryContains(keywords),
                         sourcesIn(request.sourceIn()),
-                        publishDateBetween(request.publishDateFrom(), request.publishDateTo())
+                        publishDateBetween(request.publishDateFrom(), request.publishDateTo()),
+                        cursorCondition(request)
                 )
                 .groupBy(article.id)
-                .orderBy(getOrderSpecifier(request.orderBy(), request.direction()))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize()) // 의도적으로 페이지를 하나 더 가져온다.
+                .orderBy(getOrderSpecifier(request.getOrder(), request.getDirection()))
+                .limit(pageable.getPageSize() + 1)
                 .fetch();
 
-        long total = queryFactory
-                .select(article.id.count().coalesce(0L))
-                .from(article)
-                .leftJoin(articleView).on(articleView.article.id.eq(article.id))
-                .leftJoin(comment).on(comment.article.id.eq(article.id))
-                .where(
-                        keywordOrSummaryContains(keywords),
-                        sourcesIn(request.sourceIn()),
-                        publishDateBetween(request.publishDateFrom(), request.publishDateTo())
-                )
-                .groupBy(article.id)
-                .fetchOne();
+        boolean hasNext = content.size() > pageable.getPageSize();
+        if (hasNext) {
+            content = content.subList(0, pageable.getPageSize());
+        }
 
-        return new PageImpl<>(content, pageable, total);
+        return new SliceImpl<>(content, pageable, hasNext);
     }
 
     // 검색어가 title, summary에 하나라도 부분 일치
@@ -126,9 +120,66 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
         boolean asc = direction == Direction.ASC;
 
         return switch (orderBy) {
-            case PUBLISH_DATE   -> asc ? article.publishDate.asc() : article.publishDate.desc();
-            case COMMENT_COUNT  -> asc ? comment.article.id.count().asc() : comment.article.id.count().desc();
-            case VIEW_COUNT     -> asc ? articleView.article.id.count().asc() : articleView.article.id.count().desc();
+            case PUBLISH_DATE -> asc ? article.publishDate.asc() : article.publishDate.desc();
+            case COMMENT_COUNT -> asc ? comment.article.id.count().asc() : comment.article.id.count().desc();
+            case VIEW_COUNT -> asc ? articleView.article.id.count().asc() : articleView.article.id.count().desc();
         };
+    }
+
+    private BooleanExpression cursorCondition(ArticleRequestDto request) {
+        // if (request.cursor() == null || request.after() == null) return null;
+        if (request.cursor() == null) return null;
+
+        switch (request.orderBy()) {
+            case "commentCount" -> {
+                if (request.getDirection() == Direction.DESC) {
+                    return comment.article.id.count()
+                            .lt(Long.parseLong(request.cursor()));
+                            //.and(article.createdAt.lt(request.after()));
+                } else {
+                    return comment.article.id.count()
+                            .gt(Long.parseLong(request.cursor()));
+                            //.and(article.createdAt.gt(request.after()));
+                }
+
+            }
+            case "viewCount" -> {
+                if (request.getDirection() == Direction.DESC) {
+                    return articleView.article.id.count()
+                            .lt(Long.parseLong(request.cursor()));
+                            //.and(article.createdAt.lt(request.after()));
+                } else {
+                    return articleView.article.id.count()
+                            .gt(Long.parseLong(request.cursor()));
+                            //.and(article.createdAt.gt(request.after()));
+                }
+            }
+            default -> { // default는 publishDate 기준
+                if (request.getDirection() == Direction.DESC) {
+                    return article.publishDate
+                            .lt(LocalDateTime.parse(request.cursor()));
+                            //.and(article.createdAt.lt(request.after()));
+                } else {
+                    return article.publishDate
+                            .gt(LocalDateTime.parse(request.cursor()));
+                            //.and(article.createdAt.gt(request.after()));
+                }
+            }
+        }
+    }
+
+    public long countArticleSlice(
+            ArticleRequestDto request,
+            List<String> keywords
+    ) {
+        return queryFactory
+                .select(article.id.countDistinct())
+                .from(article)
+                .where(
+                        keywordOrSummaryContains(keywords),
+                        sourcesIn(request.sourceIn()),
+                        publishDateBetween(request.publishDateFrom(), request.publishDateTo())
+                )
+                .fetchOne();
     }
 }

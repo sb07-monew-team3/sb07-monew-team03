@@ -1,6 +1,5 @@
 package com.example.monew.domain.article.dto;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -17,7 +16,6 @@ public enum Order {
         this.value = value;
     }
 
-    @JsonCreator
     public static Order forValue(String value) {
         return Arrays.stream(values())
                 .filter(order -> order.value.equals(value))
