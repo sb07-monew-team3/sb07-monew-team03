@@ -1,9 +1,11 @@
 package com.example.monew.domain.article.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import lombok.Getter;
 
 import java.util.Arrays;
 
+@Getter
 public enum Order {
     PUBLISH_DATE("publishDate"),
     COMMENT_COUNT("commentCount"),

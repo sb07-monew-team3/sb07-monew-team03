@@ -19,8 +19,8 @@ public class ArticleMapper {
         boolean viewedByMe = articleViewRepository.existsByArticleIdAndUserId(article.getId(), userId);
 
 //        int commentCount = commentRepository.countByArticleId(article.getId());
-        int commentCount = 1; // commentRepository 메서드 구현 해주시면 그때 변경하기
-        int viewCount = articleViewRepository.countByArticleId(article.getId());
+        long commentCount = 1; // TODO: commentRepository 메서드 구현 해주시면 그때 변경하기
+        long viewCount = articleViewRepository.countByArticleId(article.getId());
 
         return new ArticleDto(
                 article.getId(),

@@ -1,4 +1,5 @@
 package com.example.monew.domain.article.dto;
+import org.springframework.data.domain.Sort.Direction;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

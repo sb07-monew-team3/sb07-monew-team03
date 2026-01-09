@@ -5,6 +5,7 @@ import com.example.monew.domain.article.client.naver.NaverNewsResponse;
 import com.example.monew.domain.article.dto.*;
 import com.example.monew.domain.article.entity.Article;
 import com.example.monew.domain.article.mapper.ArticleMapper;
+import com.example.monew.domain.article.mapper.CursorPageMapper;
 import com.example.monew.domain.article.mapper.NaverArticleMapper;
 import com.example.monew.domain.article.repository.ArticleRepository;
 import com.example.monew.domain.article.repository.ArticleViewRepository;
@@ -23,6 +24,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
@@ -62,6 +65,9 @@ class ArticleServiceTest {
 
     @Mock
     private ArticleMapper articleMapper;
+
+    @Mock
+    private CursorPageMapper cursorPageMapper;
 
     @InjectMocks
     private ArticleService articleService;
@@ -245,12 +251,17 @@ class ArticleServiceTest {
                     10
             );
 
+            when(cursorPageMapper.toResponseDto(any(), anyString()))
+                    .thenReturn(mock(CursorPageResponseArticleDto.class));
+
             // when
             CursorPageResponseArticleDto response = articleService.getArticleList(articleRequestDto, userId);
 
-            
             // then
             assertThat(response).isNotNull();
+
+            verify(keywordRepository, never()).findAllByInterestId(any(UUID.class));
+            verify(articleRepository, times(1)).findArticleSlice(any(ArticleRequestDto.class), any(UUID.class), anyList(), any(Pageable.class));
         }
     }
 }
