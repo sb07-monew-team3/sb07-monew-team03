@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -64,10 +65,30 @@ public class InterestServiceImpl implements InterestService {
 
     @Override
     public void delete(UUID interestId) {
-        interestRepository.findById(interestId)
+        Interest interest = interestRepository.findById(interestId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "관심사가 없습니다."));
 
-        interestRepository.deleteById(interestId);
+        interestRepository.delete(interest);
+    }
+
+    @Override
+    public List<InterestDto> search(String keyword) {
+        List<Interest> interests = interestRepository.searchByInterestOrKeyword(keyword);
+
+        List<InterestDto> result = new ArrayList<>();
+
+        for(Interest interest : interests) {
+            List<Keyword> keywordList = keywordRepository.findByInterest(interest);
+
+            List<String> keywords = keywordList.stream()
+                    .map(key -> key.getKeyword())
+                    .toList();
+
+            InterestDto dto = interestMapper.toDto(interest, keywords);
+
+            result.add(dto);
+        }
+        return result;
     }
 
     private void validInterestName(String name) {
