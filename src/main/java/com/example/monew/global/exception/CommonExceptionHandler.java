@@ -1,5 +1,6 @@
 package com.example.monew.global.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,6 +11,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class CommonExceptionHandler {
 
@@ -25,6 +27,7 @@ public class CommonExceptionHandler {
                 e.getClass().getSimpleName(),
                 e.errorCode.getStatusCode()
         );
+        log.error("{} : {}",e.errorCode.name(), e.errorCode.getMessage());
         return ResponseEntity.status(statusCode).body(errorResponse);
     }
 
@@ -44,6 +47,9 @@ public class CommonExceptionHandler {
                 e.getClass().getSimpleName(),
                 statusCode
         );
+        for(String key : details.keySet()){
+            log.error("{} : {}",key, details.get(key));
+        }
         return ResponseEntity.status(statusCode).body(errorResponse);
     }
 
@@ -59,6 +65,7 @@ public class CommonExceptionHandler {
                 e.getClass().getSimpleName(),
                 statusCode
         );
+        log.error("{}:{}",e.getClass().getSimpleName(), e.getMessage());
         return ResponseEntity.status(statusCode).body(errorResponse);
     }
 }
