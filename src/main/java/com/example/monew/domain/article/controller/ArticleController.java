@@ -1,14 +1,13 @@
 package com.example.monew.domain.article.controller;
 
-import com.example.monew.domain.article.dto.ArticleDto;
-import com.example.monew.domain.article.dto.ArticleRequestDto;
-import com.example.monew.domain.article.dto.ArticleViewDto;
-import com.example.monew.domain.article.dto.CursorPageResponseArticleDto;
+import com.example.monew.domain.article.dto.*;
 import com.example.monew.domain.article.service.ArticleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -60,5 +59,16 @@ public class ArticleController {
     ) {
         ArticleViewDto response = articleService.recordArticleView(articleId, userId);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/sources")
+    public ResponseEntity<List<String>> getSources() {
+        List<String> sources = new ArrayList<>();
+
+        for (Source source : Source.values()) {
+            sources.add(source.getValue());
+        }
+
+        return ResponseEntity.ok(sources);
     }
 }
