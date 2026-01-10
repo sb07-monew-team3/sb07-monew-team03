@@ -2,6 +2,7 @@ package com.example.monew.domain.article.controller;
 
 import com.example.monew.domain.article.dto.ArticleDto;
 import com.example.monew.domain.article.dto.ArticleRequestDto;
+import com.example.monew.domain.article.dto.ArticleViewDto;
 import com.example.monew.domain.article.dto.CursorPageResponseArticleDto;
 import com.example.monew.domain.article.service.ArticleService;
 import lombok.RequiredArgsConstructor;
@@ -50,5 +51,14 @@ public class ArticleController {
     ) {
        articleService.deleteArticleHard(articleId);
        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{articleId}/article-views")
+    public ResponseEntity<ArticleViewDto> recordArticleView(
+            @RequestHeader(value = "Monew-Request-User-ID") UUID userId,
+            @PathVariable UUID articleId
+    ) {
+        ArticleViewDto response = articleService.recordArticleView(articleId, userId);
+        return ResponseEntity.ok(response);
     }
 }
