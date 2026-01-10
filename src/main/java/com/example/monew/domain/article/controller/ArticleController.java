@@ -35,4 +35,20 @@ public class ArticleController {
         ArticleDto response = articleService.getArticle(articleId, userId);
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{articleId}")
+    public ResponseEntity<Void> deleteArticleSoft(
+            @PathVariable UUID articleId
+    ) {
+        articleService.deleteArticleSoft(articleId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{articleId}/hard")
+    public ResponseEntity<Void> deleteArticleHard(
+            @PathVariable UUID articleId
+    ) {
+       articleService.deleteArticleHard(articleId);
+       return ResponseEntity.noContent().build();
+    }
 }
