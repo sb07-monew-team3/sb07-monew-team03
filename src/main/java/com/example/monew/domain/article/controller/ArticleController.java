@@ -1,14 +1,12 @@
 package com.example.monew.domain.article.controller;
 
+import com.example.monew.domain.article.dto.ArticleDto;
 import com.example.monew.domain.article.dto.ArticleRequestDto;
 import com.example.monew.domain.article.dto.CursorPageResponseArticleDto;
 import com.example.monew.domain.article.service.ArticleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -26,6 +24,15 @@ public class ArticleController {
     ) {
         CursorPageResponseArticleDto response = articleService.getArticleList(request, userId);
 
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{articleId}")
+    public ResponseEntity<ArticleDto> getArticle(
+            @RequestHeader(value = "Monew-Request-User-ID") UUID userId,
+            @PathVariable UUID articleId
+    ) {
+        ArticleDto response = articleService.getArticle(articleId, userId);
         return ResponseEntity.ok(response);
     }
 }
