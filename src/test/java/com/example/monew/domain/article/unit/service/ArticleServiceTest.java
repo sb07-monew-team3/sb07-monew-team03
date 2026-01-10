@@ -4,6 +4,7 @@ import com.example.monew.domain.article.client.naver.NaverNewsClient;
 import com.example.monew.domain.article.client.naver.NaverNewsResponse;
 import com.example.monew.domain.article.dto.*;
 import com.example.monew.domain.article.entity.Article;
+import com.example.monew.domain.article.entity.ArticleView;
 import com.example.monew.domain.article.mapper.ArticleMapper;
 import com.example.monew.domain.article.mapper.CursorPageMapper;
 import com.example.monew.domain.article.mapper.NaverArticleMapper;
@@ -262,6 +263,33 @@ class ArticleServiceTest {
 
             verify(keywordRepository, never()).findAllByInterestId(any(UUID.class));
             verify(articleRepository, times(1)).findArticleSlice(any(ArticleRequestDto.class), any(UUID.class), anyList(), any(Pageable.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("기사 뷰 등록 테스트")
+    class ArticleViewTest {
+        @Test
+        @DisplayName("정상적으로 기사 뷰를 등록할 수 있다")
+        void recordArticleView_success() {
+            // given
+            UUID userId = UUID.randomUUID();
+            UUID articleId = UUID.randomUUID();
+
+            when(articleViewRepository.save(any(ArticleView.class)))
+                    .thenReturn(mock(ArticleView.class));
+
+            when(articleViewMapper.toResponseDto(any(ArticleView.class)))
+                    .thenReturn(mock(ArticleViewDto.class));
+
+            // when
+            ArticleViewDto response = articleService.recordArticleView(articleId, userId);
+
+            // then
+            assertThat(response).isNotNull();
+
+            verify(articleViewRepository, times(1)).save(any(ArticleView.class));
+            verify(articleViewMapper, times(1)).toResponseDto(any(ArticleView.class));
         }
     }
 }
