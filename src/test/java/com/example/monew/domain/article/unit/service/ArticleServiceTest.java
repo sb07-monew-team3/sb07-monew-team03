@@ -6,6 +6,7 @@ import com.example.monew.domain.article.dto.*;
 import com.example.monew.domain.article.entity.Article;
 import com.example.monew.domain.article.entity.ArticleView;
 import com.example.monew.domain.article.mapper.ArticleMapper;
+import com.example.monew.domain.article.mapper.ArticleViewMapper;
 import com.example.monew.domain.article.mapper.CursorPageMapper;
 import com.example.monew.domain.article.mapper.NaverArticleMapper;
 import com.example.monew.domain.article.repository.ArticleRepository;
@@ -17,6 +18,8 @@ import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.entity.Keyword;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
+import com.example.monew.domain.user.entity.User;
+import com.example.monew.domain.user.repository.UserRepository;
 import com.example.monew.global.exception.domain.article.ArticleNotExistException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -50,6 +53,9 @@ class ArticleServiceTest {
     private ArticleViewRepository articleViewRepository;
 
     @Mock
+    private UserRepository userRepository;
+
+    @Mock
     private InterestRepository interestRepository;
 
     @Mock
@@ -69,6 +75,9 @@ class ArticleServiceTest {
 
     @Mock
     private CursorPageMapper cursorPageMapper;
+
+    @Mock
+    private ArticleViewMapper articleViewMapper;
 
     @InjectMocks
     private ArticleService articleService;
@@ -276,6 +285,12 @@ class ArticleServiceTest {
             UUID userId = UUID.randomUUID();
             UUID articleId = UUID.randomUUID();
 
+            when(articleRepository.findById(articleId))
+                    .thenReturn(Optional.of(mock(Article.class)));
+
+            when(userRepository.findById(userId))
+                    .thenReturn(Optional.of(mock(User.class)));
+
             when(articleViewRepository.save(any(ArticleView.class)))
                     .thenReturn(mock(ArticleView.class));
 
@@ -288,6 +303,8 @@ class ArticleServiceTest {
             // then
             assertThat(response).isNotNull();
 
+            verify(articleRepository, times(1)).findById(articleId);
+            verify(userRepository, times(1)).findById(userId);
             verify(articleViewRepository, times(1)).save(any(ArticleView.class));
             verify(articleViewMapper, times(1)).toResponseDto(any(ArticleView.class));
         }
