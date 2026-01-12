@@ -1,6 +1,10 @@
 package com.example.monew.domain.comment.controller;
 
-import com.example.monew.domain.comment.dto.*;
+import com.example.monew.domain.comment.dto.CommentCreateRequest;
+import com.example.monew.domain.comment.dto.CommentCursorListRequest;
+import com.example.monew.domain.comment.dto.CommentResponse;
+import com.example.monew.domain.comment.dto.CommentUpdateRequest;
+import com.example.monew.domain.comment.dto.CursorPageResponse;
 import com.example.monew.domain.comment.service.CommentQueryService;
 import com.example.monew.domain.comment.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,7 +12,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,25 +25,33 @@ import java.util.UUID;
 public class CommentController {
 
     private final CommentService commentService;
-
     private final CommentQueryService commentQueryService;
 
     @GetMapping
     public ResponseEntity<Page<CommentResponse>> list(
             @RequestHeader("Monew-Request-User-ID") UUID userId,
             @RequestParam UUID articleId,
-            Pageable pageable
+            @RequestParam(required = false) String orderBy,
+            @RequestParam(required = false) Sort.Direction direction,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer limit
     ) {
-        return ResponseEntity.ok(commentService.list(userId, articleId, pageable));
+        return ResponseEntity.ok(
+                commentService.list(userId, articleId, orderBy, direction, page, limit)
+        );
     }
 
     @PostMapping
     public ResponseEntity<CommentResponse> create(
             @Valid @RequestBody CommentCreateRequest request
     ) {
-        CommentResponse response = commentService.create(request.getUserId(), request.getArticleId(), request.getContent());
+        CommentResponse response = commentService.create(
+                request.getUserId(),
+                request.getArticleId(),
+                request.getContent()
+        );
         return ResponseEntity.created(URI.create("/api/comments/" + response.getId())).body(response);
-    } //수정
+    }
 
     @PatchMapping("/{commentId}")
     public ResponseEntity<CommentResponse> update(
@@ -53,7 +64,7 @@ public class CommentController {
 
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> softDelete(
-            @RequestHeader("Monew-Request-User-ID") UUID userId,
+            @RequestHeader(value = "Monew-Request-User-ID", required = false) UUID userId,
             @PathVariable UUID commentId
     ) {
         commentService.softDelete(userId, commentId);
@@ -62,21 +73,23 @@ public class CommentController {
 
     @DeleteMapping("/{commentId}/hard")
     public ResponseEntity<Void> hardDelete(
-            @RequestHeader("Monew-Request-User-ID") UUID userId,
+            @RequestHeader(value = "Monew-Request-User-ID", required = false) UUID userId,
             @PathVariable UUID commentId
     ) {
         commentService.hardDelete(userId, commentId);
         return ResponseEntity.noContent().build();
     }
+
     @Operation(summary = "댓글 목록 조회 (커서 페이지네이션)")
     @GetMapping("/cursor")
     public CursorPageResponse<CommentResponse> listByCursor(
+            @RequestHeader(value = "Monew-Request-User-ID", required = false) UUID userId,
             @RequestParam UUID articleId,
-            @Parameter(description = "정렬 기준 (현재 createdAt만 지원, 기본 createdAt)")
+            @Parameter(description = "정렬 기준 (createdAt|likeCount, 기본 createdAt)")
             @RequestParam(required = false) String orderBy,
             @Parameter(description = "정렬 방향 (ASC|DESC, 기본 DESC)")
             @RequestParam(required = false) Sort.Direction direction,
-            @Parameter(description = "커서 (Base64URL(createdAt|id))")
+            @Parameter(description = "커서")
             @RequestParam(required = false) String cursor,
             @Parameter(description = "다음 페이지 여부 (기본 true)")
             @RequestParam(required = false) Boolean after,
@@ -86,7 +99,6 @@ public class CommentController {
         CommentCursorListRequest req = new CommentCursorListRequest(
                 articleId, orderBy, direction, cursor, after, limit
         );
-        return commentQueryService.getCommentsByCursor(req);
+        return commentQueryService.getCommentsByCursor(userId, req);
     }
-
 }
