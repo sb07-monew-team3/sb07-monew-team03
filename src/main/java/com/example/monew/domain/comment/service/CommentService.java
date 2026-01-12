@@ -6,41 +6,52 @@ import com.example.monew.domain.comment.entity.Comment;
 import com.example.monew.domain.comment.repository.CommentLikesRepository;
 import com.example.monew.domain.comment.repository.CommentRepository;
 import com.example.monew.domain.comment.repository.CommentWithLikeCount;
+import com.example.monew.global.exception.domain.comment.CommentInvalidRequestException;
 import com.example.monew.domain.user.entity.User;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class CommentService {
 
+    private static final int DEFAULT_LIMIT = 20;
+    private static final int MAX_LIMIT = 50;
+    private static final Set<String> ALLOWED_ORDER_BY = Set.of("createdAt", "likeCount");
+
     private final CommentRepository commentRepository;
     private final CommentLikesRepository commentLikesRepository;
     private final EntityManager entityManager;
 
-    public CommentResponse create(UUID userId, UUID articleId, String content) {
-        String normalized = normalizeContent(content);
+    @Transactional(readOnly = true)
+    public Page<CommentResponse> list(
+            UUID userId,
+            UUID articleId,
+            String orderBy,
+            Sort.Direction direction,
+            Integer page,
+            Integer limit
+    ) {
+        String resolvedOrderBy = resolveOrderBy(orderBy);
+        Sort.Direction resolvedDirection = resolveDirection(direction);
+        int resolvedPage = resolvePage(page);
+        int resolvedLimit = resolveLimit(limit);
 
-        User user = findUserOrThrow(userId);
-        Article article = findArticleOrThrow(articleId);
+        Pageable pageable = PageRequest.of(
+                resolvedPage,
+                resolvedLimit,
+                Sort.by(resolvedDirection, resolvedOrderBy)
+        );
 
-        Comment saved = commentRepository.save(new Comment(user, article, normalized, false));
-
-        return toResponse(saved, userId);
+        return list(userId, articleId, pageable);
     }
 
     @Transactional(readOnly = true)
@@ -74,6 +85,40 @@ public class CommentService {
                 likeCountMap.getOrDefault(c.getId(), 0L),
                 likedIds.contains(c.getId())
         ));
+    }
+
+    private String resolveOrderBy(String orderBy) {
+        String resolved = (orderBy == null || orderBy.isBlank()) ? "createdAt" : orderBy.trim();
+        if (!ALLOWED_ORDER_BY.contains(resolved)) {
+            throw CommentInvalidRequestException.of("orderBy supports only " + ALLOWED_ORDER_BY);
+        }
+        return resolved;
+    }
+
+    private Sort.Direction resolveDirection(Sort.Direction direction) {
+        return direction == null ? Sort.Direction.DESC : direction;
+    }
+
+    private int resolvePage(Integer page) {
+        if (page == null) return 0;
+        return Math.max(page, 0);
+    }
+
+    private int resolveLimit(Integer limit) {
+        if (limit == null) return DEFAULT_LIMIT;
+        if (limit < 1) return 1;
+        return Math.min(limit, MAX_LIMIT);
+    }
+
+    public CommentResponse create(UUID userId, UUID articleId, String content) {
+        String normalized = normalizeContent(content);
+
+        User user = findUserOrThrow(userId);
+        Article article = findArticleOrThrow(articleId);
+
+        Comment saved = commentRepository.save(new Comment(user, article, normalized, false));
+
+        return toResponse(saved, userId);
     }
 
     public CommentResponse update(UUID userId, UUID commentId, String content) {

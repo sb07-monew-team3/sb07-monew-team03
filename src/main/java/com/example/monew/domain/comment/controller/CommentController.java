@@ -12,24 +12,17 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.Set;
 import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/comments")
 public class CommentController {
-
-    private static final int DEFAULT_LIMIT = 20;
-    private static final int MAX_LIMIT = 50;
-
-    private static final Set<String> ALLOWED_ORDER_BY = Set.of("createdAt", "likeCount");
 
     private final CommentService commentService;
     private final CommentQueryService commentQueryService;
@@ -38,22 +31,14 @@ public class CommentController {
     public ResponseEntity<Page<CommentResponse>> list(
             @RequestHeader("Monew-Request-User-ID") UUID userId,
             @RequestParam UUID articleId,
-            @RequestParam(required = false, defaultValue = "createdAt") String orderBy,
-            @RequestParam(required = false, defaultValue = "DESC") Sort.Direction direction,
-            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false) String orderBy,
+            @RequestParam(required = false) Sort.Direction direction,
+            @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer limit
     ) {
-        String resolvedOrderBy = (orderBy == null || orderBy.isBlank()) ? "createdAt" : orderBy;
-        if (!ALLOWED_ORDER_BY.contains(resolvedOrderBy)) {
-            throw new IllegalArgumentException("orderBy supports only " + ALLOWED_ORDER_BY);
-        }
-
-        int resolvedLimit = (limit == null) ? DEFAULT_LIMIT : Math.min(Math.max(limit, 1), MAX_LIMIT);
-
-        Sort sort = Sort.by(direction == null ? Sort.Direction.DESC : direction, resolvedOrderBy);
-        PageRequest pageable = PageRequest.of(Math.max(page, 0), resolvedLimit, sort);
-
-        return ResponseEntity.ok(commentService.list(userId, articleId, pageable));
+        return ResponseEntity.ok(
+                commentService.list(userId, articleId, orderBy, direction, page, limit)
+        );
     }
 
     @PostMapping
@@ -100,11 +85,11 @@ public class CommentController {
     public CursorPageResponse<CommentResponse> listByCursor(
             @RequestHeader(value = "Monew-Request-User-ID", required = false) UUID userId,
             @RequestParam UUID articleId,
-            @Parameter(description = "정렬 기준 (현재 createdAt만 지원, 기본 createdAt)")
+            @Parameter(description = "정렬 기준 (createdAt|likeCount, 기본 createdAt)")
             @RequestParam(required = false) String orderBy,
             @Parameter(description = "정렬 방향 (ASC|DESC, 기본 DESC)")
             @RequestParam(required = false) Sort.Direction direction,
-            @Parameter(description = "커서 (Base64URL(createdAt|id))")
+            @Parameter(description = "커서")
             @RequestParam(required = false) String cursor,
             @Parameter(description = "다음 페이지 여부 (기본 true)")
             @RequestParam(required = false) Boolean after,
@@ -114,6 +99,6 @@ public class CommentController {
         CommentCursorListRequest req = new CommentCursorListRequest(
                 articleId, orderBy, direction, cursor, after, limit
         );
-        return commentQueryService.getCommentsByCursor(req);
+        return commentQueryService.getCommentsByCursor(userId, req);
     }
 }
