@@ -49,8 +49,16 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                         article.title,
                         article.publishDate,
                         article.summary,
-                        comment.article.id.count().coalesce(0L).as("commentCount"),
-                        articleView.article.id.count().coalesce(0L).as("viewCount"),
+                        // 댓글수: 독립 서브쿼리
+                        JPAExpressions
+                                .select(comment.count().coalesce(0L))
+                                .from(comment)
+                                .where(comment.article.id.eq(article.id)),
+                        // 조회수: 독립 서브쿼리
+                        JPAExpressions
+                                .select(articleView.count().coalesce(0L))
+                                .from(articleView)
+                                .where(articleView.article.id.eq(article.id)),
                         viewedByMe
                 ))
                 .from(article)
