@@ -60,7 +60,6 @@ class NotificationControllerUnitTest {
     @DisplayName("알림 목록 조회 O - 200 조회 성공")
     void findAllNotificationByUserId_OK() throws Exception {
 
-    UUID notificationId = UUID.randomUUID();
     UUID resourceId = UUID.randomUUID();
     Instant now = Instant.now();
 
