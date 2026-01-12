@@ -13,5 +13,7 @@ public interface InterestService {
     InterestDto update(UUID interestId, InterestUpdateRequest request);
     void delete(UUID interestId);
     List<InterestDto> search(String keyword);
+    void subscribe(UUID userId, UUID interestId);
+    void unsubscribe(UUID userId, UUID interestId);
 
 }
