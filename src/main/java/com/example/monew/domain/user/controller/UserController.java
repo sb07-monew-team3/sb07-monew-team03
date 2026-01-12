@@ -7,6 +7,7 @@ import com.example.monew.domain.user.dto.UserUpdateRequest;
 import com.example.monew.domain.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -28,11 +29,11 @@ public class UserController {
     @PostMapping()
     ResponseEntity<UserDto> registerUser(@Valid @RequestBody UserRegisterRequest request){
         UserDto user = userService.createUser(request);
-        log.info("User created : {}", user.nickname());
         return new ResponseEntity<UserDto>(user, HttpStatus.CREATED);
     }
     @PostMapping("/login")
     ResponseEntity<UserDto> loginUser(@Valid @RequestBody UserLoginRequest request){
+
         UserDto user = userService.loginUser(request);
         return new ResponseEntity<UserDto>(user,HttpStatus.OK);
     }

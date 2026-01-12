@@ -4,7 +4,7 @@
     <!-- 로그 위치 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%-5level] %logger{36} - [%X{requestUserId}] [%X{requestIp}] [%X{requestUri}] %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%-5level] %logger{36} - [%X{requestId}] [%X{requestUserId}] [%X{requestIp}] [%X{requestUri}] %msg%n</pattern>
         </encoder>
         <!-- 로그 레벨 -->
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -22,7 +22,7 @@
         </rollingPolicy>
 
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%-5level] %logger{36} - [%X{requestUserId}] [%X{requestIp}] [%X{requestUri}] %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%-5level] %logger{36} - [%X{requestId}] [%X{requestUserId}] [%X{requestIp}] [%X{requestUri}] %msg%n</pattern>
         </encoder>
 
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
