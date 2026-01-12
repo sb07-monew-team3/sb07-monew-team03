@@ -4,12 +4,14 @@ import com.example.monew.domain.interest.dto.InterestDto;
 import com.example.monew.domain.interest.dto.InterestRegisterRequest;
 import com.example.monew.domain.interest.dto.InterestUpdateRequest;
 import com.example.monew.domain.interest.entity.Interest;
+import com.example.monew.domain.interest.entity.Keyword;
 import com.example.monew.domain.interest.entity.Subscription;
 import com.example.monew.domain.interest.mapper.InterestMapper;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
 import com.example.monew.domain.interest.repository.SubscriptionRepository;
 import com.example.monew.domain.interest.service.InterestServiceImpl;
+import com.example.monew.domain.interest.service.SubscriptionServiceImpl;
 import com.example.monew.domain.user.entity.User;
 import com.example.monew.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -45,14 +47,10 @@ public class InterestServiceTest {
     private SubscriptionRepository subscriptionRepository;
 
     @Mock
-    private UserRepository userRepository;
-
-    @Mock
     private InterestMapper interestMapper;
 
     @InjectMocks
     private InterestServiceImpl interestService;
-
 
     @Nested
     @DisplayName("관심사 등록")
@@ -229,16 +227,23 @@ public class InterestServiceTest {
                     .thenReturn(Optional.of(interest));
             doNothing().when(keywordRepository).deleteByInterestId(interest.getId());
 
+            when(subscriptionRepository.countByInterestId(interest.getId()))
+                    .thenReturn(1L);
+
             InterestDto interestDto = new InterestDto(
                     interest.getId(),
                     "축구",
                     newKeywords,
-                    0L,
-                    false
+                    1L,
+                    null
             );
 
-            when(interestMapper.toDto(any(Interest.class), any(List.class)))
-                    .thenReturn(interestDto);
+            when(interestMapper.toDto(
+                    any(Interest.class),
+                    any(List.class),
+                    anyLong(),
+                    any()
+            )).thenReturn(interestDto);
 
             // when
             InterestDto result = interestService.update(interest.getId(), request);
@@ -249,6 +254,7 @@ public class InterestServiceTest {
 
             verify(keywordRepository).deleteByInterestId(interest.getId());
             verify(keywordRepository).saveAll(anyList());
+            verify(subscriptionRepository).countByInterestId(interest.getId());
         }
 
         @Test
@@ -319,34 +325,55 @@ public class InterestServiceTest {
         void search_interestName_success() {
 
             // given
+            UUID userId = UUID.randomUUID();
             String searchKeyword = "동물";
             Interest interest = new Interest("동물 농장");
             ReflectionTestUtils.setField(interest, "id", UUID.randomUUID());
             ReflectionTestUtils.setField(interest, "createdAt", Instant.now());
-            List<String> keywords = List.of("강아지", "고양이");
+
+            List<String> keywordString = List.of("강아지", "고양이");
+            List<Keyword> keywords = List.of(
+                    new Keyword("강아지", interest),
+                    new Keyword("고양이", interest));
 
             when(interestRepository.searchByInterestOrKeyword(("동물")))
                     .thenReturn(List.of(interest));
 
+            when(keywordRepository.findByInterest(interest))
+                    .thenReturn(keywords);
+
+            when(subscriptionRepository.countByInterestId(interest.getId()))
+                    .thenReturn(0L);
+
+            when(subscriptionRepository.isSubscribed(userId, interest.getId()))
+                    .thenReturn(false);
+
             InterestDto interestDto = new InterestDto(
                     interest.getId(),
                     "동물 농장",
-                    keywords,
+                    keywordString,
                     0L,
                     false
                     );
 
-            when(interestMapper.toDto(any(Interest.class), any(List.class)))
-                    .thenReturn(interestDto);
+            when(interestMapper.toDto(
+                    any(Interest.class),
+                    any(List.class),
+                    anyLong(),
+                    anyBoolean()
+            )).thenReturn(interestDto);
 
             // when
-            List<InterestDto> result = interestService.search(searchKeyword);
-
+            List<InterestDto> result = interestService.search(searchKeyword, userId);
 
             // then
             assertThat(result).hasSize(1);
             assertThat(result.get(0).name()).isEqualTo("동물 농장");
             assertThat(result.get(0).keywords()).containsExactly("강아지", "고양이");
+
+            verify(keywordRepository).findByInterest(interest);
+            verify(subscriptionRepository).countByInterestId(interest.getId());
+            verify(subscriptionRepository).isSubscribed(userId, interest.getId());
         }
 
         @Test
@@ -354,35 +381,52 @@ public class InterestServiceTest {
         void search_keywordName_success() {
 
             // given
+            UUID userId = UUID.randomUUID();
             String searchKeyword = "축구";
             Interest interest = new Interest("스포츠");
             ReflectionTestUtils.setField(interest, "id", UUID.randomUUID());
             ReflectionTestUtils.setField(interest, "createdAt", Instant.now());
-            List<String> keywords = List.of("축구", "야구");
+
+            List<String> keywordString = List.of("축구", "야구");
+            List<Keyword> keywords = List.of(
+                    new Keyword("축구", interest),
+                    new Keyword("야구", interest));
 
             when(interestRepository.searchByInterestOrKeyword(("축구")))
                     .thenReturn(List.of(interest));
 
+            when(keywordRepository.findByInterest(interest))
+                    .thenReturn(keywords);
+
+            when(subscriptionRepository.countByInterestId(interest.getId()))
+                    .thenReturn(0L);
+
+            when(subscriptionRepository.isSubscribed(userId, interest.getId()))
+                    .thenReturn(false);
+
             InterestDto interestDto = new InterestDto(
                     interest.getId(),
                     "스포츠",
-                    keywords,
+                    keywordString,
                     0L,
                     false
             );
 
-            when(interestMapper.toDto(any(Interest.class), any(List.class)))
-                    .thenReturn(interestDto);
+            when(interestMapper.toDto(
+                    any(Interest.class),
+                    any(List.class),
+                    anyLong(),
+                    anyBoolean()
+            )).thenReturn(interestDto);
 
             // when
-            List<InterestDto> result = interestService.search(searchKeyword);
+            List<InterestDto> result = interestService.search(searchKeyword, userId);
 
 
             // then
             assertThat(result).hasSize(1);
             assertThat(result.get(0).name()).isEqualTo("스포츠");
             assertThat(result.get(0).keywords()).containsExactly("축구", "야구");
-
         }
         
         @Test
@@ -390,68 +434,18 @@ public class InterestServiceTest {
         void search_emptyResult_returnEmptyList() {
 
             // given
+            UUID userId = UUID.randomUUID();
             String keyword = "동물";
 
             when(interestRepository.searchByInterestOrKeyword(keyword))
                     .thenReturn(List.of());
 
             // when
-            List<InterestDto> search = interestService.search(keyword);
+            List<InterestDto> search = interestService.search(keyword, userId);
 
             // then
             assertThat(search).isEmpty();
             assertThat(search).hasSize(0);
-        }
-    }
-
-    @Nested
-    @DisplayName("관심사 구독")
-    class subscription{
-
-        @Test
-        @DisplayName("사용자는 관심사를 구독할 수 있다")
-        void subscribe_success() {
-
-            // given
-            UUID userId = UUID.randomUUID();
-            UUID interestId = UUID.randomUUID();
-
-            User user = new User("test@test.com", "아토", "Z1x2c3v4!", null);
-            Interest interest = new Interest("동물");
-
-            when(userRepository.findById(userId))
-                    .thenReturn(Optional.of(user));
-
-            when(interestRepository.findById(interestId))
-                    .thenReturn(Optional.of(interest));
-
-            // when
-            interestService.subscribe(userId, interestId);
-
-            // then
-            verify(subscriptionRepository).save(any(Subscription.class));
-        }
-
-        @Test
-        @DisplayName("사용자는 관심사 구독을 취소할 수 있다")
-        void unsubscribe_Success() {
-            // given
-            UUID userId = UUID.randomUUID();
-            UUID interestId = UUID.randomUUID();
-
-            User user = new User("test@test.com", "아토", "Z1x2c3v4!", null);
-            Interest interest = new Interest("동물");
-            Subscription subscription = new Subscription(interest, user);
-
-            when(subscriptionRepository.findSubscription(userId, interestId))
-                    .thenReturn(Optional.of(subscription));
-
-            // when
-            interestService.unsubscribe(userId, interestId);
-
-            // then
-            verify(subscriptionRepository).delete(subscription);
-
         }
     }
 }
