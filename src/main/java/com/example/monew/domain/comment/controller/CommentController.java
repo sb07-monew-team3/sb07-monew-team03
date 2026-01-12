@@ -40,7 +40,7 @@ public class CommentController {
     ) {
         CommentResponse response = commentService.create(request.getUserId(), request.getArticleId(), request.getContent());
         return ResponseEntity.created(URI.create("/api/comments/" + response.getId())).body(response);
-    }
+    } //수정
 
     @PatchMapping("/{commentId}")
     public ResponseEntity<CommentResponse> update(
