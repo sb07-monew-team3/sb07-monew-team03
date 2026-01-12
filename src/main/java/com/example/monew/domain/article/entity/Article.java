@@ -46,4 +46,8 @@ public class Article extends BaseCreatableEntity {
             joinColumns = @JoinColumn(name = "article_id"),
             inverseJoinColumns = @JoinColumn(name = "interest_id"))
     private List<Interest> interests;
+
+    public void deleteLogic() {
+        this.isDeleted = true;
+    }
 }
