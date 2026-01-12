@@ -5,9 +5,14 @@ import com.example.monew.domain.interest.dto.InterestRegisterRequest;
 import com.example.monew.domain.interest.dto.InterestUpdateRequest;
 import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.entity.Keyword;
+import com.example.monew.domain.interest.entity.Subscription;
 import com.example.monew.domain.interest.mapper.InterestMapper;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
+import com.example.monew.domain.interest.repository.SubscriptionRepository;
+import com.example.monew.domain.user.entity.User;
+import com.example.monew.domain.user.repository.UserRepository;
+import com.example.monew.global.exception.domain.user.UserNotExistException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.http.HttpStatus;
@@ -27,6 +32,8 @@ public class InterestServiceImpl implements InterestService {
 
     private final InterestRepository interestRepository;
     private final KeywordRepository keywordRepository;
+    private final SubscriptionRepository subscriptionRepository;
+    private final UserRepository userRepository;
     private final InterestMapper interestMapper;
 
     @Override
@@ -90,6 +97,21 @@ public class InterestServiceImpl implements InterestService {
         }
         return result;
     }
+
+    @Override
+    public void subscribe(UUID userId, UUID interestId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotExistException(userId));
+
+        Interest interest = interestRepository.findById(interestId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "관심사가 없습니다."));
+
+        Subscription subscription = new Subscription(interest, user);
+
+        subscriptionRepository.save(subscription);
+    }
+
 
     private void validInterestName(String name) {
         if (name == null || name.isBlank()) {
