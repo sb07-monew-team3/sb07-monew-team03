@@ -4,9 +4,11 @@ import com.example.monew.domain.interest.dto.InterestDto;
 import com.example.monew.domain.interest.dto.InterestRegisterRequest;
 import com.example.monew.domain.interest.dto.InterestUpdateRequest;
 import com.example.monew.domain.interest.entity.Interest;
+import com.example.monew.domain.interest.entity.Subscription;
 import com.example.monew.domain.interest.mapper.InterestMapper;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
+import com.example.monew.domain.interest.repository.SubscriptionRepository;
 import com.example.monew.domain.interest.service.InterestServiceImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -37,6 +38,9 @@ public class InterestServiceTest {
 
     @Mock
     private KeywordRepository keywordRepository;
+
+    @Mock
+    private SubscriptionRepository subscriptionRepository;
 
     @Mock
     private InterestMapper interestMapper;
@@ -392,6 +396,28 @@ public class InterestServiceTest {
             // then
             assertThat(search).isEmpty();
             assertThat(search).hasSize(0);
+        }
+    }
+
+    @Nested
+    @DisplayName("관심사 구독")
+    class subscription{
+
+        @Test
+        @DisplayName("사용자는 관심사를 구독할 수 있다")
+        void subscribe_success() {
+
+            // given
+            UUID userId = UUID.randomUUID();
+            UUID interestId = UUID.randomUUID();
+
+            // when
+            interestService.subscribe(userId, interestId);
+
+            // then
+            verify(subscriptionRepository).save(any(Subscription.class));
+
+
         }
     }
 }
