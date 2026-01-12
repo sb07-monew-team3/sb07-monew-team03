@@ -3,7 +3,9 @@ package com.example.monew.domain.interest.controller;
 import com.example.monew.domain.interest.dto.InterestDto;
 import com.example.monew.domain.interest.dto.InterestRegisterRequest;
 import com.example.monew.domain.interest.dto.InterestUpdateRequest;
+import com.example.monew.domain.interest.dto.SubscriptionDto;
 import com.example.monew.domain.interest.service.InterestService;
+import com.example.monew.domain.interest.service.SubscriptionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ import java.util.UUID;
 public class InterestController {
 
     private final InterestService interestService;
+    private final SubscriptionService subscriptionService;
 
     @PostMapping
     public ResponseEntity<InterestDto> registerInterest(@RequestBody InterestRegisterRequest request) {
@@ -42,24 +45,25 @@ public class InterestController {
 
     @GetMapping
     public ResponseEntity<List<InterestDto>> search(
-            @RequestParam(required = false) String keyword) {
-        List<InterestDto> interests = interestService.search(keyword);
+            @RequestParam(required = false) String keyword,
+            @RequestHeader("Monew-Request-User-ID") UUID userId) {
+        List<InterestDto> interests = interestService.search(keyword, userId);
         return ResponseEntity.ok(interests);
     }
 
     @PostMapping("/{interestId}/subscriptions")
-    public ResponseEntity<Void> subscribe(
+    public ResponseEntity<SubscriptionDto> subscribe(
             @PathVariable UUID interestId,
             @RequestHeader("Monew-Request-User-ID") UUID userId) {
-        interestService.subscribe(interestId, userId);
-        return ResponseEntity.ok().build();
+        SubscriptionDto subscribe = subscriptionService.subscribe(interestId, userId);
+        return ResponseEntity.ok(subscribe);
     }
 
     @DeleteMapping("/{interestId}/subscriptions")
     public ResponseEntity<Void> unsubscribe(
             @PathVariable UUID interestId,
             @RequestHeader("Monew-Request-User-ID") UUID userId) {
-        interestService.unsubscribe(interestId, userId);
+        subscriptionService.unsubscribe(interestId, userId);
         return ResponseEntity.noContent().build();
     }
 }
