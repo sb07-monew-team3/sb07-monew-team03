@@ -12,8 +12,5 @@ public interface InterestService {
     InterestDto create(InterestRegisterRequest request);
     InterestDto update(UUID interestId, InterestUpdateRequest request);
     void delete(UUID interestId);
-    List<InterestDto> search(String keyword);
-    void subscribe(UUID userId, UUID interestId);
-    void unsubscribe(UUID userId, UUID interestId);
-
+    List<InterestDto> search(String keyword, UUID userId);
 }
