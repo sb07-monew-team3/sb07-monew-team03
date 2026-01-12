@@ -60,8 +60,9 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                         keywordOrSummaryContains(keywords),
                         sourcesIn(request.sourceIn()),
                         publishDateBetween(request.publishDateFrom(), request.publishDateTo()),
-                        cursorCondition(request)
+                        request.orderBy().equals("publishDate") ? cursorCondition(request) : null
                 )
+                .having(!request.orderBy().equals("publishDate") ? cursorCondition(request) : null)
                 .groupBy(article.id)
                 .orderBy(getOrderSpecifier(request.getOrder(), request.getDirection()))
                 .limit(pageable.getPageSize() + 1)
@@ -134,11 +135,11 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
             case "commentCount" -> {
                 if (request.getDirection() == Direction.DESC) {
                     return comment.article.id.count()
-                            .lt(Long.parseLong(request.cursor()));
+                            .loe(Long.parseLong(request.cursor()));
                             //.and(article.createdAt.lt(request.after()));
                 } else {
                     return comment.article.id.count()
-                            .gt(Long.parseLong(request.cursor()));
+                            .goe(Long.parseLong(request.cursor()));
                             //.and(article.createdAt.gt(request.after()));
                 }
 
@@ -146,11 +147,11 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
             case "viewCount" -> {
                 if (request.getDirection() == Direction.DESC) {
                     return articleView.article.id.count()
-                            .lt(Long.parseLong(request.cursor()));
+                            .loe(Long.parseLong(request.cursor()));
                             //.and(article.createdAt.lt(request.after()));
                 } else {
                     return articleView.article.id.count()
-                            .gt(Long.parseLong(request.cursor()));
+                            .goe(Long.parseLong(request.cursor()));
                             //.and(article.createdAt.gt(request.after()));
                 }
             }
