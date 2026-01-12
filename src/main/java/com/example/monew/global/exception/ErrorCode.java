@@ -7,8 +7,9 @@ public enum ErrorCode {
     USER_VALID_FAIL("User validation fail",401),
     ARGUMENT_VALID_FAIL ("Invalid argument",400),
     USER_NOT_EXIST("User is not exist",404),
-
+    NOTIFICATION_NOT_EXIST("##### NOTI is not exist", 404);
     ARTICLE_NOT_EXIST("Article is not exist",404),;
+
 
     String message;
     int statusCode;
