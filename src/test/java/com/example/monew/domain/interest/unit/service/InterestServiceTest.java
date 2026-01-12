@@ -2,11 +2,16 @@ package com.example.monew.domain.interest.unit.service;
 
 import com.example.monew.domain.interest.dto.InterestDto;
 import com.example.monew.domain.interest.dto.InterestRegisterRequest;
+import com.example.monew.domain.interest.dto.InterestUpdateRequest;
 import com.example.monew.domain.interest.entity.Interest;
+import com.example.monew.domain.interest.entity.Subscription;
 import com.example.monew.domain.interest.mapper.InterestMapper;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
+import com.example.monew.domain.interest.repository.SubscriptionRepository;
 import com.example.monew.domain.interest.service.InterestServiceImpl;
+import com.example.monew.domain.user.entity.User;
+import com.example.monew.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,15 +20,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class InterestServiceTest {
@@ -33,6 +40,12 @@ public class InterestServiceTest {
 
     @Mock
     private KeywordRepository keywordRepository;
+
+    @Mock
+    private SubscriptionRepository subscriptionRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private InterestMapper interestMapper;
@@ -195,5 +208,250 @@ public class InterestServiceTest {
             // then
             assertThat(result).isNotNull();
         }    
+    }
+    @Nested
+    @DisplayName("관심사 키워드 수정")
+    class UpdateInterestKeywords {
+
+        @Test
+        @DisplayName("키워드를 수정할 수 있다")
+        void update_keywords_success() {
+
+            // given
+            Interest interest = new Interest("축구");
+            ReflectionTestUtils.setField(interest, "id", UUID.randomUUID());
+
+            List<String> newKeywords = List.of("손흥민", "인테르", "챔스");
+
+            InterestUpdateRequest request = new InterestUpdateRequest(newKeywords);
+
+            when(interestRepository.findById(interest.getId()))
+                    .thenReturn(Optional.of(interest));
+            doNothing().when(keywordRepository).deleteByInterestId(interest.getId());
+
+            InterestDto interestDto = new InterestDto(
+                    interest.getId(),
+                    "축구",
+                    newKeywords,
+                    0L,
+                    false
+            );
+
+            when(interestMapper.toDto(any(Interest.class), any(List.class)))
+                    .thenReturn(interestDto);
+
+            // when
+            InterestDto result = interestService.update(interest.getId(), request);
+
+            // then
+            assertThat(result.id()).isNotNull();
+            assertThat(result.keywords()).containsExactly("손흥민", "인테르", "챔스");
+
+            verify(keywordRepository).deleteByInterestId(interest.getId());
+            verify(keywordRepository).saveAll(anyList());
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 관심사로 수정 시 예외 발생")
+        void update_notFoundInterest_throwsException() {
+
+            // given
+            UUID interestId = UUID.randomUUID();
+            List<String> keywords = List.of("산책", "날씨");
+            InterestUpdateRequest request = new InterestUpdateRequest(keywords);
+
+            when(interestRepository.findById(interestId))
+                    .thenReturn(Optional.empty());
+
+            // when && then
+            assertThatThrownBy(() -> interestService.update(interestId, request))
+                    .isInstanceOf(ResponseStatusException.class)
+                    .hasMessageContaining("관심사가 없습니다.");
+        }
+    }
+
+    @Nested
+    @DisplayName("관심사 삭제")
+    class DeleteInterest {
+
+        @Test
+        @DisplayName("관심사를 삭제할 수 있다")
+        void delete_interest_success() {
+
+            // given
+            Interest interest = new Interest("동물");
+            ReflectionTestUtils.setField(interest, "id", UUID.randomUUID());
+            ReflectionTestUtils.setField(interest, "createdAt", Instant.now());
+
+            when(interestRepository.findById(interest.getId()))
+                    .thenReturn(Optional.of(interest));
+            // when
+            interestService.delete(interest.getId());
+
+            // then
+            verify(interestRepository).findById(interest.getId());
+            verify(interestRepository).delete(interest);
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 관심사 삭제 시 예외 발생")
+        void delete_notFoundInterest_throwsException() {
+
+            // given
+            UUID interestId = UUID.randomUUID();
+
+            when(interestRepository.findById(interestId))
+                    .thenReturn(Optional.empty());
+
+            // when && then
+            assertThatThrownBy(() -> interestService.delete(interestId))
+                    .isInstanceOf(ResponseStatusException.class)
+                    .hasMessageContaining("관심사가 없습니다.");
+        }
+    }
+
+    @Nested
+    @DisplayName("관심사 목록 조회")
+    class searchInterest {
+        
+        @Test
+        @DisplayName("관심사 이름으로 조회할 수 있다")
+        void search_interestName_success() {
+
+            // given
+            String searchKeyword = "동물";
+            Interest interest = new Interest("동물 농장");
+            ReflectionTestUtils.setField(interest, "id", UUID.randomUUID());
+            ReflectionTestUtils.setField(interest, "createdAt", Instant.now());
+            List<String> keywords = List.of("강아지", "고양이");
+
+            when(interestRepository.searchByInterestOrKeyword(("동물")))
+                    .thenReturn(List.of(interest));
+
+            InterestDto interestDto = new InterestDto(
+                    interest.getId(),
+                    "동물 농장",
+                    keywords,
+                    0L,
+                    false
+                    );
+
+            when(interestMapper.toDto(any(Interest.class), any(List.class)))
+                    .thenReturn(interestDto);
+
+            // when
+            List<InterestDto> result = interestService.search(searchKeyword);
+
+
+            // then
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).name()).isEqualTo("동물 농장");
+            assertThat(result.get(0).keywords()).containsExactly("강아지", "고양이");
+        }
+
+        @Test
+        @DisplayName("키워드 이름으로 조회할 수 있다")
+        void search_keywordName_success() {
+
+            // given
+            String searchKeyword = "축구";
+            Interest interest = new Interest("스포츠");
+            ReflectionTestUtils.setField(interest, "id", UUID.randomUUID());
+            ReflectionTestUtils.setField(interest, "createdAt", Instant.now());
+            List<String> keywords = List.of("축구", "야구");
+
+            when(interestRepository.searchByInterestOrKeyword(("축구")))
+                    .thenReturn(List.of(interest));
+
+            InterestDto interestDto = new InterestDto(
+                    interest.getId(),
+                    "스포츠",
+                    keywords,
+                    0L,
+                    false
+            );
+
+            when(interestMapper.toDto(any(Interest.class), any(List.class)))
+                    .thenReturn(interestDto);
+
+            // when
+            List<InterestDto> result = interestService.search(searchKeyword);
+
+
+            // then
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).name()).isEqualTo("스포츠");
+            assertThat(result.get(0).keywords()).containsExactly("축구", "야구");
+
+        }
+        
+        @Test
+        @DisplayName("조회 결과가 없으면 빈 리스트 반환한다")
+        void search_emptyResult_returnEmptyList() {
+
+            // given
+            String keyword = "동물";
+
+            when(interestRepository.searchByInterestOrKeyword(keyword))
+                    .thenReturn(List.of());
+
+            // when
+            List<InterestDto> search = interestService.search(keyword);
+
+            // then
+            assertThat(search).isEmpty();
+            assertThat(search).hasSize(0);
+        }
+    }
+
+    @Nested
+    @DisplayName("관심사 구독")
+    class subscription{
+
+        @Test
+        @DisplayName("사용자는 관심사를 구독할 수 있다")
+        void subscribe_success() {
+
+            // given
+            UUID userId = UUID.randomUUID();
+            UUID interestId = UUID.randomUUID();
+
+            User user = new User("test@test.com", "아토", "Z1x2c3v4!", null);
+            Interest interest = new Interest("동물");
+
+            when(userRepository.findById(userId))
+                    .thenReturn(Optional.of(user));
+
+            when(interestRepository.findById(interestId))
+                    .thenReturn(Optional.of(interest));
+
+            // when
+            interestService.subscribe(userId, interestId);
+
+            // then
+            verify(subscriptionRepository).save(any(Subscription.class));
+        }
+
+        @Test
+        @DisplayName("사용자는 관심사 구독을 취소할 수 있다")
+        void unsubscribe_Success() {
+            // given
+            UUID userId = UUID.randomUUID();
+            UUID interestId = UUID.randomUUID();
+
+            User user = new User("test@test.com", "아토", "Z1x2c3v4!", null);
+            Interest interest = new Interest("동물");
+            Subscription subscription = new Subscription(interest, user);
+
+            when(subscriptionRepository.findSubscription(userId, interestId))
+                    .thenReturn(Optional.of(subscription));
+
+            // when
+            interestService.unsubscribe(userId, interestId);
+
+            // then
+            verify(subscriptionRepository).delete(subscription);
+
+        }
     }
 }

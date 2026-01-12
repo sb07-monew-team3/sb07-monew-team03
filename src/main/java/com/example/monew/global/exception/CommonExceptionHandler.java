@@ -1,15 +1,26 @@
 package com.example.monew.global.exception;
 
+
+import jakarta.validation.ConstraintViolationException;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.springframework.context.MessageSourceResolvable;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 @Slf4j
 @RestControllerAdvice
@@ -29,6 +40,57 @@ public class CommonExceptionHandler {
         );
         log.error("{} : {}",e.errorCode.name(), e.errorCode.getMessage());
         return ResponseEntity.status(statusCode).body(errorResponse);
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ErrorResponse> handleMethodValidationException(HandlerMethodValidationException e
+    ) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            Instant.now(),
+            "INVALID_REQUEST",
+            "$$$$$ 잘못된 요청",
+            null,
+            e.getClass().getSimpleName(),
+            HttpStatus.BAD_REQUEST.value()
+        );
+
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(errorResponse);
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<ErrorResponse> handleMissingRequestHeader(MissingRequestHeaderException e) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            Instant.now(),
+            "INVALID_REQUEST",
+            "$$$$$ 필수 요청 헤더 누락",
+            Map.of(
+                "headerName", e.getHeaderName()
+            ),
+            e.getClass().getSimpleName(),
+            HttpStatus.BAD_REQUEST.value()
+        );
+
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(errorResponse);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e) {
+        ErrorResponse errorResponse = new ErrorResponse(
+            Instant.now(),
+            ErrorCode.ARGUMENT_VALID_FAIL.name(),
+            ErrorCode.ARGUMENT_VALID_FAIL.getMessage(),
+            null,
+            e.getClass().getSimpleName(),
+            HttpStatus.BAD_REQUEST.value()
+        );
+
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(errorResponse);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
