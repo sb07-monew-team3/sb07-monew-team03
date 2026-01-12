@@ -5,16 +5,22 @@ import com.example.monew.domain.comment.dto.CommentResponse;
 import com.example.monew.domain.comment.entity.Comment;
 import com.example.monew.domain.comment.repository.CommentLikesRepository;
 import com.example.monew.domain.comment.repository.CommentRepository;
+import com.example.monew.domain.comment.repository.CommentWithLikeCount;
 import com.example.monew.domain.user.entity.User;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -41,8 +47,33 @@ public class CommentService {
     public Page<CommentResponse> list(UUID userId, UUID articleId, Pageable pageable) {
         findArticleOrThrow(articleId);
 
-        return commentRepository.findByArticle_IdAndIsDeletedFalse(articleId, pageable)
-                .map(comment -> toResponse(comment, userId));
+        Sort.Order likeCountOrder = pageable.getSort().getOrderFor("likeCount");
+        if (likeCountOrder != null) {
+            Sort.Direction dir = likeCountOrder.getDirection() == null ? Sort.Direction.DESC : likeCountOrder.getDirection();
+
+            Page<CommentWithLikeCount> page = commentRepository.findByArticleIdOrderByLikeCount(articleId, pageable, dir);
+
+            List<UUID> commentIds = page.getContent().stream().map(it -> it.comment().getId()).toList();
+            Set<UUID> likedIds = commentLikesRepository.findLikedCommentIds(userId, commentIds);
+
+            return page.map(it -> CommentResponse.from(
+                    it.comment(),
+                    it.likeCount(),
+                    likedIds.contains(it.comment().getId())
+            ));
+        }
+
+        Page<Comment> page = commentRepository.findByArticle_IdAndIsDeletedFalse(articleId, pageable);
+
+        List<UUID> commentIds = page.getContent().stream().map(Comment::getId).toList();
+        Map<UUID, Long> likeCountMap = commentLikesRepository.countByCommentIds(commentIds);
+        Set<UUID> likedIds = commentLikesRepository.findLikedCommentIds(userId, commentIds);
+
+        return page.map(c -> CommentResponse.from(
+                c,
+                likeCountMap.getOrDefault(c.getId(), 0L),
+                likedIds.contains(c.getId())
+        ));
     }
 
     public CommentResponse update(UUID userId, UUID commentId, String content) {
@@ -64,7 +95,7 @@ public class CommentService {
         Comment comment = commentRepository.findByIdAndIsDeletedFalse(commentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
 
-        if (!comment.getUser().getId().equals(userId)) {
+        if (userId != null && !comment.getUser().getId().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed");
         }
 
@@ -75,7 +106,7 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
 
-        if (!comment.getUser().getId().equals(userId)) {
+        if (userId != null && !comment.getUser().getId().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed");
         }
 

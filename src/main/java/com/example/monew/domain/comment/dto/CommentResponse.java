@@ -20,15 +20,15 @@ public class CommentResponse {
     private long likeCount;
     private boolean likedByMe;
 
-    public static CommentResponse from(Comment comment) {
+    public static CommentResponse from(Comment comment, long likeCount, boolean likedByMe) {
         return new CommentResponse(
                 comment.getId(),
                 comment.getArticle().getId(),
                 comment.getUser().getId(),
                 comment.getContent(),
                 comment.getCreatedAt(),
-                0L,
-                false
+                likeCount,
+                likedByMe
         );
     }
 }
