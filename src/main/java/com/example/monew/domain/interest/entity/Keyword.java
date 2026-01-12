@@ -26,6 +26,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 public class Keyword extends BaseEntity {
 
+    @Column(name="keyword", nullable = false)
     private String keyword;
 
     @ManyToOne(fetch = FetchType.LAZY)

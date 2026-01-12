@@ -4,3 +4,6 @@ spring:
   profiles:
     active: dev
 
+naver:
+  client-id: ${CLIENT_ID}
+  client-secret: ${CLIENT_SECRET}

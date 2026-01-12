@@ -1,9 +1,13 @@
 package com.example.monew.global.exception;
 
+
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.context.MessageSourceResolvable;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.method.ParameterValidationResult;
@@ -18,6 +22,7 @@ import java.util.Map;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
+@Slf4j
 @RestControllerAdvice
 public class CommonExceptionHandler {
 
@@ -33,6 +38,7 @@ public class CommonExceptionHandler {
                 e.getClass().getSimpleName(),
                 e.errorCode.getStatusCode()
         );
+        log.error("{} : {}",e.errorCode.name(), e.errorCode.getMessage());
         return ResponseEntity.status(statusCode).body(errorResponse);
     }
 
@@ -103,6 +109,9 @@ public class CommonExceptionHandler {
                 e.getClass().getSimpleName(),
                 statusCode
         );
+        for(String key : details.keySet()){
+            log.error("{} : {}",key, details.get(key));
+        }
         return ResponseEntity.status(statusCode).body(errorResponse);
     }
 
@@ -118,6 +127,7 @@ public class CommonExceptionHandler {
                 e.getClass().getSimpleName(),
                 statusCode
         );
+        log.error("{}:{}",e.getClass().getSimpleName(), e.getMessage());
         return ResponseEntity.status(statusCode).body(errorResponse);
     }
 }
