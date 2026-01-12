@@ -16,12 +16,17 @@ public class LogInterceptorConfig implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String requestUserId;
-        requestUserId=request.getHeader("Monew-Request-Id")==null
+        String requestId = UUID.randomUUID().toString();
+
+        requestUserId=request.getHeader("Monew-Request-User-Id")==null
                 ? UUID.randomUUID().toString()
-                :request.getHeader("Monew-Request-Id");
-       MDC.put("requestUserId",requestUserId);
-       MDC.put("requestIp",getClientIpv4(request));
-       MDC.put("requestUri",request.getRequestURI());
+                :request.getHeader("Monew-Request-User-Id");
+
+        response.setHeader("MoNew-Request-Id",requestId);
+        MDC.put("requestId",requestId);
+        MDC.put("requestUserId",requestUserId);
+        MDC.put("requestIp",getClientIpv4(request));
+        MDC.put("requestUri",request.getRequestURI());
         return true;
     }
 

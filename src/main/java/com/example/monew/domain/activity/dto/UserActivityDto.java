@@ -8,7 +8,11 @@ public record UserActivityDto(
         UUID id,
         String email,
         String nickname,
-        Instant createdAt
+        Instant createdAt,
+        UserActivitySubscriptionDto[] subscriptions,
+        UserActivityCommentDto[] comments,
+        UserActivityCommentLikeDto[] commentLikes,
+        UserActivityArticleViewDto[] articleViews
 
 ) {
 }
