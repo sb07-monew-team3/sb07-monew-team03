@@ -16,6 +16,9 @@ public class CommentCreateRequest {
     @NotNull
     private UUID articleId;
 
+    @NotNull
+    private UUID userId; //수정
+
     @NotBlank
     private String content;
 }

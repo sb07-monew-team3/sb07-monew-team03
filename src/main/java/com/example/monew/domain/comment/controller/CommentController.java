@@ -27,7 +27,7 @@ public class CommentController {
 
     @GetMapping
     public ResponseEntity<Page<CommentResponse>> list(
-            @RequestHeader("MoNew-Request-User-ID") UUID userId,
+            @RequestHeader("Monew-Request-User-ID") UUID userId,
             @RequestParam UUID articleId,
             Pageable pageable
     ) {
@@ -36,16 +36,15 @@ public class CommentController {
 
     @PostMapping
     public ResponseEntity<CommentResponse> create(
-            @RequestHeader("MoNew-Request-User-ID") UUID userId,
             @Valid @RequestBody CommentCreateRequest request
     ) {
-        CommentResponse response = commentService.create(userId, request.getArticleId(), request.getContent());
+        CommentResponse response = commentService.create(request.getUserId(), request.getArticleId(), request.getContent());
         return ResponseEntity.created(URI.create("/api/comments/" + response.getId())).body(response);
-    }
+    } //수정
 
     @PatchMapping("/{commentId}")
     public ResponseEntity<CommentResponse> update(
-            @RequestHeader("MoNew-Request-User-ID") UUID userId,
+            @RequestHeader("Monew-Request-User-ID") UUID userId,
             @PathVariable UUID commentId,
             @Valid @RequestBody CommentUpdateRequest request
     ) {
@@ -54,7 +53,7 @@ public class CommentController {
 
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> softDelete(
-            @RequestHeader("MoNew-Request-User-ID") UUID userId,
+            @RequestHeader("Monew-Request-User-ID") UUID userId,
             @PathVariable UUID commentId
     ) {
         commentService.softDelete(userId, commentId);
@@ -63,7 +62,7 @@ public class CommentController {
 
     @DeleteMapping("/{commentId}/hard")
     public ResponseEntity<Void> hardDelete(
-            @RequestHeader("MoNew-Request-User-ID") UUID userId,
+            @RequestHeader("Monew-Request-User-ID") UUID userId,
             @PathVariable UUID commentId
     ) {
         commentService.hardDelete(userId, commentId);
