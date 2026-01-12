@@ -10,6 +10,8 @@ import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
 import com.example.monew.domain.interest.repository.SubscriptionRepository;
 import com.example.monew.domain.interest.service.InterestServiceImpl;
+import com.example.monew.domain.user.entity.User;
+import com.example.monew.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -41,6 +43,9 @@ public class InterestServiceTest {
 
     @Mock
     private SubscriptionRepository subscriptionRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private InterestMapper interestMapper;
@@ -411,12 +416,42 @@ public class InterestServiceTest {
             UUID userId = UUID.randomUUID();
             UUID interestId = UUID.randomUUID();
 
+            User user = new User("test@test.com", "아토", "Z1x2c3v4!", null);
+            Interest interest = new Interest("동물");
+
+            when(userRepository.findById(userId))
+                    .thenReturn(Optional.of(user));
+
+            when(interestRepository.findById(interestId))
+                    .thenReturn(Optional.of(interest));
+
             // when
             interestService.subscribe(userId, interestId);
 
             // then
             verify(subscriptionRepository).save(any(Subscription.class));
+        }
 
+        @Test
+        @DisplayName("사용자는 관심사 구독을 취소할 수 있다")
+        void unsubscribe_Success() {
+            // given
+            UUID userId = UUID.randomUUID();
+            UUID interestId = UUID.randomUUID();
+
+            User user = new User("test@test.com", "아토", "Z1x2c3v4!", null);
+            Interest interest = new Interest("동물");
+            Subscription subscription = new Subscription(interest, user);
+
+            when(subscriptionRepository.findSubscription(userId, interestId))
+                    .thenReturn(Optional.of(subscription));
+
+            // when
+            interestService.unsubscribe(userId, interestId);
+
+
+            // then
+            verify(subscriptionRepository).delete(subscription);
 
         }
     }
