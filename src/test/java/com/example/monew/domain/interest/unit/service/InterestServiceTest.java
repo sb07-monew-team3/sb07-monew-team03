@@ -449,7 +449,6 @@ public class InterestServiceTest {
             // when
             interestService.unsubscribe(userId, interestId);
 
-
             // then
             verify(subscriptionRepository).delete(subscription);
 
