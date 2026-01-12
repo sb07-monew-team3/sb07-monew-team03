@@ -9,7 +9,7 @@ public record ArticleDto(
         String title,
         LocalDateTime publishDate,
         String summary,
-        Integer commentCount,
-        Integer viewCount,
+        Long commentCount,
+        Long viewCount,
         Boolean viewedByMe // 요청자의 조회 여부
 ) {}

@@ -2,16 +2,25 @@ package com.example.monew.domain.article.unit.service;
 
 import com.example.monew.domain.article.client.naver.NaverNewsClient;
 import com.example.monew.domain.article.client.naver.NaverNewsResponse;
+import com.example.monew.domain.article.dto.*;
 import com.example.monew.domain.article.entity.Article;
+import com.example.monew.domain.article.entity.ArticleView;
+import com.example.monew.domain.article.mapper.ArticleMapper;
+import com.example.monew.domain.article.mapper.ArticleViewMapper;
+import com.example.monew.domain.article.mapper.CursorPageMapper;
 import com.example.monew.domain.article.mapper.NaverArticleMapper;
 import com.example.monew.domain.article.repository.ArticleRepository;
+import com.example.monew.domain.article.repository.ArticleViewRepository;
 import com.example.monew.domain.article.service.ArticleCollectionScheduler;
 import com.example.monew.domain.article.service.ArticleService;
+import com.example.monew.domain.comment.repository.CommentRepository;
 import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.entity.Keyword;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
-import org.assertj.core.api.Assertions;
+import com.example.monew.domain.user.entity.User;
+import com.example.monew.domain.user.repository.UserRepository;
+import com.example.monew.global.exception.domain.article.ArticleNotExistException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,17 +28,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,16 +50,34 @@ class ArticleServiceTest {
     private ArticleRepository articleRepository;
 
     @Mock
+    private ArticleViewRepository articleViewRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
     private InterestRepository interestRepository;
 
     @Mock
     private KeywordRepository keywordRepository;
 
     @Mock
+    private CommentRepository commentRepository;
+
+    @Mock
     private NaverNewsClient naverNewsClient;
 
     @Mock
     private NaverArticleMapper naverArticleMapper;
+
+    @Mock
+    private ArticleMapper articleMapper;
+
+    @Mock
+    private CursorPageMapper cursorPageMapper;
+
+    @Mock
+    private ArticleViewMapper articleViewMapper;
 
     @InjectMocks
     private ArticleService articleService;
@@ -106,6 +134,179 @@ class ArticleServiceTest {
 
             verify(articleRepository, times(1)).findAllBySourceUrlIn(anySet());
             verify(articleRepository, times(1)).saveAll(anyList());
+        }
+    }
+
+    @Nested
+    @DisplayName("기사 삭제 테스트")
+    class DeleteArticlesTest {
+
+        @Test
+        @DisplayName("정상적으로 기사를 논리 삭제할 수 있다")
+        void deleteArticleSoft_success() {
+            // given
+            UUID articleId = UUID.randomUUID();
+            Article article = new Article(
+                    Source.NAVER.getValue(),
+                    "",
+                    "",
+                    LocalDateTime.now(),
+                    "",
+                    false,
+                    new ArrayList<>()
+            );
+            ReflectionTestUtils.setField(article, "id", articleId);
+
+            when(articleRepository.findById(articleId))
+                    .thenReturn(Optional.of(article));
+
+            when(articleRepository.save(any(Article.class)))
+                    .thenReturn(mock(Article.class));
+
+            // when
+            articleService.deleteArticleSoft(articleId);
+
+            // then
+            assertThat(article.isDeleted()).isTrue();
+
+            verify(articleRepository, times(1)).findById(articleId);
+            verify(articleRepository, times(1)).save(article);
+        }
+
+        @Test
+        @DisplayName("정상적으로 기사를 물리 삭제할 수 있다")
+        void deleteArticleHard_success() {
+            // given
+            UUID articleId = UUID.randomUUID();
+
+            when(articleRepository.findById(articleId))
+                    .thenReturn(Optional.of(mock(Article.class)));
+
+            // when
+            articleService.deleteArticleHard(articleId);
+
+            // then
+            verify(articleRepository, times(1)).findById(articleId);
+            verify(articleRepository, times(1)).deleteById(articleId);
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 기사는 논리/물리 삭제할 수 없다")
+        void deleteArticle_validId_fail() {
+            // given
+            UUID articleId = UUID.randomUUID();
+
+            when(articleRepository.findById(articleId))
+                    .thenReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> articleService.deleteArticleSoft(articleId))
+                    .isInstanceOf(ArticleNotExistException.class);
+            assertThatThrownBy(() -> articleService.deleteArticleHard(articleId))
+                    .isInstanceOf(ArticleNotExistException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("기사 조회 테스트")
+    class FindArticleTest {
+        @Test
+        @DisplayName("정상적으로 기사 단건을 조회할 수 있다")
+        void findArticle_success() {
+            // given
+            UUID userId = UUID.randomUUID();
+            UUID articleId = UUID.randomUUID();
+            Article article = new Article(
+                    Source.NAVER.getValue(),
+                    "",
+                    "",
+                    LocalDateTime.now(),
+                    "",
+                    false,
+                    new ArrayList<>()
+            );
+            ReflectionTestUtils.setField(article, "id", articleId);
+
+            when(articleRepository.findById(articleId))
+                    .thenReturn(Optional.of(article));
+
+            when(articleMapper.toDto(article, userId))
+                    .thenReturn(mock(ArticleDto.class));
+
+            // when
+            ArticleDto response = articleService.getArticle(articleId, userId);
+
+            // then
+            assertThat(response).isNotNull();
+
+            verify(articleRepository, times(1)).findById(articleId);
+        }
+        
+        @Test
+        @DisplayName("정상적으로 기사 목록을 조회할 수 있다")
+        void findArticleList_success() {
+            // given
+            UUID userId = UUID.randomUUID();
+
+            ArticleRequestDto articleRequestDto = new ArticleRequestDto(
+                    null,
+                    null,
+                    List.of(Source.NAVER),
+                    null,
+                    null,
+                    "publishDate",
+                    "DESC",
+                    null,
+                    null,
+                    10
+            );
+
+            when(cursorPageMapper.toResponseDto(any(), anyString(), anyLong()))
+                    .thenReturn(mock(CursorPageResponseArticleDto.class));
+
+            // when
+            CursorPageResponseArticleDto response = articleService.getArticleList(articleRequestDto, userId);
+
+            // then
+            assertThat(response).isNotNull();
+
+            verify(keywordRepository, never()).findAllByInterestId(any(UUID.class));
+            verify(articleRepository, times(1)).findArticleSlice(any(ArticleRequestDto.class), any(UUID.class), anyList(), any(Pageable.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("기사 뷰 등록 테스트")
+    class ArticleViewTest {
+        @Test
+        @DisplayName("정상적으로 기사 뷰를 등록할 수 있다")
+        void recordArticleView_success() {
+            // given
+            UUID userId = UUID.randomUUID();
+            UUID articleId = UUID.randomUUID();
+
+            when(articleRepository.findById(articleId))
+                    .thenReturn(Optional.of(mock(Article.class)));
+
+            when(userRepository.findById(userId))
+                    .thenReturn(Optional.of(mock(User.class)));
+
+            when(articleViewRepository.save(any(ArticleView.class)))
+                    .thenReturn(mock(ArticleView.class));
+
+            when(articleViewMapper.toResponseDto(any(ArticleView.class)))
+                    .thenReturn(mock(ArticleViewDto.class));
+
+            // when
+            ArticleViewDto response = articleService.recordArticleView(articleId, userId);
+
+            // then
+            assertThat(response).isNotNull();
+
+            verify(articleRepository, times(1)).findById(articleId);
+            verify(userRepository, times(1)).findById(userId);
+            verify(articleViewRepository, times(1)).save(any(ArticleView.class));
+            verify(articleViewMapper, times(1)).toResponseDto(any(ArticleView.class));
         }
     }
 }
