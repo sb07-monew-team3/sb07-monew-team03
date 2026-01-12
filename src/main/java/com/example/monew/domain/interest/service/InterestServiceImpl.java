@@ -112,6 +112,13 @@ public class InterestServiceImpl implements InterestService {
         subscriptionRepository.save(subscription);
     }
 
+    @Override
+    public void unsubscribe(UUID userId, UUID interestId) {
+        Subscription subscription = subscriptionRepository.findSubscription(userId, interestId)
+                .orElseThrow(() -> new IllegalArgumentException("구독이 없습니다."));
+
+        subscriptionRepository.delete(subscription);
+    }
 
     private void validInterestName(String name) {
         if (name == null || name.isBlank()) {
