@@ -27,6 +27,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class InterestServiceImpl implements InterestService {
 
     private final InterestRepository interestRepository;
@@ -36,7 +37,6 @@ public class InterestServiceImpl implements InterestService {
     private final InterestMapper interestMapper;
 
     @Override
-    @Transactional
     public InterestDto create(InterestRegisterRequest request) {
 
         validInterestName(request.name());
@@ -55,7 +55,6 @@ public class InterestServiceImpl implements InterestService {
     }
 
     @Override
-    @Transactional
     public InterestDto update(UUID interestId, InterestUpdateRequest request) {
         Interest interest = interestRepository.findById(interestId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "관심사가 없습니다."));
@@ -72,7 +71,6 @@ public class InterestServiceImpl implements InterestService {
     }
 
     @Override
-    @Transactional
     public void delete(UUID interestId) {
         Interest interest = interestRepository.findById(interestId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "관심사가 없습니다."));
@@ -102,7 +100,6 @@ public class InterestServiceImpl implements InterestService {
     }
 
     @Override
-    @Transactional
     public void subscribe(UUID userId, UUID interestId) {
 
         User user = userRepository.findById(userId)
@@ -117,7 +114,6 @@ public class InterestServiceImpl implements InterestService {
     }
 
     @Override
-    @Transactional
     public void unsubscribe(UUID userId, UUID interestId) {
         Subscription subscription = subscriptionRepository.findSubscription(userId, interestId)
                 .orElseThrow(() -> new IllegalArgumentException("구독이 없습니다."));
