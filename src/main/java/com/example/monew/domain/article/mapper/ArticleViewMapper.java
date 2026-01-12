@@ -19,7 +19,7 @@ public class ArticleViewMapper {
 
         Article article = articleView.getArticle();
 
-//        long commentCount = commentRepository.countByArticleId(article.getId()); // TODO : 메서드 추가시 주석 제거
+        long commentCount = commentRepository.countByArticleId(article.getId());
         long articleViewCount = articleViewRepository.countByArticleId(article.getId());
 
         return new ArticleViewDto(
@@ -32,7 +32,7 @@ public class ArticleViewMapper {
                 article.getTitle(),
                 article.getPublishDate(),
                 article.getSummary(),
-                0L,
+                commentCount,
                 articleViewCount
         );
     }

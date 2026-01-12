@@ -4,6 +4,7 @@ import com.example.monew.domain.article.dto.ArticleDto;
 import com.example.monew.domain.article.dto.CursorPageResponseArticleDto;
 import com.example.monew.domain.article.repository.ArticleRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +18,7 @@ public class CursorPageMapper {
     private final ArticleRepository articleRepository;
 
     public CursorPageResponseArticleDto toResponseDto (Slice<ArticleDto> articleList, String cursor, long totalElements) {
-        ArticleDto lastContent = articleList.getContent().get(articleList.getSize() - 1);
+        ArticleDto lastContent = articleList.getContent().get(articleList.getContent().size() - 1);
         UUID lastContentId = lastContent.id();
 
         Instant nextAfter = articleRepository.findById(lastContentId).get().getCreatedAt();
