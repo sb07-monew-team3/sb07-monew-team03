@@ -24,7 +24,7 @@ public interface NotificationRepository extends JpaRepository<Notifications, UUI
         + "JOIN FETCH n.user u "
         + "WHERE u.id = :userId AND n.isRead = false "
         + "ORDER BY n.createdAt")
-    Slice<NotificationDto> findAllNotificationByUserId(@Param("userId") UUID userId,
+    Slice<Notifications> findAllByUserId(@Param("userId") UUID userId,
         @Param("createAt") Instant createAt,
         Pageable pageable);
 

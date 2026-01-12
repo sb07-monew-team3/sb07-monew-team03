@@ -15,10 +15,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 
-//@Slf4j
 @SpringBootTest
 @Transactional
+@EntityScan(basePackages = "com.example.monew.domain") // 엔티티가 위치한 최상위 패키지 명시
 public class NotificationServiceIntegrationTest {
 
     @Autowired

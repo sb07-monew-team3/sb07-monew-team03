@@ -8,6 +8,7 @@ import com.example.monew.global.exception.domain.notification.NotificationNotExi
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,27 +26,17 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notiRepository;
 
     @Override
-    public CursorResponse<NotificationDto> findAllNotificationByUserId(UUID userId, String cursor,
-        Instant createdAt, int limit) {
+    public CursorResponse<NotificationDto> findAllByUserId(UUID userId, String cursor, Instant createdAt, int limit) {
 
-        Pageable pageable = PageRequest.of(Integer.parseInt(cursor), limit, Direction.DESC);
+        Pageable pageable = PageRequest.of(Integer.parseInt(Optional.ofNullable(cursor).orElse("0")), limit, Direction.DESC);
 
-        Slice<NotificationDto> sliceDto = notiRepository.findAllNotificationByUserId(userId, createdAt, pageable);
+        Slice<NotificationDto> sliceDto = notiRepository.findAllByUserId(userId, Optional.ofNullable(createdAt).orElse(Instant.now()), pageable)
+            .map(NotificationDto::toDto);
 
-        Instant nextAfterCreatedAt = null;
-        String nextCursorUUIDString = null;
+        CursorResponse<NotificationDto> cursorResponses = NotificationDto.dtoCursorResponse(sliceDto);
+        log.info(" findAllNotificationByUserId.cursorResponses = " + cursorResponses);
 
-        if (!sliceDto.getContent().isEmpty()) {
-            NotificationDto notificationDto = sliceDto.getContent().get(sliceDto.getContent().size() - 1);
-            nextAfterCreatedAt = notificationDto.createdAt();
-            nextCursorUUIDString = notificationDto.id().toString();
-        }
-
-        CursorResponse<NotificationDto> notiDto = NotificationDto.from(sliceDto, nextCursorUUIDString, nextAfterCreatedAt);
-
-        log.info(" findAllNotificationByUserId.notiDto = " + notiDto);
-
-        return notiDto;
+        return cursorResponses;
     }
 
     @Transactional

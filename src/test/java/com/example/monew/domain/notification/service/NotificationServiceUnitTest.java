@@ -10,7 +10,9 @@ import com.example.monew.domain.notification.entity.Notifications;
 import com.example.monew.domain.notification.entity.ResourceType;
 import com.example.monew.domain.notification.repository.NotificationRepository;
 import com.example.monew.domain.user.entity.User;
+import com.example.monew.domain.user.util.NotiFactory;
 import com.example.monew.domain.user.util.TestFixture;
+import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -23,7 +25,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 
+@Transactional
 @ExtendWith(MockitoExtension.class)
 @DisplayName("NotificationService Unit Test")
 class NotificationServiceUnitTest {
@@ -34,22 +38,13 @@ class NotificationServiceUnitTest {
     private NotificationDto dto;
 
     @InjectMocks
-    private NotificationServiceImpl notiService;
+    private NotificationService notiService;
 
-    private final TestFixture testFixture = new TestFixture();
-    private User user;
-    private Notifications noti_I;
-    private Notifications noti_II;
-    private Notifications noti_III;
+    @Autowired
+    NotiFactory notiFactory;
 
     @BeforeEach
     void setUp() {
-        user = testFixture.userFactory();
-
-        Instant oneWeekAgo = Instant.now().minus(7, ChronoUnit.DAYS);
-        noti_I = new Notifications(user, "noti 1", ResourceType.INTEREST, UUID.randomUUID(), false, Instant.now());
-        noti_II = new Notifications(user, "noti 2", ResourceType.INTEREST, UUID.randomUUID(), false, oneWeekAgo);
-        noti_III = new Notifications(user, "noti 3", ResourceType.INTEREST, UUID.randomUUID(), false, oneWeekAgo);
     }
 
     @AfterEach

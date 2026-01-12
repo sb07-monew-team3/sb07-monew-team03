@@ -3,7 +3,7 @@ package com.example.monew.global.exception;
 import java.time.Instant;
 import java.util.Map;
 
-public abstract class CustomException extends RuntimeException {
+public class CustomException extends RuntimeException {
 
     final Instant timestamp = Instant.now();
     final ErrorCode errorCode;
