@@ -27,7 +27,6 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class InterestServiceImpl implements InterestService {
 
     private final InterestRepository interestRepository;
@@ -73,6 +72,7 @@ public class InterestServiceImpl implements InterestService {
     }
 
     @Override
+    @Transactional
     public void delete(UUID interestId) {
         Interest interest = interestRepository.findById(interestId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "관심사가 없습니다."));
@@ -81,6 +81,7 @@ public class InterestServiceImpl implements InterestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<InterestDto> search(String keyword) {
         List<Interest> interests = interestRepository.searchByInterestOrKeyword(keyword);
 
