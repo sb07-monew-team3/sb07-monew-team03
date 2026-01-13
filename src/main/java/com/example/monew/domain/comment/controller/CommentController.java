@@ -1,5 +1,6 @@
 package com.example.monew.domain.comment.controller;
 
+import com.example.monew.domain.comment.controller.docs.CommentControllerDocs;
 import com.example.monew.domain.comment.dto.CommentCreateRequest;
 import com.example.monew.domain.comment.dto.CommentCursorListRequest;
 import com.example.monew.domain.comment.dto.CommentResponse;
@@ -7,8 +8,6 @@ import com.example.monew.domain.comment.dto.CommentUpdateRequest;
 import com.example.monew.domain.comment.dto.CursorPageResponse;
 import com.example.monew.domain.comment.service.CommentQueryService;
 import com.example.monew.domain.comment.service.CommentService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,7 +21,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/comments")
-public class CommentController {
+public class CommentController implements CommentControllerDocs {
 
     private final CommentService commentService;
     private final CommentQueryService commentQueryService;
@@ -80,20 +79,14 @@ public class CommentController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "댓글 목록 조회 (커서 페이지네이션)")
     @GetMapping("/cursor")
     public CursorPageResponse<CommentResponse> listByCursor(
             @RequestHeader(value = "Monew-Request-User-ID", required = false) UUID userId,
             @RequestParam UUID articleId,
-            @Parameter(description = "정렬 기준 (createdAt|likeCount, 기본 createdAt)")
             @RequestParam(required = false) String orderBy,
-            @Parameter(description = "정렬 방향 (ASC|DESC, 기본 DESC)")
             @RequestParam(required = false) Sort.Direction direction,
-            @Parameter(description = "커서")
             @RequestParam(required = false) String cursor,
-            @Parameter(description = "다음 페이지 여부 (기본 true)")
             @RequestParam(required = false) Boolean after,
-            @Parameter(description = "조회 개수 (기본 20, 최대 50)")
             @RequestParam(required = false) Integer limit
     ) {
         CommentCursorListRequest req = new CommentCursorListRequest(

@@ -4,6 +4,7 @@ import com.example.monew.domain.comment.entity.Comment;
 import com.example.monew.domain.comment.entity.CommentLikes;
 import com.example.monew.domain.comment.repository.CommentLikesRepository;
 import com.example.monew.domain.comment.repository.CommentRepository;
+import com.example.monew.domain.notification.service.NotificationService;
 import com.example.monew.domain.user.entity.User;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class CommentLikeService {
     private final CommentLikesRepository commentLikesRepository;
     private final CommentRepository commentRepository;
     private final EntityManager entityManager;
+    private final NotificationService notificationService;
 
     public void like(UUID userId, UUID commentId) {
         Comment comment = getCommentOrThrow(commentId);
@@ -32,6 +34,11 @@ public class CommentLikeService {
         }
 
         commentLikesRepository.save(new CommentLikes(user, comment));
+
+        UUID receiverId = comment.getUser().getId();
+        if (!receiverId.equals(userId)) {
+            notificationService.notifyCommentLiked(receiverId, user.getNickName(), commentId);
+        }
     }
 
     public void unlike(UUID userId, UUID commentId) {
