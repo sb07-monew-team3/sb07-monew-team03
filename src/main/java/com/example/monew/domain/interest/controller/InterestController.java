@@ -1,9 +1,6 @@
 package com.example.monew.domain.interest.controller;
 
-import com.example.monew.domain.interest.dto.InterestDto;
-import com.example.monew.domain.interest.dto.InterestRegisterRequest;
-import com.example.monew.domain.interest.dto.InterestUpdateRequest;
-import com.example.monew.domain.interest.dto.SubscriptionDto;
+import com.example.monew.domain.interest.dto.*;
 import com.example.monew.domain.interest.service.InterestService;
 import com.example.monew.domain.interest.service.SubscriptionService;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,11 +42,17 @@ public class InterestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<InterestDto>> search(
+    public ResponseEntity<CursorPageResponseInterestDto> search(
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = true) String orderBy,
+            @RequestParam(required = true) String direction,
+            @RequestParam(required = false) String cursor,
+            @RequestParam(required = false) Instant after,
+            @RequestParam(required = true) int limit,
             @RequestHeader("Monew-Request-User-ID") UUID userId) {
-        List<InterestDto> interests = interestService.search(keyword, userId);
-        return ResponseEntity.ok(interests);
+        CursorPageResponseInterestDto search = interestService.search(
+                keyword, userId, orderBy, direction, cursor, after, limit);
+        return ResponseEntity.ok(search);
     }
 
     @PostMapping("/{interestId}/subscriptions")
