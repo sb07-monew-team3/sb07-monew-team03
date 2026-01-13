@@ -21,7 +21,9 @@ public class CursorPageMapper {
         ArticleDto lastContent = articleList.getContent().get(articleList.getContent().size() - 1);
         UUID lastContentId = lastContent.id();
 
-        Instant nextAfter = articleRepository.findById(lastContentId).get().getCreatedAt();
+        // createdAt은 중복 값을 가질 수 있기 때문에,
+        // 보조 커서를 위한 sortTimestamp 값을 사용
+        Instant nextAfter = articleRepository.findById(lastContentId).get().getSortTimestamp();
 
         String nextCursor = switch (cursor) {
             case "publishDate" -> lastContent.publishDate().toString();

@@ -2,7 +2,6 @@ package com.example.monew.domain.article.repository;
 
 import com.example.monew.domain.article.dto.ArticleDto;
 import com.example.monew.domain.article.dto.ArticleRequestDto;
-import com.example.monew.domain.article.dto.Order;
 import com.example.monew.domain.article.dto.Source;
 import com.example.monew.domain.article.entity.QArticle;
 import com.example.monew.domain.article.entity.QArticleView;
@@ -11,6 +10,8 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,34 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                 )
                 .exists();
 
+        // 집계 함수
+        Expression<Long> commentCountSubquery =
+                JPAExpressions
+                        .select(comment.id.count())
+                        .from(comment)
+                        .where(comment.article.id.eq(article.id));
+
+        NumberExpression<Long> commentCount =
+                Expressions.numberTemplate(
+                        Long.class,
+                        "({0})",
+                        commentCountSubquery
+                );
+
+        Expression<Long> viewCountSubquery =
+                JPAExpressions
+                        .select(articleView.id.count())
+                        .from(articleView)
+                        .where(articleView.article.id.eq(article.id));
+
+        NumberExpression<Long> viewCount =
+                Expressions.numberTemplate(
+                        Long.class,
+                        "({0})",
+                        viewCountSubquery
+                );
+
+        // 페이징으로 기사 조회
         List<ArticleDto> content = queryFactory
                 .select(Projections.constructor(ArticleDto.class,
                         article.id,
@@ -49,21 +78,19 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                         article.title,
                         article.publishDate,
                         article.summary,
-                        comment.article.id.count().coalesce(0L).as("commentCount"),
-                        articleView.article.id.count().coalesce(0L).as("viewCount"),
+                        commentCount.coalesce(0L),
+                        viewCount.coalesce(0L),
                         viewedByMe
                 ))
                 .from(article)
-                .leftJoin(articleView).on(articleView.article.id.eq(article.id))
-                .leftJoin(comment).on(comment.article.id.eq(article.id))
                 .where(
                         keywordOrSummaryContains(keywords),
                         sourcesIn(request.sourceIn()),
                         publishDateBetween(request.publishDateFrom(), request.publishDateTo()),
-                        cursorCondition(request)
+                        cursorCondition(request, commentCount, viewCount)
                 )
                 .groupBy(article.id)
-                .orderBy(getOrderSpecifier(request.getOrder(), request.getDirection()))
+                .orderBy(getOrderSpecifier(request, commentCount, viewCount))
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
@@ -113,56 +140,104 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
     }
 
     // 정렬(날짜, 댓글수, 조회수), 정렬 방향(정, 역)
-    private OrderSpecifier<?> getOrderSpecifier(Order orderBy, Direction direction) {
-        if (orderBy == null) orderBy = Order.PUBLISH_DATE;
-        if (direction == null) direction = Direction.DESC;
+    private OrderSpecifier<?>[] getOrderSpecifier(
+            ArticleRequestDto request,
+            NumberExpression<Long> commentCount,
+            NumberExpression<Long> viewCount
+    ) {
+        boolean asc = request.getDirection() == Direction.ASC;
 
-        boolean asc = direction == Direction.ASC;
-
-        return switch (orderBy) {
-            case PUBLISH_DATE -> asc ? article.publishDate.asc() : article.publishDate.desc();
-            case COMMENT_COUNT -> asc ? comment.article.id.count().asc() : comment.article.id.count().desc();
-            case VIEW_COUNT -> asc ? articleView.article.id.count().asc() : articleView.article.id.count().desc();
+        return switch (request.getOrder()) {
+            case PUBLISH_DATE -> asc
+                    ? new OrderSpecifier[]{
+                            article.publishDate.asc(),
+                            article.sortTimestamp.asc()
+                    }
+                    : new OrderSpecifier[]{
+                            article.publishDate.desc(),
+                            article.sortTimestamp.desc()
+                    };
+            case COMMENT_COUNT -> asc
+                    ? new OrderSpecifier[]{
+                            commentCount.asc(),
+                            article.sortTimestamp.asc()
+                    }
+                            : new OrderSpecifier[]{
+                            commentCount.desc(),
+                            article.sortTimestamp.desc()
+                    };
+            case VIEW_COUNT -> asc
+                    ? new OrderSpecifier[]{
+                            viewCount.asc(),
+                            article.sortTimestamp.asc()
+                    }
+                            : new OrderSpecifier[]{
+                            viewCount.desc(),
+                            article.sortTimestamp.desc()
+                    };
         };
     }
 
-    private BooleanExpression cursorCondition(ArticleRequestDto request) {
-        // if (request.cursor() == null || request.after() == null) return null;
-        if (request.cursor() == null) return null;
+    private BooleanExpression cursorCondition(
+            ArticleRequestDto request,
+            NumberExpression<Long> commentCount,
+            NumberExpression<Long> viewCount
+    ) {
+         if (request.cursor() == null || request.after() == null) return null;
 
-        switch (request.orderBy()) {
-            case "commentCount" -> {
+        switch (request.getOrder()) {
+            case COMMENT_COUNT -> {
                 if (request.getDirection() == Direction.DESC) {
-                    return comment.article.id.count()
-                            .lt(Long.parseLong(request.cursor()));
-                            //.and(article.createdAt.lt(request.after()));
+                    return commentCount
+                            .lt(Long.parseLong(request.cursor()))
+                            .or(
+                                    commentCount.eq(Long.parseLong(request.cursor()))
+                                            .and(article.sortTimestamp.lt(request.after()))
+                            );
                 } else {
-                    return comment.article.id.count()
-                            .gt(Long.parseLong(request.cursor()));
-                            //.and(article.createdAt.gt(request.after()));
+                    return commentCount
+                            .gt(Long.parseLong(request.cursor()))
+                            .or(
+                                    commentCount.eq(Long.parseLong(request.cursor()))
+                                            .and(article.sortTimestamp.gt(request.after()))
+                            );
                 }
-
             }
-            case "viewCount" -> {
+            case VIEW_COUNT -> {
                 if (request.getDirection() == Direction.DESC) {
-                    return articleView.article.id.count()
-                            .lt(Long.parseLong(request.cursor()));
-                            //.and(article.createdAt.lt(request.after()));
+                    return viewCount
+                            .lt(Long.parseLong(request.cursor()))
+                            .or(
+                                    viewCount.eq(Long.parseLong(request.cursor()))
+                                            .and(article.sortTimestamp.lt(request.after()))
+                            );
                 } else {
-                    return articleView.article.id.count()
-                            .gt(Long.parseLong(request.cursor()));
-                            //.and(article.createdAt.gt(request.after()));
+                    return viewCount
+                            .gt(Long.parseLong(request.cursor()))
+                            .or(
+                                    viewCount.eq(Long.parseLong(request.cursor()))
+                                            .and(article.sortTimestamp.gt(request.after()))
+                            );
                 }
             }
             default -> { // default는 publishDate 기준
+                LocalDateTime cursorDate = LocalDateTime.parse(request.cursor());
+
                 if (request.getDirection() == Direction.DESC) {
+
                     return article.publishDate
-                            .lt(LocalDateTime.parse(request.cursor()));
-                            //.and(article.createdAt.lt(request.after()));
+                            .lt(cursorDate)
+                            .or(
+                                    article.publishDate.eq(cursorDate)
+                                            .and(article.sortTimestamp.lt(request.after()))
+                            );
                 } else {
                     return article.publishDate
-                            .gt(LocalDateTime.parse(request.cursor()));
-                            //.and(article.createdAt.gt(request.after()));
+                            .gt(cursorDate)
+                            .or(
+                                    article.publishDate.eq(cursorDate)
+                                            .and(article.sortTimestamp.gt(request.after()))
+                            );
                 }
             }
         }

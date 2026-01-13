@@ -20,6 +20,7 @@ public class NaverArticleMapper {
                         DateParser.parse(i.pubDate()),
                         i.description(),
                         false,
+                        null,
                         interests
                         )
                 )
