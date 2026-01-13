@@ -16,7 +16,6 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepositoryCustom{
 
     @Override
     public List<Subscription> getSubscriptionByUserId(UUID userId) {
-
         QSubscription qSubscription = QSubscription.subscription;
         return jpaQueryFactory
                 .selectFrom(qSubscription)
@@ -32,5 +31,14 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepositoryCustom{
                 .from(subscription)
                 .where(subscription.interest.id.eq(interestId))
                 .fetchOne();
+    }
+
+    @Override
+    public List<Subscription> getSubscriptionsByInterestId(UUID interestId) {
+        QSubscription subscription = QSubscription.subscription;
+        return jpaQueryFactory
+                .selectFrom(subscription)
+                .where(subscription.interest.id.eq(interestId))
+                .fetch();
     }
 }
