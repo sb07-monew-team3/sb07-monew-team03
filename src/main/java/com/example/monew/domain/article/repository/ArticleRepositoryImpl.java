@@ -48,7 +48,10 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                 JPAExpressions
                         .select(comment.id.count())
                         .from(comment)
-                        .where(comment.article.id.eq(article.id));
+                        .where(
+                                comment.article.id.eq(article.id)
+                                        .and(comment.isDeleted.eq(false))
+                        );
 
         NumberExpression<Long> commentCount =
                 Expressions.numberTemplate(
@@ -84,6 +87,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                 ))
                 .from(article)
                 .where(
+                        notDeleted(),
                         keywordOrSummaryContains(keywords),
                         sourcesIn(request.sourceIn()),
                         publishDateBetween(request.publishDateFrom(), request.publishDateTo()),
@@ -100,6 +104,10 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
         }
 
         return new SliceImpl<>(content, pageable, hasNext);
+    }
+
+    private BooleanExpression notDeleted() {
+        return article.isDeleted.eq(false);
     }
 
     // 검색어가 title, summary에 하나라도 부분 일치
@@ -251,6 +259,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                 .select(article.id.countDistinct())
                 .from(article)
                 .where(
+                        notDeleted(),
                         keywordOrSummaryContains(keywords),
                         sourcesIn(request.sourceIn()),
                         publishDateBetween(request.publishDateFrom(), request.publishDateTo())
