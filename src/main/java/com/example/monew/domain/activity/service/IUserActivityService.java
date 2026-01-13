@@ -64,13 +64,13 @@ public class IUserActivityService implements UserActivityService{
                 .map(articleViewMapper::toDto)
                 .toArray(UserActivityArticleViewDto[]::new);
         UserActivityCommentLikeDto[] commentLikeDtos = commentLikes.stream()
-                .sorted(Comparator.comparing(CommentLikes::getCreatedAt).reversed())
                 .filter(x-> !x.getComment().isDeleted())
+                .sorted(Comparator.comparing(CommentLikes::getCreatedAt).reversed())
                 .map(commentLikeMapper::toDto)
                 .toArray(UserActivityCommentLikeDto[]::new);
         UserActivityCommentDto[] commentDtos = postedComment.stream()
-                .sorted(Comparator.comparing(Comment::getCreatedAt).reversed())
                 .filter(x-> !x.isDeleted())
+                .sorted(Comparator.comparing(Comment::getCreatedAt).reversed())
                 .map(commentMapper::toDto)
                 .toArray(UserActivityCommentDto[]::new);
 
