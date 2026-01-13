@@ -22,7 +22,7 @@ public class NaverNewsClient {
                 .uri(uriBuilder -> uriBuilder
                         .path("/v1/search/news.json")
                         .queryParam("query", keyword) // 검색어
-                        .queryParam("display", 10) // 기사를 몇개 가져올지
+                        .queryParam("display", 100) // 기사를 몇개 가져올지
                         .queryParam("sort", "date") // 정렬 기준 (날짜)
                         .build())
                 .header("X-Naver-Client-Id", clientId)
