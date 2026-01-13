@@ -36,7 +36,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         for (Map.Entry<Interest, Integer> entry : interestList.entrySet()) {
             Interest interest = entry.getKey();
-            String content = "[관심사]와 관련된 기사가 " + entry.getValue() + "건 등록되었습니다.";
+            String content = "[관심사]와 관련된 기사가 " + entry.getValue().toString() + "건 등록되었습니다.";
 
             subscriptionService.getSubscribedInterestIds(interest.getId())
                 .forEach(userId -> {
