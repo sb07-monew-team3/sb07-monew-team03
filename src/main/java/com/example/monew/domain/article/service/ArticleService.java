@@ -19,6 +19,7 @@ import com.example.monew.global.exception.domain.user.UserNotExistException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -37,6 +38,7 @@ public class ArticleService {
     private final CursorPageMapper cursorPageMapper;
     private final ArticleViewMapper articleViewMapper;
 
+    @Transactional
     public void deleteArticleSoft(UUID articleId) {
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new ArticleNotExistException(articleId));
@@ -45,6 +47,7 @@ public class ArticleService {
         articleRepository.save(article);
     }
 
+    @Transactional
     public void deleteArticleHard(UUID articleId) {
         articleRepository.findById(articleId)
                 .orElseThrow(() -> new ArticleNotExistException(articleId));
@@ -52,6 +55,7 @@ public class ArticleService {
         articleRepository.deleteById(articleId);
     }
 
+    @Transactional(readOnly = true)
     public ArticleDto getArticle(UUID articleId, UUID userId) {
 
         Article article = articleRepository.findById(articleId)
@@ -60,6 +64,7 @@ public class ArticleService {
         return articleMapper.toDto(article, userId);
     }
 
+    @Transactional(readOnly = true)
     public CursorPageResponseArticleDto getArticleList(ArticleRequestDto request, UUID userId) {
 
         List<String> keywords;
@@ -86,6 +91,7 @@ public class ArticleService {
         return cursorPageMapper.toResponseDto(response, request.orderBy(), totalElements);
     }
 
+    @Transactional
     public ArticleViewDto recordArticleView(UUID articleId, UUID userId) {
 
         Article article = articleRepository.findById(articleId)

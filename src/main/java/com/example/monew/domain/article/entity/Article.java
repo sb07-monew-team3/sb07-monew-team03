@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -39,6 +40,13 @@ public class Article extends BaseCreatableEntity {
     @Column(name="is_deleted", nullable = false)
     @ColumnDefault( "false")
     private boolean isDeleted;
+
+    @Column(name="sort_timestamp", nullable = false, updatable = false, unique = true)
+    private Instant sortTimestamp;
+
+    public void setSortTimestamp(Instant sortTimestamp) {
+        this.sortTimestamp = sortTimestamp;
+    }
 
     @OneToMany
     @JoinTable(

@@ -11,10 +11,11 @@ import com.example.monew.domain.interest.repository.KeywordRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -32,6 +33,7 @@ public class ArticleCollectionScheduler {
     private final NaverNewsClient naverNewsClient;
 
     @Scheduled(fixedRate = BATCH_INTERVAL)
+    @Transactional
     public void collectArticles() {
 
         /*
@@ -79,9 +81,18 @@ public class ArticleCollectionScheduler {
 
         List<Article> newArticles = articles.stream()
                 .filter(a -> !existingLinks.contains(a.getSourceUrl()))
-                .toList();
+                .collect(Collectors.toList());
 
         if(!newArticles.isEmpty()) {
+            Collections.sort(newArticles, Comparator.comparing(Article::getPublishDate));
+
+            Instant baseTime = Instant.now();
+            for(int i = 0; i < newArticles.size(); i++) {
+                newArticles.get(i).setSortTimestamp(
+                        baseTime.plus(i, ChronoUnit.MILLIS)
+                );
+            }
+
             articleRepository.saveAll(newArticles);
         }
     }
