@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -55,14 +56,22 @@ public class IUserActivityService implements UserActivityService{
         List<Comment> postedComment = commentRepository.getCommentsByUserId(userId);
 
         UserActivitySubscriptionDto[] subscriptionDtos = subscriptions.stream()
+                .sorted(Comparator.comparing(Subscription::getCreatedAt).reversed())
                 .map(subscriptionMapper::toDto)
                 .toArray(UserActivitySubscriptionDto[]::new);
         UserActivityArticleViewDto[] articleViewDtos = articleViews.stream()
+                .sorted(Comparator.comparing(ArticleView::getCreatedAt).reversed())
                 .map(articleViewMapper::toDto)
                 .toArray(UserActivityArticleViewDto[]::new);
-        UserActivityCommentLikeDto[] commentLikeDtos = commentLikes.stream().map(commentLikeMapper::toDto)
+        UserActivityCommentLikeDto[] commentLikeDtos = commentLikes.stream()
+                .filter(x-> !x.getComment().isDeleted())
+                .sorted(Comparator.comparing(CommentLikes::getCreatedAt).reversed())
+                .map(commentLikeMapper::toDto)
                 .toArray(UserActivityCommentLikeDto[]::new);
-        UserActivityCommentDto[] commentDtos = postedComment.stream().map(commentMapper::toDto)
+        UserActivityCommentDto[] commentDtos = postedComment.stream()
+                .filter(x-> !x.isDeleted())
+                .sorted(Comparator.comparing(Comment::getCreatedAt).reversed())
+                .map(commentMapper::toDto)
                 .toArray(UserActivityCommentDto[]::new);
 
         return new UserActivityDto(
