@@ -60,4 +60,13 @@ public class SubscriptionServiceImpl implements SubscriptionService{
 
         subscriptionRepository.delete(subscription);
     }
+
+    // 구독자 목록 제공 메서드
+    @Override
+    @Transactional(readOnly = true)
+    public List<UUID> getSubscribedInterestIds(UUID interestId) {
+        return subscriptionRepository.getSubscriptionsByInterestId(interestId).stream()
+                .map(subscription -> subscription.getUser().getId())
+                .toList();
+    }
 }
