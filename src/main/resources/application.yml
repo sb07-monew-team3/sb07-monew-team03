@@ -2,7 +2,7 @@ spring:
   application:
     name: monew
   profiles:
-    active: dev
+    default: dev
 
 naver:
   client-id: ${CLIENT_ID}
