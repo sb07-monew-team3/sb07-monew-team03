@@ -78,4 +78,8 @@ public class NotificationServiceImpl implements NotificationService {
             log.info("##### NotificationDeleteScheduler  -  삭제할 노티 없음");
         }
     }
+    @Override
+    public void notifyCommentLiked(UUID receiverId, String actorNickname, UUID commentId) {
+        // 알림 생성 로직 작성 (미연님)
+    }
 }

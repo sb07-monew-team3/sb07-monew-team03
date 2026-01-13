@@ -9,6 +9,6 @@ public interface NotificationService {
     CursorResponse<NotificationDto> findAllByUserId( UUID userId, String cursor, Instant after, int limit);
     void allCheckNotification( UUID userId);
     void checkNotification( UUID notificationId, UUID userId);
-
+    void notifyCommentLiked(UUID receiverId, String actorNickname, UUID commentId);
     void deleteNotificationInBatch();
 }

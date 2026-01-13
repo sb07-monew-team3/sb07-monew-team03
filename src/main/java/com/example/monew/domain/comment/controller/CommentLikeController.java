@@ -1,5 +1,6 @@
 package com.example.monew.domain.comment.controller;
 
+import com.example.monew.domain.comment.controller.docs.CommentLikeControllerDocs;
 import com.example.monew.domain.comment.service.CommentLikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +11,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/comments")
-public class CommentLikeController {
+public class CommentLikeController implements CommentLikeControllerDocs {
 
     private final CommentLikeService commentLikeService;
 
