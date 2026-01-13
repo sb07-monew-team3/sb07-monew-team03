@@ -1,18 +1,16 @@
 package com.example.monew.domain.interest.service;
 
+import com.example.monew.domain.interest.dto.CursorPageResponseInterestDto;
 import com.example.monew.domain.interest.dto.InterestDto;
 import com.example.monew.domain.interest.dto.InterestRegisterRequest;
 import com.example.monew.domain.interest.dto.InterestUpdateRequest;
 import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.entity.Keyword;
-import com.example.monew.domain.interest.entity.Subscription;
 import com.example.monew.domain.interest.mapper.InterestMapper;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
 import com.example.monew.domain.interest.repository.SubscriptionRepository;
-import com.example.monew.domain.user.entity.User;
 import com.example.monew.domain.user.repository.UserRepository;
-import com.example.monew.global.exception.domain.user.UserNotExistException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.http.HttpStatus;
@@ -20,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -67,7 +66,9 @@ public class InterestServiceImpl implements InterestService {
 
         keywordRepository.saveAll(keywords);
 
-        return interestMapper.toDto(interest, request.keywords());
+        Long count = subscriptionRepository.countByInterestId(interestId);
+
+        return interestMapper.toDto(interest, request.keywords(), count, null);
     }
 
     @Override
@@ -80,45 +81,56 @@ public class InterestServiceImpl implements InterestService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<InterestDto> search(String keyword) {
-        List<Interest> interests = interestRepository.searchByInterestOrKeyword(keyword);
+    public CursorPageResponseInterestDto search(String keyword, UUID userId, String orderBy,
+                                                String direction, String cursor, Instant after, int limit) {
+        List<Interest> interests = interestRepository.searchByInterestOrKeyword(
+                keyword, orderBy, direction, cursor, after, limit);
+
+        boolean hasNext = interests.size() > limit;
+
+        List<Interest> interestList = hasNext ? interests.subList(0, limit) : interests;
 
         List<InterestDto> result = new ArrayList<>();
 
-        for(Interest interest : interests) {
+        for(Interest interest : interestList) {
             List<Keyword> keywordList = keywordRepository.findByInterest(interest);
 
             List<String> keywords = keywordList.stream()
                     .map(key -> key.getKeyword())
                     .toList();
 
-            InterestDto dto = interestMapper.toDto(interest, keywords);
+            Long count = subscriptionRepository.countByInterestId(interest.getId());
+            boolean subscribed = subscriptionRepository.isSubscribed(userId, interest.getId());
+
+            InterestDto dto = interestMapper.toDto(interest, keywords, count, subscribed);
 
             result.add(dto);
         }
-        return result;
-    }
 
-    @Override
-    public void subscribe(UUID userId, UUID interestId) {
+        String nextCursor = null;
+        Instant nextAfter = null;
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotExistException(userId));
+        if (hasNext && !result.isEmpty()) {
+            InterestDto interestDto = result.get(result.size() - 1);
+            Interest lastInterest = interestList.get(interestList.size() - 1);
 
-        Interest interest = interestRepository.findById(interestId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "관심사가 없습니다."));
+            if ("name".equals(orderBy)) {
+                nextCursor = interestDto.name();
+            } else if ("subscriberCount".equals(orderBy)) {
+                nextCursor = String.valueOf(interestDto.subscriberCount());
+            }
 
-        Subscription subscription = new Subscription(interest, user);
+            nextAfter = lastInterest.getCreatedAt();
 
-        subscriptionRepository.save(subscription);
-    }
-
-    @Override
-    public void unsubscribe(UUID userId, UUID interestId) {
-        Subscription subscription = subscriptionRepository.findSubscription(userId, interestId)
-                .orElseThrow(() -> new IllegalArgumentException("구독이 없습니다."));
-
-        subscriptionRepository.delete(subscription);
+        }
+        return new CursorPageResponseInterestDto(
+                result,
+                nextCursor,
+                nextAfter,
+                result.size(),
+                0L,
+                hasNext
+        );
     }
 
     private void validInterestName(String name) {

@@ -18,4 +18,18 @@ public class InterestMapper {
                 false
         );
     }
+
+    public InterestDto toDto(Interest interest,
+                             List<String> keywords,
+                             Long subscriberCount,
+                             Boolean subscribedByMe) {
+
+        return new InterestDto(
+                interest.getId(),
+                interest.getName(),
+                keywords,
+                subscriberCount,
+                subscribedByMe
+        );
+    }
 }
