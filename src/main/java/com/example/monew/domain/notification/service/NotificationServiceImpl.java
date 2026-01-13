@@ -1,13 +1,18 @@
 package com.example.monew.domain.notification.service;
 
+import com.example.monew.domain.interest.entity.Interest;
+import com.example.monew.domain.interest.repository.SubscriptionRepository;
+import com.example.monew.domain.interest.service.SubscriptionService;
 import com.example.monew.domain.notification.dto.NotificationDto;
 import com.example.monew.domain.notification.entity.Notifications;
+import com.example.monew.domain.notification.entity.ResourceType;
 import com.example.monew.domain.notification.repository.NotificationRepository;
 import com.example.monew.domain.notification.response.CursorResponse;
 import com.example.monew.global.exception.domain.notification.NotificationNotExistException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,11 +29,36 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notiRepository;
+    private final SubscriptionService subscriptionService;
+
+    public void createInterestAlarm(Map<Interest, Integer> interestList) {
+        // 구독 중인 관심사와 관련된 기사가 새로 등록된 경우 알림 생성
+
+        for (Map.Entry<Interest, Integer> entry : interestList.entrySet()) {
+            Interest interest = entry.getKey();
+            String content = "[관심사]와 관련된 기사가 " + entry.getValue() + "건 등록되었습니다.";
+
+            subscriptionService.getSubscribedInterestIds(interest.getId())
+                .forEach(userId -> {
+
+                    Notifications notification = new Notifications(
+                        userId,
+                        content,
+                        ResourceType.INTEREST,
+                        interest.getId()
+                    );
+
+                    notiRepository.save(notification);
+
+                    log.info("##### createInterestAlarm.userId = {} : {}", userId, content);
+                });
+        }
+    }
 
     @Override
     public CursorResponse<NotificationDto> findAllByUserId(UUID userId, String cursor, Instant createdAt, int limit) {
 
-        Pageable pageable = PageRequest.of(Integer.parseInt(Optional.ofNullable(cursor).orElse("0")), limit, Direction.DESC);
+        Pageable pageable = PageRequest.of(Integer.parseInt(Optional.ofNullable(cursor).orElse("0")), limit, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Slice<NotificationDto> sliceDto = notiRepository.findAllByUserId(userId, Optional.ofNullable(createdAt).orElse(Instant.now()), pageable)
             .map(NotificationDto::toDto);

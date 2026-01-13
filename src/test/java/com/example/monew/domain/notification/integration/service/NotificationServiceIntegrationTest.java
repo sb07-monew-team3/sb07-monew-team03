@@ -7,7 +7,7 @@ import com.example.monew.domain.notification.repository.NotificationRepository;
 import com.example.monew.domain.notification.service.NotificationService;
 import com.example.monew.domain.user.entity.User;
 import com.example.monew.domain.user.repository.UserRepository;
-import com.example.monew.domain.user.util.NotiFactory;
+import com.example.monew.domain.notification.util.NotiFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -30,6 +30,7 @@ public class NotificationServiceIntegrationTest {
     UserRepository userRepository;
     @Autowired
     EntityManager em;
+
     @Autowired
     NotiFactory notiFactory;
 
