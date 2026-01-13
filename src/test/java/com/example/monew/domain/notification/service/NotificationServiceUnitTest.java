@@ -5,9 +5,13 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import com.example.monew.domain.interest.entity.Interest;
+import com.example.monew.domain.interest.service.SubscriptionService;
+import com.example.monew.domain.interest.service.SubscriptionServiceImpl;
 import com.example.monew.domain.notification.dto.NotificationDto;
 import com.example.monew.domain.notification.entity.Notifications;
 import com.example.monew.domain.notification.entity.ResourceType;
@@ -19,12 +23,14 @@ import com.example.monew.domain.user.util.TestFixture;
 import com.example.monew.global.exception.domain.notification.NotificationNotExistException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -33,6 +39,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.test.util.ReflectionTestUtils;
+import static org.mockito.Mockito.*;
+
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("NotificationService Unit Test")
@@ -42,6 +50,12 @@ class NotificationServiceUnitTest {
 
     @InjectMocks
     private NotificationServiceImpl notiService;
+
+//    @InjectMocks
+//    private SubscriptionServiceImpl subscriptionService;
+
+    @Mock
+    private SubscriptionServiceImpl subscriptionService; // ⭐ 반드시 필요
 
 
 //    private UUID userId;
@@ -160,8 +174,8 @@ class NotificationServiceUnitTest {
             null
         );
 
-        ReflectionTestUtils.setField(user.getId(), "id", userId);
-        ReflectionTestUtils.setField(user.getId(), "createdAt", Instant.now());
+        ReflectionTestUtils.setField(user, "id", userId);
+        ReflectionTestUtils.setField(user, "createdAt", Instant.now());
 
         Notifications notifications = spy(new Notifications(
             user.getId(),
@@ -199,4 +213,53 @@ class NotificationServiceUnitTest {
             notiService.checkNotification(notificationId, userId)
         ).isInstanceOf(NotificationNotExistException.class);
     }
+
+    @Test
+    @DisplayName("구독 관심사 관련 새 기사 등록시 알림 생성 - OK")
+    void createInterestAlarm_OK() {
+        // given
+        UUID interestId = UUID.randomUUID();
+        UUID userId1 = UUID.randomUUID();
+        UUID userId2 = UUID.randomUUID();
+
+        Interest interest = mock(Interest.class);
+        given(interest.getId()).willReturn(interestId);
+
+        Map<Interest, Integer> interestMap = Map.of(
+            interest, 3
+        );
+
+        given(subscriptionService.getSubscribedInterestIds(interestId))
+            .willReturn(List.of(userId1, userId2));
+
+        // when
+        notiService.createInterestAlarm(interestMap);
+
+        // then
+        ArgumentCaptor<Notifications> captor =
+            ArgumentCaptor.forClass(Notifications.class);
+
+        verify(notiRepository, times(2))
+            .save(captor.capture());
+
+        List<Notifications> savedNotifications = captor.getAllValues();
+
+        assertThat(savedNotifications).hasSize(2);
+
+        savedNotifications.forEach(notification -> {
+            assertThat(notification.getUserId())
+                .isIn(userId1, userId2);
+            assertThat(notification.getResourceType())
+                .isEqualTo(ResourceType.INTEREST);
+            assertThat(notification.getResourceId())
+                .isEqualTo(interestId);
+            assertThat(notification.getContent())
+                .contains("3건 등록되었습니다");
+            assertThat(notification.isRead()).isFalse();
+        });
+
+        verify(subscriptionService)
+            .getSubscribedInterestIds(interestId);
+    }
+
 }

@@ -21,8 +21,9 @@ import java.util.UUID;
 @Table(name = "notifications")
 public class Notifications extends BaseCreatableEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "user_id")
+    @Column(name = "user_id", columnDefinition = "uuid", nullable = false)
     private UUID userId;
 
     @Column(name="content",nullable = false)
@@ -58,7 +59,7 @@ public class Notifications extends BaseCreatableEntity {
     }
 
     public void checkNotificationRead(UUID userId) {
-        if(this.userId.equals(userId)) {
+        if(userId != null && this.userId.equals(userId)) {
             this.isRead = true;
         }
     }

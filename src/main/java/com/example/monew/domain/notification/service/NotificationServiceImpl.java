@@ -31,30 +31,6 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notiRepository;
     private final SubscriptionService subscriptionService;
 
-    public void createInterestAlarm(Map<Interest, Integer> interestList) {
-        // 구독 중인 관심사와 관련된 기사가 새로 등록된 경우 알림 생성
-
-        for (Map.Entry<Interest, Integer> entry : interestList.entrySet()) {
-            Interest interest = entry.getKey();
-            String content = "[관심사]와 관련된 기사가 " + entry.getValue().toString() + "건 등록되었습니다.";
-
-            subscriptionService.getSubscribedInterestIds(interest.getId())
-                .forEach(userId -> {
-
-                    Notifications notification = new Notifications(
-                        userId,
-                        content,
-                        ResourceType.INTEREST,
-                        interest.getId()
-                    );
-
-                    notiRepository.save(notification);
-
-                    log.info("##### createInterestAlarm.userId = {} : {}", userId, content);
-                });
-        }
-    }
-
     @Override
     public CursorResponse<NotificationDto> findAllByUserId(UUID userId, String cursor, Instant createdAt, int limit) {
 
@@ -111,5 +87,29 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void notifyCommentLiked(UUID receiverId, String actorNickname, UUID commentId) {
         // 알림 생성 로직 작성 (미연님)
+    }
+
+    // 구독 중인 관심사와 관련된 기사가 새로 등록된 경우 알림 생성
+    public void createInterestAlarm(Map<Interest, Integer> interestList) {
+
+        for (Map.Entry<Interest, Integer> entry : interestList.entrySet()) {
+            Interest interest = entry.getKey();
+            String content = "[관심사]와 관련된 기사가 " + entry.getValue().toString() + "건 등록되었습니다.";
+
+            subscriptionService.getSubscribedInterestIds(interest.getId())
+                .forEach(userId -> {
+
+                    Notifications notification = new Notifications(
+                        userId,
+                        content,
+                        ResourceType.INTEREST,
+                        interest.getId()
+                    );
+
+                    notiRepository.save(notification);
+
+                    log.info("##### createInterestAlarm.userId = {} : {}", userId, content);
+                });
+        }
     }
 }
