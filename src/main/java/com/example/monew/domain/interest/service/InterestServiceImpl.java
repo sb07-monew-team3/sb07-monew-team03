@@ -1,5 +1,6 @@
 package com.example.monew.domain.interest.service;
 
+import com.example.monew.domain.interest.dto.CursorPageResponseInterestDto;
 import com.example.monew.domain.interest.dto.InterestDto;
 import com.example.monew.domain.interest.dto.InterestRegisterRequest;
 import com.example.monew.domain.interest.dto.InterestUpdateRequest;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -79,12 +81,18 @@ public class InterestServiceImpl implements InterestService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<InterestDto> search(String keyword, UUID userId) {
-        List<Interest> interests = interestRepository.searchByInterestOrKeyword(keyword);
+    public CursorPageResponseInterestDto search(String keyword, UUID userId, String orderBy,
+                                                String direction, String cursor, Instant after, int limit) {
+        List<Interest> interests = interestRepository.searchByInterestOrKeyword(
+                keyword, orderBy, direction, cursor, after, limit);
+
+        boolean hasNext = interests.size() > limit;
+
+        List<Interest> interestList = hasNext ? interests.subList(0, limit) : interests;
 
         List<InterestDto> result = new ArrayList<>();
 
-        for(Interest interest : interests) {
+        for(Interest interest : interestList) {
             List<Keyword> keywordList = keywordRepository.findByInterest(interest);
 
             List<String> keywords = keywordList.stream()
@@ -98,7 +106,31 @@ public class InterestServiceImpl implements InterestService {
 
             result.add(dto);
         }
-        return result;
+
+        String nextCursor = null;
+        Instant nextAfter = null;
+
+        if (hasNext && !result.isEmpty()) {
+            InterestDto interestDto = result.get(result.size() - 1);
+            Interest lastInterest = interestList.get(interestList.size() - 1);
+
+            if ("name".equals(orderBy)) {
+                nextCursor = interestDto.name();
+            } else if ("subscriberCount".equals(orderBy)) {
+                nextCursor = String.valueOf(interestDto.subscriberCount());
+            }
+
+            nextAfter = lastInterest.getCreatedAt();
+
+        }
+        return new CursorPageResponseInterestDto(
+                result,
+                nextCursor,
+                nextAfter,
+                result.size(),
+                0L,
+                hasNext
+        );
     }
 
     private void validInterestName(String name) {
