@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +28,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public CursorResponse<NotificationDto> findAllByUserId(UUID userId, String cursor, Instant createdAt, int limit) {
 
-        Pageable pageable = PageRequest.of(Integer.parseInt(Optional.ofNullable(cursor).orElse("0")), limit, Direction.DESC);
+        Pageable pageable = PageRequest.of(Integer.parseInt(Optional.ofNullable(cursor).orElse("0")), limit, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Slice<NotificationDto> sliceDto = notiRepository.findAllByUserId(userId, Optional.ofNullable(createdAt).orElse(Instant.now()), pageable)
             .map(NotificationDto::toDto);

@@ -30,6 +30,7 @@ public class NotificationServiceIntegrationTest {
     UserRepository userRepository;
     @Autowired
     EntityManager em;
+
     @Autowired
     NotiFactory notiFactory;
 
