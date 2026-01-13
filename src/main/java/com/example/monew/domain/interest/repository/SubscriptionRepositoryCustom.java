@@ -9,4 +9,5 @@ public interface SubscriptionRepositoryCustom {
 
     List<Subscription> getSubscriptionByUserId(UUID userId);
     Long countByInterestId(UUID interestId);
+    List<Subscription> getSubscriptionsByInterestId(UUID interestId);
 }
