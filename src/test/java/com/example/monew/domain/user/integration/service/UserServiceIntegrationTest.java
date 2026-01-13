@@ -21,7 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+        "CLIENT_ID=test-client-id",
+        "CLIENT_SECRET=test-client-secret"
+})
 @DisplayName("User Service Integration Test")
 @Transactional
 public class UserServiceIntegrationTest {

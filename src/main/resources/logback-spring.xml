@@ -13,11 +13,11 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/.logs</file>
+        <file>/app/logs/.log</file>
 
         <!-- 날짜가 바뀔 때 (자정 기준) 로그 파일 분리 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/app-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>/app/logs/app-%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
 

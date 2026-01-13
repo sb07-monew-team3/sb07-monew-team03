@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/monew
+    url: jdbc:postgresql://postgres:5432/monew
     username: monew_user
     password: monew_password
     driver-class-name: org.postgresql.Driver
@@ -11,12 +11,12 @@ spring:
       hibernate:
         format_sql: true
         default_batch_fetch_size: 50
-        show_sql: true
+        show_sql: false
     open-in-view: false
 
   logging:
     level:
-      org.hibernate.SQL: debug
+      org.hibernate.SQL: info
 server:
   port: 8080
 
@@ -27,17 +27,6 @@ springdoc:
     enabled: true
   api-docs:
     path: /api-docs
-
-
-decorator:
-  datasource:
-    enabled: true                  # P6Spy 및 데이터소스 데코레이터 전체 활성화 여부 (기본값: true)
-    p6spy:
-      enable-logging: true         # SQL 로깅 기능 자체를 켤지 끄를지 결정
-      multiline: true              # 쿼리를 여러 줄로 포맷팅하여 출력 (가독성 매우 향상됨)
-      logging: slf4j               # 로그 출력 방식 (sysout, slf4j, file 등. slf4j 권장)
-      log-filter:
-        pattern: ".*"              # 정규식 패턴을 사용하여 특정 쿼리만 로깅하거나 제외 가능
 
 info:
   app:
@@ -55,10 +44,13 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info, prometheus
   endpoint:
     health:
       show-details: always
   info:
     env:
       enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
