@@ -66,12 +66,12 @@ public class S3ArticleStorage {
     @Transactional
     public void backupArticles() {
         try {
-            ZoneId zone = ZoneOffset.UTC;
-            LocalDate yesterday = LocalDate.now(zone).minusDays(1); // 하루마다 어제자 뉴스들을 백업
-            Instant start = yesterday.atTime(LocalTime.MIN).atZone(zone).toInstant();
-            Instant end = yesterday.atTime(LocalTime.MAX).atZone(zone).toInstant();
 
-            List<Article> articleList = articleRepository.findAllByCreatedAtBetween(start, end);
+            LocalDate yesterday = LocalDate.now().minusDays(1); // 하루마다 어제자 뉴스들을 백업
+            LocalDateTime start = yesterday.atTime(LocalTime.MIN);
+            LocalDateTime end = yesterday.atTime(23, 59, 59);
+
+            List<Article> articleList = articleRepository.findAllByPublishDateBetween(start, end);
 
             ObjectMapper objectMapper = new ObjectMapper()
                     .registerModule(new JavaTimeModule()) // Instant, LocalDateTime 지원

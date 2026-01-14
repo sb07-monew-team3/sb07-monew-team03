@@ -8,7 +8,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -23,7 +23,7 @@ public interface ArticleRepository extends JpaRepository<Article, UUID>, Article
 
     long countArticleSlice(ArticleRequestDto request, List<String> keywords);
 
-    List<Article> findAllByCreatedAtBetween(Instant start, Instant end);
+    List<Article> findAllByPublishDateBetween(LocalDateTime start, LocalDateTime end);
 
     Optional<Article> findBySourceUrl(String sourceUrl);
 }
