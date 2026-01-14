@@ -4,10 +4,13 @@ import com.example.monew.domain.activity.dto.UserActivityArticleViewDto;
 import com.example.monew.domain.article.entity.Article;
 import com.example.monew.domain.article.entity.ArticleView;
 import com.example.monew.domain.article.repository.ArticleViewRepository;
+import com.example.monew.domain.comment.entity.Comment;
 import com.example.monew.domain.comment.repository.CommentRepository;
 import com.example.monew.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -20,7 +23,11 @@ public class UserActivityArticleViewMapper {
 
         Article article = articleView.getArticle();
         User user = articleView.getUser();
-        int articleCommentCount = Math.toIntExact(commentRepository.countByArticleId(article.getId()));
+        long validCommentCount = commentRepository.findByArticle_Id(article.getId()).stream()
+                .filter(x -> !x.isDeleted())
+                .count();
+
+        int articleCommentCount = Math.toIntExact(validCommentCount);
         int articleViewCount = Math.toIntExact(articleViewRepository.countByArticleId(article.getId()));
 
 
