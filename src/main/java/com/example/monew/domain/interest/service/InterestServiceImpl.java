@@ -10,7 +10,6 @@ import com.example.monew.domain.interest.mapper.InterestMapper;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
 import com.example.monew.domain.interest.repository.SubscriptionRepository;
-import com.example.monew.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.http.HttpStatus;
@@ -32,7 +31,6 @@ public class InterestServiceImpl implements InterestService {
     private final InterestRepository interestRepository;
     private final KeywordRepository keywordRepository;
     private final SubscriptionRepository subscriptionRepository;
-    private final UserRepository userRepository;
     private final InterestMapper interestMapper;
 
     @Override
