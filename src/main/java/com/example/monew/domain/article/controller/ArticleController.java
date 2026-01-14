@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -70,5 +71,15 @@ public class ArticleController {
         }
 
         return ResponseEntity.ok(sources);
+    }
+
+    @GetMapping("/restore")
+    public ResponseEntity<ArticleRestoreResultDto> restoreArticles(
+            @RequestParam LocalDateTime from,
+            @RequestParam LocalDateTime to
+    ) {
+        ArticleRestoreResultDto response = articleService.restoreArticles(from, to);
+
+        return ResponseEntity.ok(response);
     }
 }

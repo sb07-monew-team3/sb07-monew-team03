@@ -1,9 +1,6 @@
 package com.example.monew.domain.article.service;
 
-import com.example.monew.domain.article.dto.ArticleDto;
-import com.example.monew.domain.article.dto.ArticleRequestDto;
-import com.example.monew.domain.article.dto.ArticleViewDto;
-import com.example.monew.domain.article.dto.CursorPageResponseArticleDto;
+import com.example.monew.domain.article.dto.*;
 import com.example.monew.domain.article.entity.Article;
 import com.example.monew.domain.article.entity.ArticleView;
 import com.example.monew.domain.article.mapper.ArticleMapper;
@@ -11,6 +8,7 @@ import com.example.monew.domain.article.mapper.ArticleViewMapper;
 import com.example.monew.domain.article.mapper.CursorPageMapper;
 import com.example.monew.domain.article.repository.ArticleRepository;
 import com.example.monew.domain.article.repository.ArticleViewRepository;
+import com.example.monew.domain.article.storage.S3ArticleStorage;
 import com.example.monew.domain.interest.repository.KeywordRepository;
 import com.example.monew.domain.user.entity.User;
 import com.example.monew.domain.user.repository.UserRepository;
@@ -21,6 +19,8 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,6 +37,8 @@ public class ArticleService {
     private final ArticleMapper articleMapper;
     private final CursorPageMapper cursorPageMapper;
     private final ArticleViewMapper articleViewMapper;
+
+    private final S3ArticleStorage s3ArticleStorage;
 
     @Transactional
     public void deleteArticleSoft(UUID articleId) {
@@ -61,7 +63,7 @@ public class ArticleService {
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new ArticleNotExistException(articleId));
 
-        return articleMapper.toDto(article, userId);
+        return articleMapper.toResponseDto(article, userId);
     }
 
     @Transactional(readOnly = true)
@@ -105,5 +107,29 @@ public class ArticleService {
         ArticleView saved = articleViewRepository.save(articleView);
 
         return articleViewMapper.toResponseDto(saved);
+    }
+
+    @Transactional
+    public ArticleRestoreResultDto restoreArticles(LocalDateTime from, LocalDateTime to) {
+        List<Article> articleList = s3ArticleStorage.loadArticlesFromBackup(from, to);
+        List<UUID> restoredArticleIds = new ArrayList<>();
+
+        for (Article article : articleList) {
+            articleRepository.findBySourceUrl(article.getSourceUrl())
+                    .ifPresentOrElse(
+                            existing -> {
+                                if(existing.isDeleted()) { // 논리 삭제 된 뉴스 복구
+                                    existing.restoreLogic();
+                                    restoredArticleIds.add(existing.getId());
+                                }
+                            },
+                            () -> { // 물리 삭제된 뉴스 복구
+                                Article saved = articleRepository.save(article);
+                                restoredArticleIds.add(saved.getId());
+                            }
+                    );
+        }
+
+        return articleMapper.toRestoreResultDto(restoredArticleIds);
     }
 }

@@ -29,9 +29,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -99,8 +99,27 @@ class ArticleServiceTest {
             Keyword keyword = new Keyword("비트코인", interest);
             ReflectionTestUtils.setField(keyword, "id", UUID.randomUUID());
 
-            Article article = mock(Article.class);
-            Article article2 = mock(Article.class);
+            Article article = new Article(
+                    "",
+                    "",
+                    "",
+                    LocalDateTime.now(),
+                    "",
+                    false,
+                    Instant.now(),
+                    List.of(interest)
+            );
+
+            Article article2 = new Article(
+                    "",
+                    "",
+                    "",
+                    LocalDateTime.now().minusDays(1),
+                    "",
+                    false,
+                    Instant.now(),
+                    List.of(interest)
+            );
 
             NaverNewsResponse response = mock(NaverNewsResponse.class);
 
@@ -153,6 +172,7 @@ class ArticleServiceTest {
                     LocalDateTime.now(),
                     "",
                     false,
+                    Instant.now(),
                     new ArrayList<>()
             );
             ReflectionTestUtils.setField(article, "id", articleId);
@@ -223,6 +243,7 @@ class ArticleServiceTest {
                     LocalDateTime.now(),
                     "",
                     false,
+                    Instant.now(),
                     new ArrayList<>()
             );
             ReflectionTestUtils.setField(article, "id", articleId);
@@ -230,7 +251,7 @@ class ArticleServiceTest {
             when(articleRepository.findById(articleId))
                     .thenReturn(Optional.of(article));
 
-            when(articleMapper.toDto(article, userId))
+            when(articleMapper.toResponseDto(article, userId))
                     .thenReturn(mock(ArticleDto.class));
 
             // when

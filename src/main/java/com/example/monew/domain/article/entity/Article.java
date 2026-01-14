@@ -2,17 +2,16 @@ package com.example.monew.domain.article.entity;
 
 import com.example.monew.domain.base.BaseCreatableEntity;
 import com.example.monew.domain.interest.entity.Interest;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -39,6 +38,7 @@ public class Article extends BaseCreatableEntity {
 
     @Column(name="is_deleted", nullable = false)
     @ColumnDefault( "false")
+    @JsonProperty("deleted") // json 직렬화시 deleted로 저장, 역직렬화 매핑을 위해 어노테이션 추가
     private boolean isDeleted;
 
     @Column(name="sort_timestamp", nullable = false, updatable = false, unique = true)
@@ -46,6 +46,12 @@ public class Article extends BaseCreatableEntity {
 
     public void setSortTimestamp(Instant sortTimestamp) {
         this.sortTimestamp = sortTimestamp;
+    }
+
+    @Override
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY) // 백업 시에는 id까지 저장, 복구 시에는 id를 가져오지 않는다.(물리 삭제 데이터 복구 위함)
+    public UUID getId() {
+        return super.getId();
     }
 
     @OneToMany
@@ -57,5 +63,9 @@ public class Article extends BaseCreatableEntity {
 
     public void deleteLogic() {
         this.isDeleted = true;
+    }
+
+    public void restoreLogic() {
+        this.isDeleted = false;
     }
 }
