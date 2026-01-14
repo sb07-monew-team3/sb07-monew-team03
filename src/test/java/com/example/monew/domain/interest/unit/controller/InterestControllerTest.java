@@ -5,6 +5,10 @@ import com.example.monew.domain.interest.dto.*;
 import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.service.InterestService;
 import com.example.monew.domain.interest.service.SubscriptionService;
+import com.example.monew.global.exception.domain.interest.InterestDuplicateNameException;
+import com.example.monew.global.exception.domain.interest.InterestNotExistException;
+import com.example.monew.global.exception.domain.interest.SubscriptionNotExistException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -165,7 +169,7 @@ public class InterestControllerTest {
     }
 
     @Test
-    @DisplayName("관심사 구독 취소 성공 시 204 No Content를 반환한다")
+    @DisplayName("관심사 구독 취소 성공 시 200 ok 반환한다")
     void unsubscribe_success() throws Exception {
 
         // given
@@ -177,7 +181,7 @@ public class InterestControllerTest {
         // when
         mockmvc.perform(delete("/api/interests/{interestId}/subscriptions", interestId)
                         .header("Monew-Request-User-ID", userId.toString()))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
 
         // then
         verify(subscriptionService).unsubscribe(interestId, userId);
@@ -220,5 +224,98 @@ public class InterestControllerTest {
                         .param("limit", "10")
                         .header("Monew-Request-User-ID", userId.toString()))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 관심사 수정 시 404 반환한다")
+    void updateInterest_notFound() throws Exception {
+
+        // given
+        UUID interestId = UUID.randomUUID();
+        InterestUpdateRequest request = new InterestUpdateRequest(List.of("강아지", "고양이"));
+
+        when(interestService.update(any(UUID.class), any(InterestUpdateRequest.class)))
+                .thenThrow(new InterestNotExistException(interestId));
+
+        // when && than
+        mockmvc.perform(patch("/api/interests/{interestId}", interestId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("INTEREST_NOT_EXIST"));
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 관심사 삭제 시 404 반환한다")
+    void deleteInterest_notFound() throws Exception {
+
+        // given
+        UUID interestId = UUID.randomUUID();
+
+        doThrow(new InterestNotExistException(interestId))
+                .when(interestService).delete(any(UUID.class));
+
+        // when && then
+        mockmvc.perform(delete("/api/interests/{interestId}", interestId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("INTEREST_NOT_EXIST"));
+
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 관심사 구독 시 404 반환한다")
+    void subscribe_notFound() throws Exception {
+
+        // given
+        UUID interestId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        when(subscriptionService.subscribe(any(UUID.class), any(UUID.class)))
+                .thenThrow(new InterestNotExistException(interestId));
+
+        // when && then
+        mockmvc.perform(post("/api/interests/{interestId}/subscriptions", interestId)
+                        .header("Monew-Request-User-ID", userId.toString()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("INTEREST_NOT_EXIST"));
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 구독 취소 시 404 반환한다")
+    void unsubscribe_notFound() throws Exception {
+
+        // given
+        UUID interestId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        doThrow(new SubscriptionNotExistException(userId, interestId))
+                .when(subscriptionService).unsubscribe(any(UUID.class), any(UUID.class));
+
+        // when && then
+        mockmvc.perform(delete("/api/interests/{interestId}/subscriptions", interestId)
+                        .header("Monew-Request-User-ID", userId.toString()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("SUBSCRIPTION_NOT_EXIST"));
+    }
+    
+    @Test
+    @DisplayName("중복된 관심사 등록 시 409 반환한다")
+    void registerInterest_duplicate() throws Exception {
+
+        // given
+        InterestRegisterRequest request = new InterestRegisterRequest(
+                "동물",
+                List.of("강아지", "고양이")
+        );
+
+        when(interestService.create(any(InterestRegisterRequest.class)))
+                .thenThrow(new InterestDuplicateNameException("동물"));
+
+        // when && then
+        mockmvc.perform(post("/api/interests")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("INTEREST_DUPLICATE_NAME"));
     }
 }
