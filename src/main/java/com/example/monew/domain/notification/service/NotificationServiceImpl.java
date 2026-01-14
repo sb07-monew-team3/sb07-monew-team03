@@ -1,6 +1,5 @@
 package com.example.monew.domain.notification.service;
 
-import com.example.monew.domain.comment.service.CommentLikeService;
 import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.service.SubscriptionService;
 import com.example.monew.domain.notification.dto.NotificationDto;
