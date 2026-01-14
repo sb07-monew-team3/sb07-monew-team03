@@ -43,7 +43,7 @@ public record NotificationDto(
             .createdAt(noti.getCreatedAt())
             .updatedAt(noti.getUpdatedAt())
             .confirmed(noti.isRead())
-            .userId(noti.getUser().getId())
+            .userId(noti.getUserId())
             .content(noti.getContent())
             .resourceType(noti.getResourceType())
             .resourceId(noti.getResourceId())

@@ -35,7 +35,7 @@ public class NotificationController {
         @RequestParam(required = false)
         Instant after,          // 보조 커서(createdAt) 값
 
-        @RequestParam
+        @RequestParam(defaultValue = "50")
         @Positive int limit,    // 커서 페이지 크기
 
         @RequestHeader("Monew-Request-User-ID")
