@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public record ArticleRequestDto(
         String keyword,
-        UUID interestedId,
+        UUID interestId,
         List<Source> sourceIn,
         LocalDateTime publishDateFrom,
         LocalDateTime publishDateTo,
