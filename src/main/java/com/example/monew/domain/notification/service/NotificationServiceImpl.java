@@ -8,6 +8,8 @@ import com.example.monew.domain.notification.entity.Notifications;
 import com.example.monew.domain.notification.entity.ResourceType;
 import com.example.monew.domain.notification.repository.NotificationRepository;
 import com.example.monew.domain.notification.response.CursorResponse;
+import com.example.monew.domain.user.entity.User;
+import com.example.monew.domain.user.repository.UserRepository;
 import com.example.monew.global.exception.domain.notification.NotificationNotExistException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -21,8 +23,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
 @Service
@@ -30,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notiRepository;
     private final SubscriptionService subscriptionService;
+    private final UserRepository userRepository;
 
     @Override
     public CursorResponse<NotificationDto> findAllByUserId(UUID userId, String cursor, Instant createdAt, int limit) {
@@ -90,8 +95,11 @@ public class NotificationServiceImpl implements NotificationService {
     public void notifyCommentLiked(UUID userId, String actorNickname, UUID resouce_id) {
         String content = "[" + actorNickname + "]님이 나의 댓글을 좋아합니다.";
 
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
         Notifications notification = new Notifications(
-            userId,
+            user,
             content,
             ResourceType.COMMENT,
             resouce_id
@@ -111,8 +119,11 @@ public class NotificationServiceImpl implements NotificationService {
             subscriptionService.getSubscribedInterestIds(interest.getId())
                 .forEach(userId -> {
 
+                    User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
                     Notifications notification = new Notifications(
-                        userId,
+                        user,
                         content,
                         ResourceType.INTEREST,
                         interest.getId()
