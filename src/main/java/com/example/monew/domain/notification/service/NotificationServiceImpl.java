@@ -96,7 +96,7 @@ public class NotificationServiceImpl implements NotificationService {
         String content = "[" + actorNickname + "]님이 나의 댓글을 좋아합니다.";
 
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User[" + userId.toString() + "] not found"));
 
         Notifications notification = new Notifications(
             user,
@@ -120,7 +120,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .forEach(userId -> {
 
                     User user = userRepository.findById(userId)
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User[" + userId.toString() + "] not found"));
 
                     Notifications notification = new Notifications(
                         user,
