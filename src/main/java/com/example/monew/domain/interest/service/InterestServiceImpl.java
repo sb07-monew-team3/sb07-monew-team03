@@ -10,12 +10,12 @@ import com.example.monew.domain.interest.mapper.InterestMapper;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
 import com.example.monew.domain.interest.repository.SubscriptionRepository;
+import com.example.monew.global.exception.domain.interest.InterestDuplicateNameException;
+import com.example.monew.global.exception.domain.interest.InterestNotExistException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.similarity.LevenshteinDistance;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ public class InterestServiceImpl implements InterestService {
     @Override
     public InterestDto update(UUID interestId, InterestUpdateRequest request) {
         Interest interest = interestRepository.findById(interestId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "관심사가 없습니다."));
+                .orElseThrow(() -> new InterestNotExistException(interestId));
 
         keywordRepository.deleteByInterestId(interestId);
 
@@ -72,7 +72,7 @@ public class InterestServiceImpl implements InterestService {
     @Override
     public void delete(UUID interestId) {
         Interest interest = interestRepository.findById(interestId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "관심사가 없습니다."));
+                .orElseThrow(() -> new InterestNotExistException(interestId));
 
         interestRepository.delete(interest);
     }
@@ -137,7 +137,7 @@ public class InterestServiceImpl implements InterestService {
         }
 
         if(interestRepository.existsByName(name)) {
-            throw new IllegalArgumentException("유사한 이름의 관심사가 이미 존재합니다.");
+            throw new InterestDuplicateNameException(name);
         }
     }
 
@@ -149,7 +149,7 @@ public class InterestServiceImpl implements InterestService {
                 .findFirst();
 
         if(similarName.isPresent()){
-            throw new IllegalArgumentException("유사한 이름의 관심사가 이미 존재합니다.");
+            throw new InterestDuplicateNameException(newName);
         }
     }
 
