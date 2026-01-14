@@ -15,6 +15,8 @@ import com.example.monew.domain.interest.service.InterestServiceImpl;
 import com.example.monew.domain.interest.service.SubscriptionServiceImpl;
 import com.example.monew.domain.user.entity.User;
 import com.example.monew.domain.user.repository.UserRepository;
+import com.example.monew.global.exception.domain.interest.InterestDuplicateNameException;
+import com.example.monew.global.exception.domain.interest.InterestNotExistException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -108,8 +110,7 @@ public class InterestServiceTest {
 
             // when && then
             assertThatThrownBy(() -> interestService.create(request))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("관심사 이름은 필수입니다.");
+                    .isInstanceOf(IllegalArgumentException.class);
         }
 
         @Test
@@ -144,8 +145,7 @@ public class InterestServiceTest {
 
             // when && then
             assertThatThrownBy(() -> interestService.create(request))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("유사한 이름의 관심사가 이미 존재합니다.");
+                    .isInstanceOf(InterestDuplicateNameException.class);
 
         }
 
@@ -165,9 +165,7 @@ public class InterestServiceTest {
 
             // when && then
             assertThatThrownBy(() -> interestService.create(request))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("유사한 이름의 관심사가 이미 존재합니다.");
-
+                    .isInstanceOf(InterestDuplicateNameException.class);
         }
 
         @Test
@@ -273,8 +271,7 @@ public class InterestServiceTest {
 
             // when && then
             assertThatThrownBy(() -> interestService.update(interestId, request))
-                    .isInstanceOf(ResponseStatusException.class)
-                    .hasMessageContaining("관심사가 없습니다.");
+                    .isInstanceOf(InterestNotExistException.class);
         }
     }
 
@@ -313,8 +310,7 @@ public class InterestServiceTest {
 
             // when && then
             assertThatThrownBy(() -> interestService.delete(interestId))
-                    .isInstanceOf(ResponseStatusException.class)
-                    .hasMessageContaining("관심사가 없습니다.");
+                    .isInstanceOf(InterestNotExistException.class);
         }
     }
 
