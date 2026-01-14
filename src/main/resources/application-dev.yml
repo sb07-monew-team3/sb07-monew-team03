@@ -28,6 +28,9 @@ springdoc:
   api-docs:
     path: /api-docs
 
+logging:
+  file:
+    path: logs
 
 decorator:
   datasource:
