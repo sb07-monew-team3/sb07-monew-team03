@@ -8,6 +8,7 @@ import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.entity.Keyword;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
+import com.example.monew.domain.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,8 @@ public class ArticleCollectionScheduler {
     private final NaverArticleMapper naverArticleMapper;
 
     private final NaverNewsClient naverNewsClient;
+
+    private final NotificationService notificationService;
 
     @Scheduled(fixedRate = BATCH_INTERVAL)
     @Transactional
@@ -93,6 +96,18 @@ public class ArticleCollectionScheduler {
                 );
             }
 
+            // 새로운 기사 등록시 구독 중인 관심사 관련 알림 생성
+            HashMap<Interest, Integer> interestList = new HashMap<>();
+
+            newArticles.forEach(article -> {
+                List<Interest> articleInterests = article.getInterests();
+
+                articleInterests.forEach(interest -> {
+                    interestList.merge(interest, 1, Integer::sum);
+                });
+            });
+
+            notificationService.createInterestAlarm(interestList);
             articleRepository.saveAll(newArticles);
         }
     }
