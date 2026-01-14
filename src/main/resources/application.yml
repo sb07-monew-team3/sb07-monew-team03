@@ -5,8 +5,8 @@ spring:
     default: dev
 
 naver:
-  client-id: ${CLIENT_ID}
-  client-secret: ${CLIENT_SECRET}
+  client-id: ${CLIENT_ID:-}
+  client-secret: ${CLIENT_SECRET:-}
 
 s3:
   access-key: ${AWS_S3_ACCESS_KEY}

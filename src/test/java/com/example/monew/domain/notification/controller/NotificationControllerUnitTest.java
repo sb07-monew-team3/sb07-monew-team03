@@ -146,7 +146,7 @@ class NotificationControllerUnitTest {
             .given(notiService)
             .allCheckNotification(userId);
 
-        mockMvc.perform(patch("/notifications")
+        mockMvc.perform(patch("/api/notifications")
                 .header("Monew-Request-User-ID", userId.toString())
                 .contentType(MediaType.APPLICATION_JSON)
             )
@@ -159,7 +159,7 @@ class NotificationControllerUnitTest {
     @DisplayName("전체 알림 확인 X - 400 잘못된 요청 (입력값 검증 실패)")
     void allCheckNotification_ERR_400() throws Exception {
 
-        mockMvc.perform(patch("/notifications")
+        mockMvc.perform(patch("/api/notifications")
 //                .header("Monew-Request-User-ID", userId.toString()) 헤더 누락
                 .contentType(MediaType.APPLICATION_JSON)
             )
@@ -175,7 +175,7 @@ class NotificationControllerUnitTest {
             null
         )).when(notiService).allCheckNotification(userId);
 
-        mockMvc.perform(patch("/notifications")
+        mockMvc.perform(patch("/api/notifications")
                 .header("Monew-Request-User-ID", userId.toString())
                 .contentType(MediaType.APPLICATION_JSON)
             )
@@ -195,7 +195,7 @@ class NotificationControllerUnitTest {
             .allCheckNotification(userId);
 
         // when & then
-        mockMvc.perform(patch("/notifications")
+        mockMvc.perform(patch("/api/notifications")
                 .header("Monew-Request-User-ID", userId.toString())
                 .contentType(MediaType.APPLICATION_JSON)
             )

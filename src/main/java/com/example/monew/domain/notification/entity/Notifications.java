@@ -1,6 +1,7 @@
 package com.example.monew.domain.notification.entity;
 
 import com.example.monew.domain.base.BaseCreatableEntity;
+import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -22,7 +23,8 @@ import java.util.UUID;
 public class Notifications extends BaseCreatableEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", columnDefinition = "uuid", nullable = false)
+//    @Column(name = "user_id", columnDefinition = "uuid", nullable = false)
     private User user;
 
     @Column(name="content",nullable = false)
@@ -44,8 +46,21 @@ public class Notifications extends BaseCreatableEntity {
     @Column(columnDefinition = "timestamp with time zone")
     private Instant updatedAt;
 
+    public Notifications(
+        User user,
+        String content,
+        ResourceType resourceType,
+        UUID resourceId
+    ) {
+        this.user = user;
+        this.content = content;
+        this.resourceType = resourceType;
+        this.resourceId = resourceId;
+        this.isRead = false;
+    }
+
     public void checkNotificationRead(UUID userId) {
-        if(this.user.getId().equals(userId)) {
+        if(userId != null && this.user.getId().equals(userId)) {
             this.isRead = true;
         }
     }

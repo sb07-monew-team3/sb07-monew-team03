@@ -40,6 +40,10 @@ info:
     name: sprintTeam3
     email: genius5375@gmail.com
 
+logging:
+  file:
+    path: /app/logs
+
 management:
   endpoints:
     web:

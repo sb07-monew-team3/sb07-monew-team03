@@ -16,4 +16,6 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> ,Comment
     Page<Comment> findByArticle_IdAndIsDeletedFalse(UUID articleId, Pageable pageable);
 
     Optional<Comment> findByIdAndIsDeletedFalse(UUID commentId);
+
+    List<Comment> findByArticle_Id(UUID articleId);
 }

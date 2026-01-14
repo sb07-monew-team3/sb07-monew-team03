@@ -1,4 +1,4 @@
-package com.example.monew.domain.user.util;
+package com.example.monew.domain.notification.util;
 
 import com.example.monew.domain.user.entity.User;
 import jakarta.persistence.EntityManager;

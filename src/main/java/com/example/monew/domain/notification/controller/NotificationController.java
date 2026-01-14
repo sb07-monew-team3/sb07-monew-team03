@@ -24,7 +24,7 @@ import java.util.UUID;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/notifications")
+@RequestMapping("/api/notifications")
 public class NotificationController {
     private final NotificationService service;
 
@@ -35,7 +35,7 @@ public class NotificationController {
         @RequestParam(required = false)
         Instant after,          // 보조 커서(createdAt) 값
 
-        @RequestParam
+        @RequestParam(defaultValue = "50")
         @Positive int limit,    // 커서 페이지 크기
 
         @RequestHeader("Monew-Request-User-ID")
