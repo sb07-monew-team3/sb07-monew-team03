@@ -10,6 +10,8 @@ import com.example.monew.domain.interest.repository.KeywordRepository;
 import com.example.monew.domain.interest.repository.SubscriptionRepository;
 import com.example.monew.domain.user.entity.User;
 import com.example.monew.domain.user.repository.UserRepository;
+import com.example.monew.global.exception.domain.interest.InterestNotExistException;
+import com.example.monew.global.exception.domain.interest.SubscriptionNotExistException;
 import com.example.monew.global.exception.domain.user.UserNotExistException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -38,7 +40,7 @@ public class SubscriptionServiceImpl implements SubscriptionService{
                 .orElseThrow(() -> new UserNotExistException(userId));
 
         Interest interest = interestRepository.findById(interestId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "관심사가 없습니다."));
+                .orElseThrow(() -> new InterestNotExistException(interestId));
 
         Subscription subscription = new Subscription(interest, user);
         Subscription saved = subscriptionRepository.save(subscription);
@@ -56,7 +58,7 @@ public class SubscriptionServiceImpl implements SubscriptionService{
     @Override
     public void unsubscribe(UUID interestId, UUID userId) {
         Subscription subscription = subscriptionRepository.findSubscription(userId, interestId)
-                .orElseThrow(() -> new IllegalArgumentException("구독이 없습니다."));
+                .orElseThrow(() -> new SubscriptionNotExistException(userId, interestId));
 
         subscriptionRepository.delete(subscription);
     }
