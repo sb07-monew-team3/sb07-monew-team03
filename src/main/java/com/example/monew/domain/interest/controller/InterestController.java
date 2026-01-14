@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -68,6 +67,6 @@ public class InterestController {
             @PathVariable UUID interestId,
             @RequestHeader("Monew-Request-User-ID") UUID userId) {
         subscriptionService.unsubscribe(interestId, userId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 }
