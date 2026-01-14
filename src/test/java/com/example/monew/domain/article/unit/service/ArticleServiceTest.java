@@ -241,7 +241,7 @@ class ArticleServiceTest {
 
             verify(articleRepository, times(1)).findById(articleId);
         }
-        
+
         @Test
         @DisplayName("정상적으로 기사 목록을 조회할 수 있다")
         void findArticleList_success() {

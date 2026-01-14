@@ -1,7 +1,7 @@
 package com.example.monew.domain.notification.service;
 
+import com.example.monew.domain.comment.service.CommentLikeService;
 import com.example.monew.domain.interest.entity.Interest;
-import com.example.monew.domain.interest.repository.SubscriptionRepository;
 import com.example.monew.domain.interest.service.SubscriptionService;
 import com.example.monew.domain.notification.dto.NotificationDto;
 import com.example.monew.domain.notification.entity.Notifications;
@@ -84,17 +84,29 @@ public class NotificationServiceImpl implements NotificationService {
             log.info("##### NotificationDeleteScheduler  -  삭제할 노티 없음");
         }
     }
+
+    // 내가 작성한 댓글에 좋아요가 눌리면 알림 생성
     @Override
-    public void notifyCommentLiked(UUID receiverId, String actorNickname, UUID commentId) {
-        // 알림 생성 로직 작성 (미연님)
+    public void notifyCommentLiked(UUID userId, String actorNickname, UUID resouce_id) {
+        String content = "[" + actorNickname + "]님이 나의 댓글을 좋아합니다.";
+
+        Notifications notification = new Notifications(
+            userId,
+            content,
+            ResourceType.COMMENT,
+            resouce_id
+        );
+
+        notiRepository.save(notification);
     }
 
+    @Override
     // 구독 중인 관심사와 관련된 기사가 새로 등록된 경우 알림 생성
     public void createInterestAlarm(Map<Interest, Integer> interestList) {
 
         for (Map.Entry<Interest, Integer> entry : interestList.entrySet()) {
             Interest interest = entry.getKey();
-            String content = "[관심사]와 관련된 기사가 " + entry.getValue().toString() + "건 등록되었습니다.";
+            String content = "[" + interest.getName() + "]와 관련된 기사가 " + entry.getValue().toString() + "건 등록되었습니다.";
 
             subscriptionService.getSubscribedInterestIds(interest.getId())
                 .forEach(userId -> {
@@ -108,7 +120,7 @@ public class NotificationServiceImpl implements NotificationService {
 
                     notiRepository.save(notification);
 
-                    log.info("##### createInterestAlarm.userId = {} : {}", userId, content);
+                    log.info("##### createInterestAlarm.userId = {} : {}", userId.toString(), content);
                 });
         }
     }
