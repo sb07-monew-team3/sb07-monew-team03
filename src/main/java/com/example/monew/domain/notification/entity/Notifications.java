@@ -2,6 +2,7 @@ package com.example.monew.domain.notification.entity;
 
 import com.example.monew.domain.base.BaseCreatableEntity;
 import com.example.monew.domain.interest.entity.Interest;
+import com.example.monew.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -21,10 +22,10 @@ import java.util.UUID;
 @Table(name = "notifications")
 public class Notifications extends BaseCreatableEntity {
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id")
-    @Column(name = "user_id", columnDefinition = "uuid", nullable = false)
-    private UUID userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", columnDefinition = "uuid", nullable = false)
+//    @Column(name = "user_id", columnDefinition = "uuid", nullable = false)
+    private User user;
 
     @Column(name="content",nullable = false)
     private String content;
@@ -46,12 +47,12 @@ public class Notifications extends BaseCreatableEntity {
     private Instant updatedAt;
 
     public Notifications(
-        UUID userId,
+        User user,
         String content,
         ResourceType resourceType,
         UUID resourceId
     ) {
-        this.userId = userId;
+        this.user = user;
         this.content = content;
         this.resourceType = resourceType;
         this.resourceId = resourceId;
@@ -59,7 +60,7 @@ public class Notifications extends BaseCreatableEntity {
     }
 
     public void checkNotificationRead(UUID userId) {
-        if(userId != null && this.userId.equals(userId)) {
+        if(userId != null && this.user.getId().equals(userId)) {
             this.isRead = true;
         }
     }

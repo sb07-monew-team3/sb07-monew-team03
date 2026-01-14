@@ -10,7 +10,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import com.example.monew.domain.interest.entity.Interest;
-import com.example.monew.domain.interest.service.SubscriptionService;
 import com.example.monew.domain.interest.service.SubscriptionServiceImpl;
 import com.example.monew.domain.notification.dto.NotificationDto;
 import com.example.monew.domain.notification.entity.Notifications;
@@ -19,6 +18,7 @@ import com.example.monew.domain.notification.repository.NotificationRepository;
 import com.example.monew.domain.notification.response.CursorResponse;
 import com.example.monew.domain.user.dto.UserDto;
 import com.example.monew.domain.user.entity.User;
+import com.example.monew.domain.user.repository.UserRepository;
 import com.example.monew.domain.user.util.TestFixture;
 import com.example.monew.global.exception.domain.notification.NotificationNotExistException;
 import java.time.Instant;
@@ -47,6 +47,9 @@ import static org.mockito.Mockito.*;
 class NotificationServiceUnitTest {
     @Mock
     private NotificationRepository notiRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private NotificationServiceImpl notiService;
@@ -89,7 +92,7 @@ class NotificationServiceUnitTest {
         UUID notificationId = UUID.randomUUID();
 
         Notifications notifications = new Notifications(
-            user.getId(),
+            user,
             "testContent",
             ResourceType.INTEREST,
             UUID.randomUUID(),
@@ -131,7 +134,7 @@ class NotificationServiceUnitTest {
         ReflectionTestUtils.setField(user, "createdAt", Instant.now());
 
         Notifications noti1 = spy(new Notifications(
-            user.getId(),
+            user,
             "content1",
             ResourceType.INTEREST,
             UUID.randomUUID(),
@@ -140,7 +143,7 @@ class NotificationServiceUnitTest {
         ));
 
         Notifications noti2 = spy(new Notifications(
-            user.getId(),
+            user,
             "content2",
             ResourceType.INTEREST,
             UUID.randomUUID(),
@@ -178,7 +181,7 @@ class NotificationServiceUnitTest {
         ReflectionTestUtils.setField(user, "createdAt", Instant.now());
 
         Notifications notifications = spy(new Notifications(
-            user.getId(),
+            user,
             "testContent",
             ResourceType.INTEREST,
             UUID.randomUUID(),
@@ -224,6 +227,7 @@ class NotificationServiceUnitTest {
 
         Interest interest = mock(Interest.class);
         given(interest.getId()).willReturn(interestId);
+        given(interest.getName()).willReturn("스프링");
 
         Map<Interest, Integer> interestMap = Map.of(
             interest, 3
@@ -231,6 +235,17 @@ class NotificationServiceUnitTest {
 
         given(subscriptionService.getSubscribedInterestIds(interestId))
             .willReturn(List.of(userId1, userId2));
+
+        User user1 = new User("u1@test.com", "u1", "pw", null);
+        User user2 = new User("u2@test.com", "u2", "pw", null);
+
+        ReflectionTestUtils.setField(user1, "id", userId1);
+        ReflectionTestUtils.setField(user2, "id", userId2);
+
+        given(userRepository.findById(userId1))
+            .willReturn(Optional.of(user1));
+        given(userRepository.findById(userId2))
+            .willReturn(Optional.of(user2));
 
         // when
         notiService.createInterestAlarm(interestMap);
@@ -243,23 +258,26 @@ class NotificationServiceUnitTest {
             .save(captor.capture());
 
         List<Notifications> savedNotifications = captor.getAllValues();
-
         assertThat(savedNotifications).hasSize(2);
 
         savedNotifications.forEach(notification -> {
-            assertThat(notification.getUserId())
+            assertThat(notification.getUser().getId())
                 .isIn(userId1, userId2);
             assertThat(notification.getResourceType())
                 .isEqualTo(ResourceType.INTEREST);
             assertThat(notification.getResourceId())
                 .isEqualTo(interestId);
             assertThat(notification.getContent())
+                .contains("[스프링]")
                 .contains("3건 등록되었습니다");
             assertThat(notification.isRead()).isFalse();
         });
 
         verify(subscriptionService)
             .getSubscribedInterestIds(interestId);
+
+        verify(userRepository).findById(userId1);
+        verify(userRepository).findById(userId2);
     }
 
 }
