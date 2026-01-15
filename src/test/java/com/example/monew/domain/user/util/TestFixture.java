@@ -1,14 +1,12 @@
 package com.example.monew.domain.user.util;
 
 
+import com.example.monew.domain.activity.dto.UserActivityDto;
 import com.example.monew.domain.article.entity.Article;
 import com.example.monew.domain.comment.dto.CommentCreateRequest;
 import com.example.monew.domain.interest.dto.InterestRegisterRequest;
 import com.example.monew.domain.interest.entity.Interest;
-import com.example.monew.domain.user.dto.UserDto;
-import com.example.monew.domain.user.dto.UserLoginRequest;
-import com.example.monew.domain.user.dto.UserRegisterRequest;
-import com.example.monew.domain.user.dto.UserUpdateRequest;
+import com.example.monew.domain.user.dto.*;
 import com.example.monew.domain.user.entity.User;
 import io.swagger.v3.oas.annotations.media.Content;
 import org.springframework.stereotype.Component;
@@ -64,6 +62,18 @@ public class TestFixture {
         return new InterestRegisterRequest(
                 randomString(),
                 List.of(randomString(),randomString(),randomString())
+        );
+    }
+    public UserActivityDto userActivityDtoFactory(){
+        return new UserActivityDto(
+                UUID.randomUUID(),
+                randomString()+ "@naver.com",
+                randomString(),
+                Instant.now(),
+                null,
+                null,
+                null,
+                null
         );
     }
 
