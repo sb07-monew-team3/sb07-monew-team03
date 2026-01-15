@@ -88,7 +88,7 @@ class NotificationControllerUnitTest {
         .willReturn(response);
 
     // when & then
-    mockMvc.perform(get("/notifications")
+    mockMvc.perform(get("/api/notifications")
             .param("limit", String.valueOf(limit))
             .header("Monew-Request-User-ID", userId.toString())
             .contentType(MediaType.APPLICATION_JSON)
@@ -114,7 +114,7 @@ class NotificationControllerUnitTest {
     @DisplayName("알림 목록 조회 X - 400 잘못된 요청 (limit <= 0)")
     void findAllNotificationByUserId_ERR_400() throws Exception { // HandlerMethodValidationException, ConstraintViolationException
 
-        mockMvc.perform(get("/notifications")
+        mockMvc.perform(get("/api/notifications")
                 .param("limit", "0")
                 .header("Monew-Request-User-ID", userId.toString())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -130,7 +130,7 @@ class NotificationControllerUnitTest {
         given(notiService.findAllByUserId(userId, null, null, limit))
             .willThrow(new RuntimeException("알림 목록 조회 XXXX - 500 서버 내부 오류"));
 
-        mockMvc.perform(get("/notifications")
+        mockMvc.perform(get("/api/notifications")
                 .param("limit", String.valueOf(limit))
                 .header("Monew-Request-User-ID", userId.toString())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -214,7 +214,7 @@ class NotificationControllerUnitTest {
             .when(notiService)
             .checkNotification(notificationId, userId);
 
-        mockMvc.perform(patch("/notifications/{notificationId}", notificationId)
+        mockMvc.perform(patch("/api/notifications/{notificationId}", notificationId)
                 .header("Monew-Request-User-ID", userId.toString())
                 .contentType(MediaType.APPLICATION_JSON)
             )
@@ -228,7 +228,7 @@ class NotificationControllerUnitTest {
     @DisplayName("알림 확인 X - 400 잘못된 요청 (입력값 검증 실패) -  헤더 누락")
     void checkNotification_ERR_400() throws Exception {
 
-        mockMvc.perform(patch("/notifications/{notificationId}", notificationId)
+        mockMvc.perform(patch("/api/notifications/{notificationId}", notificationId)
                 .contentType(MediaType.APPLICATION_JSON)
             )
             .andExpect(status().isBadRequest())
@@ -247,7 +247,7 @@ class NotificationControllerUnitTest {
         )).when(notiService)
             .checkNotification(notificationId, userId);
 
-        mockMvc.perform(patch("/notifications/{notificationId}", notificationId)
+        mockMvc.perform(patch("/api/notifications/{notificationId}", notificationId)
                 .header("Monew-Request-User-ID", userId.toString())
                 .contentType(MediaType.APPLICATION_JSON)
             )
@@ -266,7 +266,7 @@ class NotificationControllerUnitTest {
             .when(notiService)
             .checkNotification(notificationId, userId);
 
-        mockMvc.perform(patch("/notifications/{notificationId}", notificationId)
+        mockMvc.perform(patch("/api/notifications/{notificationId}", notificationId)
                 .header("Monew-Request-User-ID", userId.toString())
                 .contentType(MediaType.APPLICATION_JSON)
             )

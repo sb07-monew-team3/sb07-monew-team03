@@ -1,10 +1,5 @@
 package com.example.monew.domain.notification.service;
 
-import com.example.monew.domain.notification.entity.Notifications;
-import com.example.monew.domain.notification.repository.NotificationRepository;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

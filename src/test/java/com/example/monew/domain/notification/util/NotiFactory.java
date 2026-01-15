@@ -1,5 +1,7 @@
 package com.example.monew.domain.notification.util;
 
+import com.example.monew.domain.notification.entity.Notifications;
+import com.example.monew.domain.notification.entity.ResourceType;
 import com.example.monew.domain.user.entity.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -7,6 +9,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @Component
 public class NotiFactory {
@@ -16,6 +19,30 @@ public class NotiFactory {
 
     String randomString(){
         return UUID.randomUUID().toString().substring(0,10);
+    }
+
+    public User mockUser(String nickName) {
+        User user = new User(nickName + "@test.com", nickName, "ahffkd", null);
+
+        ReflectionTestUtils.setField(user, "id", UUID.randomUUID());
+        ReflectionTestUtils.setField(user, "createdAt", Instant.now());
+
+        return user;
+    }
+
+    public Notifications mockNoti(User user) {
+        Notifications notifications = new Notifications(
+            user,
+            "testContent",
+            ResourceType.INTEREST,
+            UUID.randomUUID(),
+            false,
+            Instant.now()
+        );
+
+        ReflectionTestUtils.setField(notifications, "id", UUID.randomUUID());
+
+        return notifications;
     }
 
     public User newUser(){
@@ -44,7 +71,5 @@ public class NotiFactory {
 
         return id;
     }
-
-
 }
 

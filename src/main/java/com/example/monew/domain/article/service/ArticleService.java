@@ -72,14 +72,14 @@ public class ArticleService {
         List<String> keywords;
 
         // 검색어와 관심사는 동시에 들어올 수 없다
-        if(request.keyword() != null && request.interestedId() != null) {
+        if(!request.keyword().isBlank() && request.interestId() != null) {
             throw new IllegalArgumentException("키워드와 관심사가 모두 들어올 수 없습니다."); // TODO: 커스텀 예외 추가 필요
         }
 
-        if(request.keyword() != null) {
+        if(!request.keyword().isBlank()) {
             keywords = List.of(request.keyword());
         } else {
-            keywords = keywordRepository.findAllByInterestId(request.interestedId()).stream()
+            keywords = keywordRepository.findAllByInterestId(request.interestId()).stream()
                     .map(k -> k.getKeyword())
                     .collect(Collectors.toList());
         }
