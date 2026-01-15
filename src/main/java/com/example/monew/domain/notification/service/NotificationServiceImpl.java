@@ -43,7 +43,9 @@ public class NotificationServiceImpl implements NotificationService {
         Slice<NotificationDto> sliceDto = notiRepository.findAllByUserId(userId, Optional.ofNullable(createdAt).orElse(Instant.now()), pageable)
             .map(NotificationDto::toDto);
 
-        CursorResponse<NotificationDto> cursorResponses = NotificationDto.dtoCursorResponse(sliceDto);
+        Long totalCount = notiRepository.countByUserId(userId, Optional.ofNullable(createdAt).orElse(Instant.now()));
+
+        CursorResponse<NotificationDto> cursorResponses = NotificationDto.dtoCursorResponse(sliceDto, totalCount);
         log.info(" findAllNotificationByUserId.cursorResponses = " + cursorResponses);
 
         return cursorResponses;
