@@ -2,6 +2,9 @@ package com.example.monew.domain.notification.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,6 +40,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.test.util.ReflectionTestUtils;
+
 import static org.mockito.Mockito.*;
 
 
@@ -149,8 +154,38 @@ class NotificationServiceUnitTest {
     @Test
     @DisplayName("case - 내가 작성한 댓글에 좋아요가 눌리면 알림 생성")
     void notifyCommentLiked() {
+        // given
+        UUID commentId = UUID.randomUUID();
+        String actorNickname = "liker";
 
+        given(userRepository.findById(mockUserI.getId()))
+            .willReturn(Optional.of(mockUserI));
+
+        ArgumentCaptor<Notifications> captor =
+            ArgumentCaptor.forClass(Notifications.class);
+
+        // when
+        notiService.notifyCommentLiked(mockUserI.getId(), actorNickname, commentId);
+
+        // then
+        verify(userRepository).findById(mockUserI.getId());
+        verify(notiRepository).save(captor.capture());
+
+        Notifications savedNotification = captor.getValue();
+
+        assertAll(
+            () -> assertEquals(mockUserI, savedNotification.getUser()),
+            () -> assertEquals(
+                "[" + actorNickname + "]님이 나의 댓글을 좋아합니다.",
+                savedNotification.getContent()
+            ),
+            () -> assertEquals(ResourceType.COMMENT, savedNotification.getResourceType()),
+            () -> assertEquals(commentId, savedNotification.getResourceId()),
+            () -> assertFalse(savedNotification.isRead())
+        );
     }
+
+
 
     @Test
     @DisplayName("case - 구독 관심사 관련 새 기사 등록시 알림 생성 - OK")

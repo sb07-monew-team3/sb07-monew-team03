@@ -71,7 +71,5 @@ public class NotiFactory {
 
         return id;
     }
-
-
 }
 
