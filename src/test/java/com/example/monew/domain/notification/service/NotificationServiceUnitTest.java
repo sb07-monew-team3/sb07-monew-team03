@@ -54,9 +54,6 @@ class NotificationServiceUnitTest {
     @InjectMocks
     private NotificationServiceImpl notiService;
 
-//    @InjectMocks
-//    private SubscriptionServiceImpl subscriptionService;
-
     @Mock
     private SubscriptionServiceImpl subscriptionService; // ⭐ 반드시 필요
 
