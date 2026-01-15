@@ -19,16 +19,14 @@ public record NotificationDto(
     ResourceType resourceType,
     UUID resourceId
 ) {
-    public static CursorResponse<NotificationDto> dtoCursorResponse(Slice<NotificationDto> sliceDto) {
+    public static CursorResponse<NotificationDto> dtoCursorResponse(Slice<NotificationDto> sliceDto, Long totalElement) {
         String nextCursorUUID = null;
         Instant nextCreatedAt = null;
-        Long totalElement = 0L;
 
         if (!sliceDto.getContent().isEmpty()) {
             NotificationDto notificationDto = sliceDto.getContent().get(sliceDto.getContent().size() - 1);
             nextCursorUUID = notificationDto.id().toString();
             nextCreatedAt = notificationDto.createdAt();
-            totalElement = Long.valueOf(sliceDto.getContent().size());
         }
 
         return new CursorResponse<>(sliceDto.getContent(),
