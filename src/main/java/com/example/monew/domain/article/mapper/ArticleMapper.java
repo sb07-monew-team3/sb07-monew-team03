@@ -27,6 +27,7 @@ public class ArticleMapper {
         return new ArticleDto(
                 article.getId(),
                 article.getSource(),
+                article.getSourceUrl(),
                 article.getTitle(),
                 article.getPublishDate(),
                 article.getSummary(),

@@ -13,16 +13,23 @@ import java.util.List;
 public class NaverArticleMapper {
     public List<Article> toArticleList(List<Item> items, List<Interest> interests)  {
         return items.stream()
-                .map(i -> new Article(
-                        Source.NAVER.getValue(),
-                        i.originallink(),
-                        i.title(),
-                        DateParser.parse(i.pubDate()),
-                        i.description(),
-                        false,
-                        null,
-                        interests
-                        )
+                .map(i -> {
+
+                        // 볼드체 제거
+                        String summary = i.description().replaceAll("</?b>","");
+                        String title = i.title().replaceAll("</?b>","");
+
+                        return new Article(
+                                        Source.NAVER.getValue(),
+                                        i.originallink(),
+                                        title,
+                                        DateParser.parse(i.pubDate()),
+                                        summary,
+                                        false,
+                                        null,
+                                        interests
+                                );
+                        }
                 )
                 .toList();
     }

@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
@@ -39,34 +40,22 @@ public class ArticleCollectionScheduler {
     @Transactional
     public void collectArticles() {
 
-        /*
-        1. 현재 존재하는 관심사의 모든 키워드를 저장
-        2. key(키워드), value(관심사) 형태로 HashMap 저장
-        3. 키워드 기준으로 기사 검색 (naver 등)
-        4. 반환된 item을 article로 변환하면서 interests에 HashMap의 value를 집어넣는다.
-        5. 이미 저장된 기사는 제외하고 새로운 기사를 db에 저장
-         */
 
-        HashMap<String, List<Interest>> map = new HashMap<>();
+        // keyword와 interests 매핑
+        Map<String, List<Interest>> map = new HashMap<>();
 
         List<Interest> interests = interestRepository.findAll();
 
-        interests.forEach(interest -> {
+        for (Interest interest : interests) {
             List<Keyword> keywords = keywordRepository.findAllByInterestId(interest.getId());
 
-            keywords.forEach(k -> {
-                String keywordName = k.getKeyword();
-
-                List<Interest> value = map.get(keywordName);
-
-                if(value == null) {
-                    map.put(keywordName, List.of(interest));
-                } else {
-                    value.add(interest);
-                    map.put(keywordName, value);
-                }
-            });
-        });
+            // keyword이름을 가진 키가 없는 경우 빈 리스트를 생성
+            // keyword이름을 가진 키가 있는 경우 리스트에 관심사 추가
+            for (Keyword keyword : keywords) {
+                map.computeIfAbsent(keyword.getKeyword(), k -> new ArrayList<>())
+                        .add(interest);
+            }
+        }
 
         List<Article> articles = map.keySet().stream()
                 .map(k ->
@@ -74,17 +63,56 @@ public class ArticleCollectionScheduler {
                 .flatMap(List::stream)
                 .toList();
 
-        Set<String> links = articles.stream()
+        // 링크 별 중복 기사를 HashMap의 형태로 저장
+        Map<String, List<Article>> checkArticles = new HashMap<>();
+
+        // key 값(기사 링크)이 존재하는 경우 value에 article 추가
+        // key 값(기사 링크)이 없는 경우 빈 value로 빈 리스트 생성 후 article 추가
+        articles.forEach(article ->
+                checkArticles.
+                        computeIfAbsent(article.getSourceUrl(), k -> new ArrayList<>())
+                        .add(article)
+        );
+
+        List<Article> uniqueArticles = new ArrayList<>();
+
+        checkArticles.forEach((k, v) -> {
+            Article article = v.get(0);
+
+            // 링크 별 중복된 기사들은 관심사만 더하여 하나의 기사로 병합
+            for(int i = 1; i < v.size(); i++) {
+                article.updateInterests(v.get(i).getInterests());
+            }
+
+            uniqueArticles.add(article);
+        });
+
+        Set<String> links = uniqueArticles.stream()
                 .map(a -> a.getSourceUrl())
                 .collect(Collectors.toSet());
 
-        Set<String> existingLinks = articleRepository.findAllBySourceUrlIn(links).stream()
-                .map(a -> a.getSourceUrl())
-                .collect(Collectors.toSet());
+        // 수집 된 기사 중 DB에 이미 있는 기사들 저장
+        Map<String, Article> existingArticleMap =
+                articleRepository.findAllBySourceUrlIn(links).stream()
+                        .collect(Collectors.toMap(
+                                Article::getSourceUrl, // key: article의 sourceUrl
+                                Function.identity() // value: article 객체
+                        ));
 
-        List<Article> newArticles = articles.stream()
-                .filter(a -> !existingLinks.contains(a.getSourceUrl()))
-                .collect(Collectors.toList());
+        List<Article> newArticles = new ArrayList<>();
+        List<Article> existArticles = new ArrayList<>();
+
+        for (Article article : uniqueArticles) {
+            Article existing =  existingArticleMap.get(article.getSourceUrl());
+
+            if (existing == null) {
+                newArticles.add(article);
+            } else {
+                existing.updateInterests(article.getInterests());
+                existArticles.add(existing);
+            }
+
+        }
 
         if(!newArticles.isEmpty()) {
             Collections.sort(newArticles, Comparator.comparing(Article::getPublishDate));
@@ -109,6 +137,10 @@ public class ArticleCollectionScheduler {
 
             notificationService.createInterestAlarm(interestList);
             articleRepository.saveAll(newArticles);
+        }
+
+        if(!existArticles.isEmpty()) {
+            articleRepository.saveAll(existArticles);
         }
     }
 }

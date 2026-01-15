@@ -6,6 +6,7 @@ import java.util.UUID;
 public record ArticleDto(
         UUID id,
         String source,
+        String sourceUrl,
         String title,
         LocalDateTime publishDate,
         String summary,

@@ -14,12 +14,14 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.Instant;
 import java.util.UUID;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
 @Table(name = "notifications")
+@EntityListeners(AuditingEntityListener.class)
 public class Notifications extends BaseCreatableEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
