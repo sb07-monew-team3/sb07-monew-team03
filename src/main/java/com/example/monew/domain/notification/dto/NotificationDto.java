@@ -22,18 +22,20 @@ public record NotificationDto(
     public static CursorResponse<NotificationDto> dtoCursorResponse(Slice<NotificationDto> sliceDto) {
         String nextCursorUUID = null;
         Instant nextCreatedAt = null;
+        Long totalElement = 0L;
 
         if (!sliceDto.getContent().isEmpty()) {
             NotificationDto notificationDto = sliceDto.getContent().get(sliceDto.getContent().size() - 1);
             nextCursorUUID = notificationDto.id().toString();
             nextCreatedAt = notificationDto.createdAt();
+            totalElement = Long.valueOf(sliceDto.getContent().size());
         }
 
         return new CursorResponse<>(sliceDto.getContent(),
             nextCursorUUID,
             nextCreatedAt,
             sliceDto.getSize(),
-            null,
+            totalElement,
             sliceDto.hasNext());
     }
 
