@@ -78,6 +78,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                 .select(Projections.constructor(ArticleDto.class,
                         article.id,
                         article.source,
+                        article.sourceUrl,
                         article.title,
                         article.publishDate,
                         article.summary,
