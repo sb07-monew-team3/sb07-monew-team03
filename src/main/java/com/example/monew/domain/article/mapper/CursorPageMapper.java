@@ -18,6 +18,17 @@ public class CursorPageMapper {
     private final ArticleRepository articleRepository;
 
     public CursorPageResponseArticleDto toResponseDto (Slice<ArticleDto> articleList, String cursor, long totalElements) {
+        if(articleList.getContent().isEmpty()) {
+            return new CursorPageResponseArticleDto(
+                    articleList.getContent(),
+                    null,
+                    null,
+                    articleList.getSize(),
+                    0L,
+                    false
+            );
+        }
+
         ArticleDto lastContent = articleList.getContent().get(articleList.getContent().size() - 1);
         UUID lastContentId = lastContent.id();
 
