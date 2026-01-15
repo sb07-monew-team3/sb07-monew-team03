@@ -24,7 +24,7 @@ public class Article extends BaseCreatableEntity {
     @Column(name="source", nullable = false, updatable = false)
     private String source;
 
-    @Column(name="source_url", nullable = false, updatable = false, unique = true)
+    @Column(name="source_url", nullable = false, updatable = false, unique = true, length = 500)
     private String sourceUrl;
 
     @Column(name="title", nullable = false, updatable = false)
