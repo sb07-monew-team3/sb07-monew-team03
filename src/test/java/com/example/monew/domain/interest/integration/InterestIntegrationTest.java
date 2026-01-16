@@ -4,9 +4,11 @@ import com.example.monew.domain.interest.dto.InterestRegisterRequest;
 import com.example.monew.domain.interest.dto.InterestUpdateRequest;
 import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.entity.Keyword;
+import com.example.monew.domain.interest.entity.Subscription;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
 import com.example.monew.domain.interest.repository.SubscriptionRepository;
+import com.example.monew.domain.notification.repository.NotificationRepository;
 import com.example.monew.domain.user.entity.User;
 import com.example.monew.domain.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Transactional
 public class InterestIntegrationTest {
 
     @Autowired
@@ -51,15 +55,15 @@ public class InterestIntegrationTest {
     private SubscriptionRepository subscriptionRepository;
 
     @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
     private UUID userId;
 
     @BeforeEach
     void setUp() {
-        subscriptionRepository.deleteAll();
-        keywordRepository.deleteAll();
-        interestRepository.deleteAll();
 
         userId = UUID.randomUUID();
     }
@@ -247,9 +251,12 @@ public class InterestIntegrationTest {
 
     @Test
     @DisplayName("관심사 구독할 수 있다")
-    void subscribeInterest_Success() {
+    void subscribeInterest_Success() throws Exception {
 
         // given
+        User user = new User("test22@test.com", "테스트", "Z1x2c3v4!", null);
+        userRepository.save(user);
+
         Interest interest = new Interest("코딩");
         interestRepository.save(interest);
 
@@ -262,13 +269,65 @@ public class InterestIntegrationTest {
         keywordRepository.saveAll(keywords);
 
         // when && then
+        mockMvc.perform(post("/api/interests/{interestId}/subscriptions", interest.getId())
+                .header("Monew-Request-User-ID", user.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.interestId").value(interest.getId().toString()))
+                .andExpect(jsonPath("$.interestSubscriberCount").value(1));
+    }
+    
+    @Test
+    @DisplayName("없는 관심사 구독 시 404 반환한다")
+    void subscribeInterest_NotFound() throws Exception {
 
+        // given
+        User user = new User("test22@test1.com", "테스트1", "Z1x2c3v4!", null);
+        userRepository.save(user);
 
+        UUID interestId = UUID.randomUUID();
 
+        // when && then
+        mockMvc.perform(post("/api/interests/{interestId}/subscriptions", interestId)
+                .header("Monew-Request-User-ID", user.getId()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("INTEREST_NOT_EXIST"));
+    }
+    
+    @Test
+    @DisplayName("관심사 구독 취소 할 수 있다")
+    void unsubscribeInterest_Success() throws Exception {
+
+        // given
+        User user = new User("abcd@abc.com", "테스트1", "Z1x2c3v4!", null);
+        userRepository.save(user);
+
+        Interest interest = new Interest("코딩");
+        interestRepository.save(interest);
+
+        Subscription subscription = new Subscription(interest, user);
+        subscriptionRepository.save(subscription);
+
+        // when && then
+        mockMvc.perform(delete("/api/interests/{interestId}/subscriptions", interest.getId())
+                .header("Monew-Request-User-ID", user.getId()))
+                .andExpect(status().isOk());
     }
 
+    @Test
+    @DisplayName("없는 관심사 구독 취소 시 404 반환")
+    void unsubscribeInterest_NotFound() throws Exception {
 
+        // given
+        User user = new User("e@e.com", "테스트2", "Z1x2c3v4!", null);
+        userRepository.save(user);
 
+        Interest interest = new Interest("코딩");
+        interestRepository.save(interest);
 
-
+        // when && then
+        mockMvc.perform(delete("/api/interests/{interestId}/subscriptions", interest.getId())
+                .header("Monew-Request-User-ID", user.getId()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("SUBSCRIPTION_NOT_EXIST"));
+    }
 }
