@@ -162,15 +162,7 @@ public class CommentService {
         long likeCount = commentLikesRepository.countByComment_Id(comment.getId());
         boolean likedByMe = commentLikesRepository.existsByUserIdAndCommentId(requesterUserId, comment.getId());
 
-        return new CommentResponse(
-                comment.getId(),
-                comment.getArticle().getId(),
-                comment.getUser().getId(),
-                comment.getContent(),
-                comment.getCreatedAt(),
-                likeCount,
-                likedByMe
-        );
+        return CommentResponse.from(comment, likeCount, likedByMe);
     }
 
     private User findUserOrThrow(UUID userId) {

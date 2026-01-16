@@ -39,7 +39,8 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
         return jpaQueryFactory
                 .select(comment.count())
                 .from(comment)
-                .where(comment.article.id.eq(articleId))
+                .where(comment.article.id.eq(articleId)
+                        .and(comment.isDeleted.isFalse()))
                 .fetchOne();
     }
 
@@ -67,6 +68,98 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .orderBy(orderBy)
                 .limit(limitPlusOne)
                 .fetch();
+    }
+
+    @Override
+    public List<Comment> findByArticleIdWithCreatedAtCursorOnly(UUID articleId,
+                                                                Instant cursorCreatedAt,
+                                                                boolean after,
+                                                                int limitPlusOne,
+                                                                Sort.Direction direction) {
+        QComment comment = QComment.comment;
+
+        BooleanExpression base = comment.article.id.eq(articleId)
+                .and(comment.isDeleted.isFalse());
+
+        BooleanExpression cursorCond = (cursorCreatedAt == null)
+                ? null
+                : buildCreatedAtOnlyCursorCondition(comment, cursorCreatedAt, after, direction);
+
+        OrderSpecifier<?>[] orderBy = buildCreatedAtOrder(comment, direction);
+
+        return jpaQueryFactory
+                .selectFrom(comment)
+                .where(allOf(base, cursorCond))
+                .orderBy(orderBy)
+                .limit(limitPlusOne)
+                .fetch();
+    }
+
+    // ✅ 이번에 추가: likeCount 정렬 + cursor=Instant(createdAt)로 페이징
+    @Override
+    public List<CommentWithLikeCount> findByArticleIdOrderByLikeCountWithCreatedAtCursorOnly(
+            UUID articleId,
+            Instant cursorCreatedAt,
+            boolean after,
+            int limitPlusOne,
+            Sort.Direction direction
+    ) {
+        QComment c = QComment.comment;
+        QCommentLikes cl = QCommentLikes.commentLikes;
+
+        NumberExpression<Long> likeCount = cl.id.count();
+
+        BooleanExpression base = c.article.id.eq(articleId)
+                .and(c.isDeleted.isFalse());
+
+        BooleanExpression cursorCond = (cursorCreatedAt == null)
+                ? null
+                : buildCreatedAtOnlyCursorCondition(c, cursorCreatedAt, after, direction);
+
+        boolean desc = direction == Sort.Direction.DESC;
+
+        List<Tuple> rows = jpaQueryFactory
+                .select(c.id, c.createdAt, likeCount)
+                .from(c)
+                .leftJoin(cl).on(cl.comment.id.eq(c.id))
+                .where(allOf(base, cursorCond))
+                .groupBy(c.id, c.createdAt)
+                .orderBy(
+                        desc ? likeCount.desc() : likeCount.asc(),
+                        desc ? c.createdAt.desc() : c.createdAt.asc(),
+                        desc ? c.id.desc() : c.id.asc()
+                )
+                .limit(limitPlusOne)
+                .fetch();
+
+        if (rows.isEmpty()) return List.of();
+
+        List<UUID> idsInOrder = new ArrayList<>(rows.size());
+        Map<UUID, Long> countMap = new HashMap<>();
+
+        for (Tuple row : rows) {
+            UUID id = row.get(c.id);
+            Long cnt = row.get(likeCount);
+            idsInOrder.add(id);
+            countMap.put(id, cnt == null ? 0L : cnt);
+        }
+
+        List<Comment> comments = jpaQueryFactory
+                .selectFrom(c)
+                .where(c.id.in(idsInOrder))
+                .fetch();
+
+        Map<UUID, Comment> commentMap = comments.stream()
+                .collect(Collectors.toMap(Comment::getId, it -> it));
+
+        List<CommentWithLikeCount> result = new ArrayList<>();
+        for (UUID id : idsInOrder) {
+            Comment comment = commentMap.get(id);
+            if (comment != null) {
+                result.add(new CommentWithLikeCount(comment, countMap.getOrDefault(id, 0L)));
+            }
+        }
+        return result;
     }
 
     @Override
@@ -237,6 +330,17 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
         }
         return comment.createdAt.lt(cursorCreatedAt)
                 .or(comment.createdAt.eq(cursorCreatedAt).and(comment.id.lt(cursorId)));
+    }
+
+    private BooleanExpression buildCreatedAtOnlyCursorCondition(QComment comment,
+                                                                Instant cursorCreatedAt,
+                                                                boolean after,
+                                                                Sort.Direction direction) {
+        boolean desc = direction == Sort.Direction.DESC;
+        if (desc) {
+            return after ? comment.createdAt.lt(cursorCreatedAt) : comment.createdAt.gt(cursorCreatedAt);
+        }
+        return after ? comment.createdAt.gt(cursorCreatedAt) : comment.createdAt.lt(cursorCreatedAt);
     }
 
     private OrderSpecifier<?>[] buildCreatedAtOrder(QComment comment, Sort.Direction direction) {
