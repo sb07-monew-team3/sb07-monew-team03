@@ -1,5 +1,6 @@
 package com.example.monew.domain.interest.controller;
 
+import com.example.monew.domain.interest.docs.InterestControllerDocs;
 import com.example.monew.domain.interest.dto.*;
 import com.example.monew.domain.interest.service.InterestService;
 import com.example.monew.domain.interest.service.SubscriptionService;
@@ -14,7 +15,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/interests")
 @RequiredArgsConstructor
-public class InterestController {
+public class InterestController implements InterestControllerDocs {
 
     private final InterestService interestService;
     private final SubscriptionService subscriptionService;
