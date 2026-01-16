@@ -39,4 +39,12 @@ public interface CommentRepositoryCustom {
             Pageable pageable,
             Sort.Direction direction
     );
+    List<Comment> findByArticleIdWithCreatedAtCursorOnly(
+            UUID articleId,
+            Instant cursorCreatedAt,
+            boolean after,
+            int limitPlusOne,
+            Sort.Direction direction
+    );
+
 }

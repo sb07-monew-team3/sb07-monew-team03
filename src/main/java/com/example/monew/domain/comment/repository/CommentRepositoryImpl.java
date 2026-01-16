@@ -285,4 +285,46 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 new OrderSpecifier<>(order, comment.id)
         };
     }
+
+    @Override
+    public List<Comment> findByArticleIdWithCreatedAtCursorOnly(
+            UUID articleId,
+            Instant cursorCreatedAt,
+            boolean after,
+            int limitPlusOne,
+            Sort.Direction direction
+    ) {
+        QComment comment = QComment.comment;
+
+        BooleanExpression base = comment.article.id.eq(articleId)
+                .and(comment.isDeleted.isFalse());
+
+        BooleanExpression cursorCond = (cursorCreatedAt == null)
+                ? null
+                : buildCreatedAtOnlyCursorCondition(comment, cursorCreatedAt, after, direction);
+
+        OrderSpecifier<?>[] orderBy = buildCreatedAtOrder(comment, direction);
+
+        return jpaQueryFactory
+                .selectFrom(comment)
+                .where(allOf(base, cursorCond))
+                .orderBy(orderBy)
+                .limit(limitPlusOne)
+                .fetch();
+    }
+
+    private BooleanExpression buildCreatedAtOnlyCursorCondition(
+            QComment comment,
+            Instant cursorCreatedAt,
+            boolean after,
+            Sort.Direction direction
+    ) {
+        boolean desc = direction == Sort.Direction.DESC;
+
+        if (desc) {
+            return after ? comment.createdAt.lt(cursorCreatedAt) : comment.createdAt.gt(cursorCreatedAt);
+        }
+        return after ? comment.createdAt.gt(cursorCreatedAt) : comment.createdAt.lt(cursorCreatedAt);
+    }
+
 }
