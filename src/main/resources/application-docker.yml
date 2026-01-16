@@ -1,22 +1,23 @@
 spring:
   datasource:
-    url: jdbc:postgresql://postgres:5432/monew
-    username: monew_user
-    password: monew_password
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
-        format_sql: true
         default_batch_fetch_size: 50
         show_sql: false
     open-in-view: false
 
   logging:
     level:
-      org.hibernate.SQL: info
+      root: info
+      org.hibernate.SQL: off
+
 server:
   port: 8080
 
