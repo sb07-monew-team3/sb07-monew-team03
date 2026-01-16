@@ -1,4 +1,4 @@
-package com.example.monew.domain.notification.controller;
+package com.example.monew.domain.notification.unit.controller;
 
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.BDDMockito.given;
@@ -6,11 +6,13 @@ import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 
+import com.example.monew.domain.notification.controller.NotificationController;
 import com.example.monew.domain.notification.dto.NotificationDto;
 import com.example.monew.domain.notification.entity.ResourceType;
 import com.example.monew.domain.notification.response.CursorResponse;
@@ -22,7 +24,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -84,8 +85,8 @@ class NotificationControllerUnitTest {
             false
         );
 
-    given(notiService.findAllByUserId(userId, null, null, limit))
-        .willReturn(response);
+        when(notiService.findAllByUserId(userId, null, null, limit))
+        .thenReturn(response);
 
     // when & then
     mockMvc.perform(get("/api/notifications")
