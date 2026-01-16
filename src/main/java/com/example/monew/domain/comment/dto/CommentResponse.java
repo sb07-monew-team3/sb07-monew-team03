@@ -14,6 +14,7 @@ public class CommentResponse {
     private UUID id;
     private UUID articleId;
     private UUID userId;
+    private String userNickname;
     private String content;
     private Instant createdAt;
 
@@ -25,6 +26,7 @@ public class CommentResponse {
                 comment.getId(),
                 comment.getArticle().getId(),
                 comment.getUser().getId(),
+                comment.getUser().getNickName(),
                 comment.getContent(),
                 comment.getCreatedAt(),
                 likeCount,

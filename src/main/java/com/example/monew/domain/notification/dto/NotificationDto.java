@@ -19,7 +19,7 @@ public record NotificationDto(
     ResourceType resourceType,
     UUID resourceId
 ) {
-    public static CursorResponse<NotificationDto> dtoCursorResponse(Slice<NotificationDto> sliceDto) {
+    public static CursorResponse<NotificationDto> dtoCursorResponse(Slice<NotificationDto> sliceDto, Long totalElement) {
         String nextCursorUUID = null;
         Instant nextCreatedAt = null;
 
@@ -33,7 +33,7 @@ public record NotificationDto(
             nextCursorUUID,
             nextCreatedAt,
             sliceDto.getSize(),
-            null,
+            totalElement,
             sliceDto.hasNext());
     }
 
