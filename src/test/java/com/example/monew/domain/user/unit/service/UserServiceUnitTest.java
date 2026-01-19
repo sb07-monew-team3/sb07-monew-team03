@@ -46,6 +46,7 @@ public class UserServiceUnitTest {
     private UserDto userDto;
     @BeforeEach
     void setUp() {
+
         user = testFixture.userFactory();
         userDto = new UserDto(user.getId(),user.getEmail(),user.getNickName(),user.getCreatedAt());
 
