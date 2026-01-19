@@ -33,6 +33,8 @@ public class InterestServiceImpl implements InterestService {
     private final SubscriptionRepository subscriptionRepository;
     private final InterestMapper interestMapper;
 
+    private static final double SIMILARITY_THRESHOLD = 0.8;
+
     @Override
     public InterestDto create(InterestRegisterRequest request) {
 
@@ -145,7 +147,7 @@ public class InterestServiceImpl implements InterestService {
         List<String> nameList = interestRepository.findAllNames();
 
         Optional<String> similarName = nameList.stream()
-                .filter(name -> calculateSimilarity(name, newName) >= 0.8)
+                .filter(name -> calculateSimilarity(name, newName) >= SIMILARITY_THRESHOLD)
                 .findFirst();
 
         if(similarName.isPresent()){
