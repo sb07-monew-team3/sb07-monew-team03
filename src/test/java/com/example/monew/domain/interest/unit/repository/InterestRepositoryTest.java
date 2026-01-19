@@ -47,6 +47,11 @@ public class InterestRepositoryTest {
     @Autowired
     private EntityManager em;
 
+    private Interest coding;
+    private Interest hardware;
+    private Interest finance;
+
+
     @BeforeEach
     void setUp() {
 
@@ -57,19 +62,25 @@ public class InterestRepositoryTest {
         em.flush();
         em.clear();
 
-        Interest interest = new Interest("코딩");
-        Interest interest2 = new Interest("하드웨어");
-        Interest interest3 = new Interest("금융");
+        coding = new Interest("코딩");
+        hardware = new Interest("하드웨어");
+        finance = new Interest("금융");
 
-        interestRepository.saveAll(List.of(interest, interest2, interest3));
+        Instant now = Instant.now();
+        ReflectionTestUtils.setField(coding, "createdAt", now);
+        ReflectionTestUtils.setField(hardware, "createdAt", now.plusMillis(20));
+        ReflectionTestUtils.setField(finance, "createdAt", now.plusMillis(40));
+
+        interestRepository.saveAll(List.of(coding, hardware, finance));
+
 
         List<Keyword> keywords = List.of(
-                new Keyword("자바", interest),
-                new Keyword("스프링", interest),
-                new Keyword("그래픽카드", interest2),
-                new Keyword("CPU", interest2),
-                new Keyword("비트코인", interest3),
-                new Keyword("코스닥", interest3)
+                new Keyword("자바", coding),
+                new Keyword("스프링", coding),
+                new Keyword("그래픽카드", hardware),
+                new Keyword("CPU", hardware),
+                new Keyword("비트코인", finance),
+                new Keyword("코스닥", finance)
         );
         keywordRepository.saveAll(keywords);
 
@@ -78,12 +89,12 @@ public class InterestRepositoryTest {
         User user3 = new User("c@c.com", "테스트3", "1234", null);
         userRepository.saveAll(List.of(user1, user2, user3));
 
-        Subscription sub1 = new Subscription(interest, user1);
-        Subscription sub2 = new Subscription(interest, user2);
-        Subscription sub3 = new Subscription(interest, user3);
-        Subscription sub4 = new Subscription(interest2, user1);
-        Subscription sub5 = new Subscription(interest2, user2);
-        Subscription sub6 = new Subscription(interest3, user1);
+        Subscription sub1 = new Subscription(coding, user1);
+        Subscription sub2 = new Subscription(coding, user2);
+        Subscription sub3 = new Subscription(coding, user3);
+        Subscription sub4 = new Subscription(hardware, user1);
+        Subscription sub5 = new Subscription(hardware, user2);
+        Subscription sub6 = new Subscription(finance, user1);
         subscriptionRepository.saveAll(List.of(sub1, sub2, sub3, sub4, sub5, sub6));
 
     }
@@ -173,4 +184,48 @@ public class InterestRepositoryTest {
                 .containsExactly("금융", "하드웨어", "코딩");
     }
 
+    @Test
+    @DisplayName("이름 오름차순 기준 커서로 동작한다")
+    void search_nameCursor_asc() {
+
+        // given
+        String keyword = null; //전체 조회하기
+        String orderBy = "name";
+        String direction = "asc";
+        String cursor = "코딩";
+        Instant after = Instant.now();
+        int limit = 10;
+
+        // when
+        List<Interest> search = interestRepository.searchByInterestOrKeyword(
+                keyword, orderBy, direction, cursor, after, limit);
+
+        // then
+        assertThat(search).hasSize(1);
+        assertThat(search.get(0).getName()).isEqualTo("하드웨어");
+        assertThat(search).extracting("name").doesNotContain("코딩", "금융");
+    }
+
+    @Test
+    @DisplayName("구독자수 내림차순 기준 커서가 동작한다")
+    void search_subscriptionCountCursor_desc() {
+
+        // given
+        String keyword = null; //전체 조회하기
+        String orderBy = "subscriberCount";
+        String direction = "desc";
+        String cursor = "3";
+        Instant after = coding.getCreatedAt();
+        int limit = 10;
+
+        // when
+        List<Interest> search = interestRepository.searchByInterestOrKeyword(
+                keyword, orderBy, direction, cursor, after, limit);
+
+
+        // then
+        assertThat(search).hasSize(2);
+        assertThat(search).extracting("name").containsExactly("하드웨어", "금융");
+        assertThat(search).extracting("name").doesNotContain("코딩");
+    }
 }
