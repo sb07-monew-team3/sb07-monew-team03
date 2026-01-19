@@ -82,15 +82,15 @@ public class InterestRepositoryImpl implements InterestRepositoryCustom {
         // 정렬
         if ("name".equals(orderBy)) {
             if ("ASC".equalsIgnoreCase(direction)) {
-                query.orderBy(qInterest.name.asc());
+                query.orderBy(qInterest.name.asc(), qInterest.createdAt.asc());
             } else {
-                query.orderBy(qInterest.name.desc());
+                query.orderBy(qInterest.name.desc(), qInterest.createdAt.desc());
             }
         } else if ("subscriberCount".equals(orderBy)) {
             if ("ASC".equalsIgnoreCase(direction)) {
-                query.orderBy(qSubscription.id.count().asc());
+                query.orderBy(qSubscription.id.count().asc(), qInterest.createdAt.asc());
             } else {
-                query.orderBy(qSubscription.id.count().desc());
+                query.orderBy(qSubscription.id.count().desc(), qInterest.createdAt.desc());
             }
         }
 
