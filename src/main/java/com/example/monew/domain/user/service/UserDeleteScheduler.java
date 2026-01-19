@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserDeleteScheduler {
 
-    static final long BATCH_INTERVAL = 1000 * 60 * 60; //60분마다 호출함
+    static final long BATCH_INTERVAL = 1000 * 60 * 60 * 24; //24시간마다 호출함
 
     private final UserRepository userRepository;
 
