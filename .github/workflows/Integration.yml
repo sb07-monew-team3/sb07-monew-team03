@@ -47,7 +47,7 @@ jobs:
 
       - name: Run integration test
         env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/testdb
+          SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/monew
           SPRING_DATASOURCE_USERNAME: monew_user
           SPRING_DATASOURCE_PASSWORD: monew_password
           SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
