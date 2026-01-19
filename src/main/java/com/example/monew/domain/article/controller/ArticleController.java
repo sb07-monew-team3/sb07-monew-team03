@@ -1,5 +1,6 @@
 package com.example.monew.domain.article.controller;
 
+import com.example.monew.domain.article.docs.ArticleControllerDocs;
 import com.example.monew.domain.article.dto.*;
 import com.example.monew.domain.article.service.ArticleService;
 import jakarta.validation.Valid;
@@ -15,7 +16,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/articles")
-public class ArticleController {
+public class ArticleController implements ArticleControllerDocs {
 
     private final ArticleService articleService;
 
