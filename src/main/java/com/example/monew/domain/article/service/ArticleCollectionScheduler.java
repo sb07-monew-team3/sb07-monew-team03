@@ -1,14 +1,19 @@
 package com.example.monew.domain.article.service;
 
 import com.example.monew.domain.article.client.naver.NaverNewsClient;
+import com.example.monew.domain.article.client.rss.ArticleRefiner;
+import com.example.monew.domain.article.client.rss.RssClient;
+import com.example.monew.domain.article.client.rss.RssParser;
+import com.example.monew.domain.article.dto.Source;
 import com.example.monew.domain.article.entity.Article;
-import com.example.monew.domain.article.mapper.NaverArticleMapper;
+import com.example.monew.domain.article.mapper.ApiArticleMapper;
 import com.example.monew.domain.article.repository.ArticleRepository;
 import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.entity.Keyword;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
 import com.example.monew.domain.notification.service.NotificationService;
+import com.rometools.rome.feed.synd.SyndFeed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -30,15 +35,23 @@ public class ArticleCollectionScheduler {
     private final InterestRepository interestRepository;
     private final KeywordRepository keywordRepository;
 
-    private final NaverArticleMapper naverArticleMapper;
+    private final ApiArticleMapper apiArticleMapper;
 
     private final NaverNewsClient naverNewsClient;
 
     private final NotificationService notificationService;
 
+    private final RssClient rssClient;
+
     @Scheduled(fixedRate = BATCH_INTERVAL)
     @Transactional
     public void collectArticles() {
+
+        // RSS URL들
+        Map<Source, String> urls = new LinkedHashMap<>();
+        urls.put(Source.HANKYUNG, "https://www.hankyung.com/feed/all-news");
+        urls.put(Source.CHOSUN, "https://www.chosun.com/arc/outboundfeeds/rss/?outputType=xml");
+        urls.put(Source.YEONHAP,"https://www.yonhapnewstv.co.kr/browse/feed/");
 
 
         // keyword와 interests 매핑
@@ -57,11 +70,30 @@ public class ArticleCollectionScheduler {
             }
         }
 
+        // Naver API로 검색
         List<Article> articles = map.keySet().stream()
                 .map(k ->
-                        naverArticleMapper.toArticleList(naverNewsClient.search(k).items(), map.get(k))) // article 엔티티로 정제
+                        apiArticleMapper.toArticleList(naverNewsClient.search(k).items(), map.get(k))) // article 엔티티로 정제
                 .flatMap(List::stream)
-                .toList();
+                .collect(Collectors.toList());
+
+        // RSS의 최신 기사 저장
+        List<Article> rssArticles = new ArrayList<>();
+
+        urls.forEach((source,url) -> {
+            String xml = rssClient.fetch(url);
+            SyndFeed originalArticles = RssParser.parseRss(xml);
+            List<Article> articleList = originalArticles.getEntries().stream()
+                    .map(entry -> apiArticleMapper.toArticle(entry, source))
+                    .toList();
+            rssArticles.addAll(articleList);
+        });
+
+        // RSS의 기사를 검색어 기준으로 필터링
+        List<Article> refinedRssArticles = ArticleRefiner.refineArticles(rssArticles, map);
+
+        // 수집된 모든 기사를 하나의 리스트에 저장
+        Collections.addAll(articles, refinedRssArticles.toArray(new Article[0]));
 
         // 링크 별 중복 기사를 HashMap의 형태로 저장
         Map<String, List<Article>> checkArticles = new HashMap<>();
