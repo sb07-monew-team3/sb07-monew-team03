@@ -29,9 +29,9 @@ public interface UserControllerDocs {
                             name = "유저 등록 성공",
                             value = """
                                     {
-                                    "id" : 11111111111111111111111111111
-                                    "email" : "test123@naver.com"
-                                    "nickname" : "test1234"
+                                    "id" : "11111111111111111111111111111",
+                                    "email" : "test123@naver.com",
+                                    "nickname" : "test1234",
                                     "createdAt" : "2024-04-05"
                                     }
                                     """
@@ -52,9 +52,9 @@ public interface UserControllerDocs {
                             name = "유저 로그인 성공",
                             value = """
                                     {
-                                    "id" : 11111111111111111111111111111
-                                    "email" : "test123@naver.com"
-                                    "nickname" : "test1234"
+                                    "id" : "11111111111111111111111111111",
+                                    "email" : "test123@naver.com",
+                                    "nickname" : "test1234",
                                     "createdAt" : "2024-04-05"
                                     }
                                     """
@@ -86,9 +86,9 @@ public interface UserControllerDocs {
                             name ="유저 업데이트 성공",
                             value = """
                                     {
-                                    "id" : 11111111111111111111111111111
-                                    "email" : "test123@naver.com"
-                                    "nickname" : "test1234"
+                                    "id" : "11111111111111111111111111111",
+                                    "email" : "test123@naver.com",
+                                    "nickname" : "test1234",
                                     "createdAt" : "2024-04-05"
                                     }
                                     """
