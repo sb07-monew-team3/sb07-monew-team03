@@ -9,6 +9,9 @@ jobs:
     name: IntegrationTest
     runs-on: ubuntu-22.04
 
+    permissions:
+      pull-requests: write
+
     env:
       CLIENT_ID: ${{secrets.CLIENT_ID}}
       CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
