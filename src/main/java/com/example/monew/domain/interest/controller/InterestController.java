@@ -4,6 +4,7 @@ import com.example.monew.domain.interest.docs.InterestControllerDocs;
 import com.example.monew.domain.interest.dto.*;
 import com.example.monew.domain.interest.service.InterestService;
 import com.example.monew.domain.interest.service.SubscriptionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class InterestController implements InterestControllerDocs {
     private final SubscriptionService subscriptionService;
 
     @PostMapping
-    public ResponseEntity<InterestDto> registerInterest(@RequestBody InterestRegisterRequest request) {
+    public ResponseEntity<InterestDto> registerInterest(@Valid @RequestBody InterestRegisterRequest request) {
         InterestDto interestResponse = interestService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(interestResponse);
@@ -30,7 +31,7 @@ public class InterestController implements InterestControllerDocs {
     @PatchMapping("/{interestId}")
     public ResponseEntity<InterestDto> update(
             @PathVariable UUID interestId,
-            @RequestBody InterestUpdateRequest request) {
+            @Valid @RequestBody InterestUpdateRequest request) {
         InterestDto interestResponse = interestService.update(interestId, request);
         return ResponseEntity.ok(interestResponse);
     }
