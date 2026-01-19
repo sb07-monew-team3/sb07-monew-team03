@@ -45,6 +45,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.batch:spring-batch-test'
+
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     developmentOnly 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
 
@@ -64,7 +65,6 @@ dependencies {
 }
 
 test{
-
     finalizedBy jacocoTestReport
 }
 
@@ -97,12 +97,15 @@ jacocoTestReport {
 
 tasks.named('test') {
     useJUnitPlatform()
+    def envFile = file(".env")
     doFirst {
-        file(".env").eachLine { line ->
-            if (!line.startsWith("#") && line.contains("=")) {
-                def (k, v) = line.split("=", 2)
-                environment k.trim(), v.trim()
-                systemProperty k.trim(), v.trim()
+        if (envFile.exists()) {
+            envFile.eachLine { line ->
+                if (!line.startsWith("#") && line.contains("=")) {
+                    def (k, v) = line.split("=", 2)
+                    environment k.trim(), v.trim()
+                    systemProperty k.trim(), v.trim()
+                }
             }
         }
     }
