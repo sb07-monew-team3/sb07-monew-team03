@@ -193,7 +193,7 @@ public class InterestRepositoryTest {
         String orderBy = "name";
         String direction = "asc";
         String cursor = "코딩";
-        Instant after = Instant.now();
+        Instant after = coding.getCreatedAt();
         int limit = 10;
 
         // when
