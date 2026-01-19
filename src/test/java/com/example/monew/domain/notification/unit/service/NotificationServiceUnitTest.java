@@ -1,4 +1,4 @@
-package com.example.monew.domain.notification.service;
+package com.example.monew.domain.notification.unit.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -19,6 +19,7 @@ import com.example.monew.domain.notification.entity.Notifications;
 import com.example.monew.domain.notification.entity.ResourceType;
 import com.example.monew.domain.notification.repository.NotificationRepository;
 import com.example.monew.domain.notification.response.CursorResponse;
+import com.example.monew.domain.notification.service.NotificationServiceImpl;
 import com.example.monew.domain.notification.util.NotiFactory;
 import com.example.monew.domain.user.entity.User;
 import com.example.monew.domain.user.repository.UserRepository;
@@ -40,7 +41,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.mockito.Mockito.*;
 
@@ -161,13 +161,9 @@ class NotificationServiceUnitTest {
         given(userRepository.findById(mockUserI.getId()))
             .willReturn(Optional.of(mockUserI));
 
-        ArgumentCaptor<Notifications> captor =
-            ArgumentCaptor.forClass(Notifications.class);
-
-        // when
         notiService.notifyCommentLiked(mockUserI.getId(), actorNickname, commentId);
 
-        // then
+        ArgumentCaptor<Notifications> captor = ArgumentCaptor.forClass(Notifications.class);
         verify(userRepository).findById(mockUserI.getId());
         verify(notiRepository).save(captor.capture());
 
@@ -175,17 +171,12 @@ class NotificationServiceUnitTest {
 
         assertAll(
             () -> assertEquals(mockUserI, savedNotification.getUser()),
-            () -> assertEquals(
-                "[" + actorNickname + "]님이 나의 댓글을 좋아합니다.",
-                savedNotification.getContent()
-            ),
+            () -> assertEquals( "[" + actorNickname + "]님이 나의 댓글을 좋아합니다.", savedNotification.getContent()),
             () -> assertEquals(ResourceType.COMMENT, savedNotification.getResourceType()),
             () -> assertEquals(commentId, savedNotification.getResourceId()),
             () -> assertFalse(savedNotification.isRead())
         );
     }
-
-
 
     @Test
     @DisplayName("case - 구독 관심사 관련 새 기사 등록시 알림 생성 - OK")
@@ -235,9 +226,7 @@ class NotificationServiceUnitTest {
             assertThat(notification.isRead()).isFalse();
         });
 
-        verify(subscriptionService)
-            .getSubscribedInterestIds(interestId);
-
+        verify(subscriptionService).getSubscribedInterestIds(interestId);
         verify(userRepository).findById(mockUserI.getId());
         verify(userRepository).findById(mockUserII.getId());
     }

@@ -28,11 +28,8 @@ public interface NotificationRepository extends JpaRepository<Notifications, UUI
         Pageable pageable);
 
     @Query("SELECT COUNT(n) FROM Notifications n "
-        + "JOIN n.user u "
-        + "WHERE u.id = :userId AND n.isRead = false "
-        + "ORDER BY n.createdAt")
-    Long countByUserId(@Param("userId") UUID userId,
-        @Param("createAt") Instant createAt);
+        + "WHERE n.user.id = :userId AND n.isRead = false")
+    Long countByUserId(@Param("userId") UUID userId);
 
     List<Notifications> findAllByUserId(UUID userId);
     Optional<Notifications> findByIdAndUserId(UUID notificationId, UUID userId);
