@@ -1,0 +1,61 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_batch_fetch_size: 50
+        show_sql: false
+    open-in-view: false
+
+  logging:
+    level:
+      root: info
+      org.hibernate.SQL: off
+
+server:
+  port: 8080
+
+springdoc:
+  swagger-ui:
+    path: /api-docs.html
+    display-request-duration: true
+    enabled: true
+  api-docs:
+    path: /api-docs
+
+info:
+  app:
+    name: monew
+    description: News Web Application
+    version: 1.0.0
+    encoding: UTF-8
+    java-version: 17
+
+  company:
+    name: sprintTeam3
+    email: genius5375@gmail.com
+
+logging:
+  file:
+    path: /app/logs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info, prometheus
+  endpoint:
+    health:
+      show-details: always
+  info:
+    env:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}

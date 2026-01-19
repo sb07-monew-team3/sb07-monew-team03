@@ -1,0 +1,56 @@
+package com.example.monew.domain.article.mapper;
+
+import com.example.monew.domain.article.dto.ArticleDto;
+import com.example.monew.domain.article.dto.CursorPageResponseArticleDto;
+import com.example.monew.domain.article.repository.ArticleRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Slice;
+import org.springframework.stereotype.Component;
+
+import java.time.Instant;
+import java.util.UUID;
+
+@Component
+@RequiredArgsConstructor
+public class CursorPageMapper {
+
+    private final ArticleRepository articleRepository;
+
+    public CursorPageResponseArticleDto toResponseDto (Slice<ArticleDto> articleList, String cursor, long totalElements) {
+        if(articleList.getContent().isEmpty()) {
+            return new CursorPageResponseArticleDto(
+                    articleList.getContent(),
+                    null,
+                    null,
+                    articleList.getSize(),
+                    0L,
+                    false
+            );
+        }
+
+        ArticleDto lastContent = articleList.getContent().get(articleList.getContent().size() - 1);
+        UUID lastContentId = lastContent.id();
+
+        // createdAt은 중복 값을 가질 수 있기 때문에,
+        // 보조 커서를 위한 sortTimestamp 값을 사용
+        Instant nextAfter = articleRepository.findById(lastContentId).get().getSortTimestamp();
+
+        String nextCursor = switch (cursor) {
+            case "publishDate" -> lastContent.publishDate().toString();
+            case "commentCount" -> lastContent.commentCount().toString();
+            case "viewCount" -> lastContent.viewCount().toString();
+            default -> throw new IllegalArgumentException("Unsupported cursor: " + cursor);
+        };
+
+        return new CursorPageResponseArticleDto(
+                articleList.getContent(),
+                nextCursor,
+                nextAfter,
+                articleList.getSize(),
+                totalElements,
+                articleList.hasNext()
+        );
+    }
+
+}

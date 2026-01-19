@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  app:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: monew
+    ports:
+      - "8080:8080"
+    environment:
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      loki:
+        condition: service_started
+    networks:
+      - monew-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: monew-prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    ports:
+      - "9090:9090"
+    networks:
+      - monew-network
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: monew-node-exporter
+    ports:
+      - "9100:9100"
+    networks:
+      - monew-network
+
+  postgres:
+    image: postgres:16
+    container_name: monew-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: monew_user
+      POSTGRES_PASSWORD: monew_password
+      POSTGRES_DB: monew
+
+    volumes:
+      - monew-postgres-data:/var/lib/postgresql/data
+
+    command: >
+      -c shared_buffers=128MB
+      -c max_connections=50
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U monew_user -d monew"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - monew-network
+
+  loki:
+    image: grafana/loki:2.9.3
+    container_name: monew-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki-config.yml:/etc/loki/config.yml
+      - ./loki-data:/loki
+    command: -config.file=/etc/loki/config.yml
+    networks:
+      - monew-network
+  promtail:
+    image: grafana/promtail:2.9.3
+    container_name: monew-promtail
+    volumes:
+      - ./logs:/app/logs
+      - ./promtail-config.yml:/etc/promtail/config.yml
+    command:
+      - -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - monew-network
+  grafana:
+    image: grafana/grafana:10.2.3
+    container_name: monew-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+    depends_on:
+      - loki
+    networks:
+      - monew-network
+
+volumes:
+  monew-postgres-data:
+    driver: local
+
+networks:
+  monew-network:
+    driver: bridge
