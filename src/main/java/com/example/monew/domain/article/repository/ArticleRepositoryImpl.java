@@ -1,6 +1,6 @@
 package com.example.monew.domain.article.repository;
 
-import com.example.monew.domain.article.dto.ArticleDto;
+import com.example.monew.domain.article.dto.ArticleQueryDto;
 import com.example.monew.domain.article.dto.ArticleRequestDto;
 import com.example.monew.domain.article.dto.Source;
 import com.example.monew.domain.article.entity.QArticle;
@@ -32,7 +32,7 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
     private final QComment comment = QComment.comment;
 
     @Override
-    public Slice<ArticleDto> findArticleSlice(ArticleRequestDto request, UUID userId, List<String> keywords, Pageable pageable) {
+    public Slice<ArticleQueryDto> findArticleSlice(ArticleRequestDto request, UUID userId, List<String> keywords, Pageable pageable) {
 
         Expression<Boolean> viewedByMe = JPAExpressions
                 .selectOne()
@@ -74,8 +74,8 @@ public class ArticleRepositoryImpl implements ArticleRepositoryCustom {
                 );
 
         // 페이징으로 기사 조회
-        List<ArticleDto> content = queryFactory
-                .select(Projections.constructor(ArticleDto.class,
+        List<ArticleQueryDto> content = queryFactory
+                .select(Projections.constructor(ArticleQueryDto.class,
                         article.id,
                         article.source,
                         article.sourceUrl,
