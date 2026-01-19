@@ -44,6 +44,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Check PostgreSQL connection
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          psql -h postgres -U monew_user -d monew -c '\dt'
+        env:
+          PGPASSWORD: monew_password
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
