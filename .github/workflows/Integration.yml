@@ -9,6 +9,14 @@ jobs:
     name: IntegrationTest
     runs-on: ubuntu-22.04
 
+    env:
+      CLIENT_ID: ${{secrets.CLIENT_ID}}
+      CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
+      AWS_S3_ACCESS_KEY: ${{secrets.AWS_S3_ACCESS_KEY}}
+      AWS_S3_SECRET_KEY: ${{secrets.AWS_S3_SECRET_KEY}}
+      AWS_S3_REGION: ${{secrets.AWS_S3_REGION}}
+      AWS_S3_BUCKET: ${{secrets.AWS_S3_BUCKET}}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
