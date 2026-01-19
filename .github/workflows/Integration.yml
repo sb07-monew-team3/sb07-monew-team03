@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     permissions:
+      contents: read
       pull-requests: write
 
     env:
@@ -20,6 +21,17 @@ jobs:
       AWS_S3_REGION: ${{secrets.AWS_S3_REGION}}
       AWS_S3_BUCKET: ${{secrets.AWS_S3_BUCKET}}
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: monew
+          POSTGRES_USER: monew_user
+          POSTGRES_PASSWORD: monew_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test"
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -34,6 +46,11 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run integration test
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/testdb
+          SPRING_DATASOURCE_USERNAME: monew_user
+          SPRING_DATASOURCE_PASSWORD: monew_password
+          SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
         run: ./gradlew test
 
       - name: Upload jacoco report to PR
@@ -42,4 +59,3 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           paths: ${{ github.workspace }}/build/reports/jacoco/test/jacocoTestReport.xml
           min-coverage-overall: 40
-          min-coverage-changed: 0
