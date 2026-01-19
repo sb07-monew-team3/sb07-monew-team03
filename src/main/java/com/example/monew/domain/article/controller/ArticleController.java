@@ -1,7 +1,9 @@
 package com.example.monew.domain.article.controller;
 
+import com.example.monew.domain.article.docs.ArticleControllerDocs;
 import com.example.monew.domain.article.dto.*;
 import com.example.monew.domain.article.service.ArticleService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,14 +16,14 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/articles")
-public class ArticleController {
+public class ArticleController implements ArticleControllerDocs {
 
     private final ArticleService articleService;
 
     @GetMapping
     public ResponseEntity<CursorPageResponseArticleDto> getArticles(
             @RequestHeader(value = "Monew-Request-User-ID") UUID userId,
-            ArticleRequestDto request
+            @Valid ArticleRequestDto request
     ) {
         CursorPageResponseArticleDto response = articleService.getArticleList(request, userId);
 
