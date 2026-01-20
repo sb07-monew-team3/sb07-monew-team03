@@ -1,6 +1,6 @@
 package com.example.monew.domain.comment.unit.repository;
 
-import com.example.monew.config.QuerydslTestConfig;
+import com.example.monew.global.config.QueryDslConfig;
 import com.example.monew.domain.article.entity.Article;
 import com.example.monew.domain.comment.entity.Comment;
 import com.example.monew.domain.comment.entity.CommentLikes;
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({QuerydslTestConfig.class})
+@Import({QueryDslConfig.class})
 class CommentLikesRepositoryImplDataJpaTest {
 
     @Autowired
