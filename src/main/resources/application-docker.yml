@@ -13,11 +13,6 @@ spring:
         show_sql: false
     open-in-view: false
 
-  logging:
-    level:
-      root: info
-      org.hibernate.SQL: off
-
 server:
   port: 8080
 
@@ -42,6 +37,9 @@ info:
     email: genius5375@gmail.com
 
 logging:
+  level:
+    root: info
+    org.hibernate.SQL: off
   file:
     path: /app/logs
 
