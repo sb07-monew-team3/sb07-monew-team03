@@ -8,7 +8,7 @@ import com.example.monew.domain.article.entity.ArticleView;
 import com.example.monew.domain.article.mapper.ArticleMapper;
 import com.example.monew.domain.article.mapper.ArticleViewMapper;
 import com.example.monew.domain.article.mapper.CursorPageMapper;
-import com.example.monew.domain.article.mapper.NaverArticleMapper;
+import com.example.monew.domain.article.mapper.ApiArticleMapper;
 import com.example.monew.domain.article.repository.ArticleRepository;
 import com.example.monew.domain.article.repository.ArticleViewRepository;
 import com.example.monew.domain.article.service.ArticleCollectionScheduler;
@@ -68,7 +68,7 @@ class ArticleServiceTest {
     private NaverNewsClient naverNewsClient;
 
     @Mock
-    private NaverArticleMapper naverArticleMapper;
+    private ApiArticleMapper apiArticleMapper;
 
     @Mock
     private ArticleMapper articleMapper;
@@ -132,7 +132,7 @@ class ArticleServiceTest {
             when(naverNewsClient.search("비트코인"))
                     .thenReturn(response);
 
-            when(naverArticleMapper.toArticleList(any(), anyList()))
+            when(apiArticleMapper.toArticleList(any(), anyList()))
                     .thenReturn(List.of(article, article2));
 
             when(articleRepository.findAllBySourceUrlIn(anySet()))
@@ -149,7 +149,7 @@ class ArticleServiceTest {
             verify(keywordRepository, times(1)).findAllByInterestId(any());
 
             verify(naverNewsClient, times(1)).search(anyString());
-            verify(naverArticleMapper, times(1)).toArticleList(any(), anyList());
+            verify(apiArticleMapper, times(1)).toArticleList(any(), anyList());
 
             verify(articleRepository, times(1)).findAllBySourceUrlIn(anySet());
             verify(articleRepository, times(1)).saveAll(anyList());
