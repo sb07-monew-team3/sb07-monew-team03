@@ -43,7 +43,6 @@ public class ArticleCollectionScheduler {
 
     private final RssClient rssClient;
 
-    @Scheduled(fixedRate = BATCH_INTERVAL)
     @Transactional
     public void collectArticles() {
 

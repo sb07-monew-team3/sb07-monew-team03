@@ -16,7 +16,7 @@
         </filter>
     </appender>
 
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="FILE" class="com.example.monew.global.util.S3RollingAppender">
         <file>${LOG_PATH}/.log</file>
 
         <!-- 날짜가 바뀔 때 (자정 기준) 로그 파일 분리 -->

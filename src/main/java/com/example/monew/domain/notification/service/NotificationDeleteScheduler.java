@@ -13,7 +13,6 @@ public class NotificationDeleteScheduler {
 
     private final NotificationService notiService;
 
-    @Scheduled(fixedRate = BATCH_INTERVAL)
     public void deleteNotificationInBatch() {
         notiService.deleteNotificationInBatch();
     }
