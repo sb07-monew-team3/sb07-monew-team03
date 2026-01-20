@@ -13,6 +13,7 @@ import com.example.monew.domain.interest.repository.KeywordRepository;
 import com.example.monew.domain.user.entity.User;
 import com.example.monew.domain.user.repository.UserRepository;
 import com.example.monew.global.exception.domain.article.ArticleNotExistException;
+import com.example.monew.global.exception.domain.article.InvalidSearchConditionException;
 import com.example.monew.global.exception.domain.user.UserNotExistException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -73,7 +74,7 @@ public class ArticleService {
 
         // 검색어와 관심사는 동시에 들어올 수 없다
         if(!request.keyword().isBlank() && request.interestId() != null) {
-            throw new IllegalArgumentException("키워드와 관심사가 모두 들어올 수 없습니다."); // TODO: 커스텀 예외 추가 필요
+            throw new InvalidSearchConditionException("키워드와 관심사가 모두 들어올 수 없습니다.");
         }
 
         if(!request.keyword().isBlank()) {
