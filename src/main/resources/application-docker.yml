@@ -13,6 +13,13 @@ spring:
         show_sql: false
     open-in-view: false
 
+  batch:
+    jdbc:
+      initialize-schema: always
+      table-prefix: batch.BATCH_
+    job:
+      enabled: false
+
 server:
   port: 8080
 

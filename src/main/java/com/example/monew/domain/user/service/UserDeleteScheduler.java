@@ -3,6 +3,7 @@ package com.example.monew.domain.user.service;
 import com.example.monew.domain.user.entity.User;
 import com.example.monew.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,13 +17,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserDeleteScheduler {
 
-    static final long BATCH_INTERVAL = 1000 * 60 * 60 * 24; //24시간마다 호출함
-
     private final UserRepository userRepository;
-
-    @Scheduled(fixedRate = BATCH_INTERVAL)
     @Transactional
     public void deleteUser(){
+
         Instant currentTime = Instant.now();
         List<User> logicDeleteUser = userRepository.findLogicDeleteUser();
         if(logicDeleteUser.isEmpty()) return;

@@ -4,6 +4,12 @@ spring:
     username: monew_user
     password: monew_password
     driver-class-name: org.postgresql.Driver
+  batch:
+    jdbc:
+      initialize-schema: always
+      table-prefix: batch.BATCH_
+    job:
+      enabled: false
   jpa:
     hibernate:
       ddl-auto: update

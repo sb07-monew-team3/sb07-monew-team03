@@ -13,7 +13,8 @@ public enum ErrorCode {
     INTEREST_NOT_EXIST("Interest is not exist", 404),
     INTEREST_DUPLICATE_NAME("Duplicate or similar interest name", 409),
     SUBSCRIPTION_NOT_EXIST("Subscription is not exist", 404),
-    LOG_NOT_EXIST("Log is not exist", 404);
+    LOG_NOT_EXIST("Log is not exist", 404),
+    BATCH_JOB_FAIL("Batch job fail", 500);
 
 
     String message;
