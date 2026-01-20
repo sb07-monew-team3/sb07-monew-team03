@@ -1,6 +1,7 @@
 package com.example.monew.domain.article.repository;
 
 import com.example.monew.domain.article.dto.ArticleDto;
+import com.example.monew.domain.article.dto.ArticleQueryDto;
 import com.example.monew.domain.article.dto.ArticleRequestDto;
 import com.example.monew.domain.article.entity.Article;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +20,7 @@ public interface ArticleRepository extends JpaRepository<Article, UUID>, Article
 
     List<Article> findAllBySourceUrlIn(Set<String> sourceUrls);
 
-    Slice<ArticleDto> findArticleSlice(ArticleRequestDto request, UUID userId, List<String> keywords, Pageable pageable);
+    Slice<ArticleQueryDto> findArticleSlice(ArticleRequestDto request, UUID userId, List<String> keywords, Pageable pageable);
 
     long countArticleSlice(ArticleRequestDto request, List<String> keywords);
 

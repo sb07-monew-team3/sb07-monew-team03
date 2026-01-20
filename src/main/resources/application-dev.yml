@@ -14,9 +14,6 @@ spring:
         show_sql: true
     open-in-view: false
 
-  logging:
-    level:
-      org.hibernate.SQL: debug
 server:
   port: 8080
 
@@ -29,6 +26,10 @@ springdoc:
     path: /api-docs
 
 logging:
+  level:
+    root: info
+    org.hibernate.SQL: debug
+    com.example.monew: debug
   file:
     path: logs
 

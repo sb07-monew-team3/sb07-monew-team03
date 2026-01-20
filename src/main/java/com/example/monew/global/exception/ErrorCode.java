@@ -8,6 +8,7 @@ public enum ErrorCode {
     ARGUMENT_VALID_FAIL ("Invalid argument",400),
     USER_NOT_EXIST("User is not exist",404),
     NOTIFICATION_NOT_EXIST("##### NOTI is not exist", 404),
+    INVALID_SEARCH_CONDITION("Invalid search condition", 400),
     ARTICLE_NOT_EXIST("Article is not exist",404),
     INTEREST_NOT_EXIST("Interest is not exist", 404),
     INTEREST_DUPLICATE_NAME("Duplicate or similar interest name", 409),
