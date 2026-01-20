@@ -4,7 +4,8 @@ public enum JobStatus {
 
     USER_DELETE("userDeleteJob","userDeleteStep"),
     NOTIFICATION_DELETE("notificationDeleteJob","notificationDeleteStep"),
-    ARTICLE_COLLECT("articleCollectJob","articleCollectStep");
+    ARTICLE_COLLECT("articleCollectJob","articleCollectStep"),
+    ARTICLE_BACKUP("articleBackupJob","articleBackupStep");
 
     private final String jobName;
     private final String stepName;

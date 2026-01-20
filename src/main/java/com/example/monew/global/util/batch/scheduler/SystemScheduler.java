@@ -29,4 +29,9 @@ public class SystemScheduler {
     public void runArticleCollectJob(){
         batchJobScheduler.run(JobStatus.ARTICLE_COLLECT.getJobName());
     }
+
+    @Scheduled(fixedRate = BATCH_INTERVAL_DAY)
+    public void runArticleBackupJob(){
+        batchJobScheduler.run(JobStatus.ARTICLE_BACKUP.getJobName());
+    }
 }
