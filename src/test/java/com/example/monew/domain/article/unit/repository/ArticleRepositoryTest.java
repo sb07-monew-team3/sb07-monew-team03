@@ -136,7 +136,7 @@ class ArticleRepositoryTest {
                 baseDate.minusDays(1),
                 "서버 CPU 선택 가이드",
                 false,
-                baseInstant.plusMillis(10),
+                baseInstant.plusSeconds(10),
                 List.of(hardware)
         );
 
@@ -147,7 +147,7 @@ class ArticleRepositoryTest {
                 baseDate,
                 "Spring MVC vs WebFlux",
                 false,
-                baseInstant.plusMillis(20),
+                baseInstant.plusSeconds(20),
                 List.of(backend)
         );
 
@@ -158,7 +158,7 @@ class ArticleRepositoryTest {
                 baseDate.minusDays(3),
                 "Hibernate batch size 최적화",
                 false,
-                baseInstant.plusMillis(30),
+                baseInstant.plusSeconds(30),
                 List.of(backend)
         );
 
@@ -169,7 +169,7 @@ class ArticleRepositoryTest {
                 baseDate.minusDays(4),
                 "BooleanExpression 활용법",
                 false,
-                baseInstant.plusMillis(40),
+                baseInstant.plusSeconds(40),
                 List.of(backend)
         );
 
@@ -180,7 +180,7 @@ class ArticleRepositoryTest {
                 baseDate.minusDays(5),
                 "G1 GC 튜닝 포인트",
                 false,
-                baseInstant.plusMillis(50),
+                baseInstant.plusSeconds(50),
                 List.of(backend)
         );
 
@@ -191,7 +191,7 @@ class ArticleRepositoryTest {
                 baseDate.minusDays(6),
                 "Young / Old 영역 분석",
                 false,
-                baseInstant.plusMillis(60),
+                baseInstant.plusSeconds(60),
                 List.of(backend)
         );
 
@@ -202,7 +202,7 @@ class ArticleRepositoryTest {
                 baseDate.minusDays(7),
                 "CPU / Memory 제한 설정",
                 false,
-                baseInstant.plusMillis(70),
+                baseInstant.plusSeconds(70),
                 List.of(infra)
         );
 
@@ -213,7 +213,7 @@ class ArticleRepositoryTest {
                 baseDate.minusDays(8),
                 "노드 리소스 관리",
                 false,
-                baseInstant.plusMillis(80),
+                baseInstant.plusSeconds(80),
                 List.of(infra)
         );
 
@@ -224,7 +224,7 @@ class ArticleRepositoryTest {
                 baseDate.minusDays(9),
                 "복합 인덱스 활용법",
                 false,
-                baseInstant.plusMillis(90),
+                baseInstant.plusSeconds(90),
                 List.of(database)
         );
 
@@ -235,7 +235,7 @@ class ArticleRepositoryTest {
                 baseDate.minusDays(10),
                 "캐시 일관성 유지",
                 false,
-                baseInstant.plusMillis(100),
+                baseInstant.plusSeconds(100),
                 List.of(database)
         );
 
@@ -246,7 +246,7 @@ class ArticleRepositoryTest {
                 baseDate.minusDays(11),
                 "Analyzer 선택 기준",
                 false,
-                baseInstant.plusMillis(110),
+                baseInstant.plusSeconds(110),
                 List.of(database)
         );
 
@@ -257,7 +257,7 @@ class ArticleRepositoryTest {
                 baseDate.minusDays(12),
                 "이벤트 루프 모델",
                 false,
-                baseInstant.plusMillis(120),
+                baseInstant.plusSeconds(120),
                 List.of(backend)
         );
 
@@ -268,7 +268,7 @@ class ArticleRepositoryTest {
                 baseDate.minusDays(13),
                 "Access Token 만료 전략",
                 false,
-                baseInstant.plusMillis(130),
+                baseInstant.plusSeconds(130),
                 List.of(security)
         );
 
@@ -279,7 +279,7 @@ class ArticleRepositoryTest {
                 baseDate.minusDays(14),
                 "Authorization Code Flow",
                 false,
-                baseInstant.plusMillis(140),
+                baseInstant.plusSeconds(140),
                 List.of(security)
         );
 
@@ -290,7 +290,7 @@ class ArticleRepositoryTest {
                 baseDate.minusDays(15),
                 "AWS 비용 절감 전략",
                 false,
-                baseInstant.plusMillis(150),
+                baseInstant.plusSeconds(150),
                 List.of(cloud)
         );
 
@@ -301,7 +301,7 @@ class ArticleRepositoryTest {
                 baseDate.minusDays(16),
                 "워크로드별 인스턴스 추천",
                 false,
-                baseInstant.plusMillis(160),
+                baseInstant.plusSeconds(160),
                 List.of(cloud)
         );
 
@@ -312,7 +312,7 @@ class ArticleRepositoryTest {
                 baseDate.minusDays(17),
                 "GitHub Actions 활용",
                 false,
-                baseInstant.plusMillis(170),
+                baseInstant.plusSeconds(170),
                 List.of(infra)
         );
 
@@ -323,7 +323,7 @@ class ArticleRepositoryTest {
                 baseDate.minusDays(18),
                 "Prometheus & Grafana",
                 false,
-                baseInstant.plusMillis(180),
+                baseInstant.plusSeconds(180),
                 List.of(infra)
         );
 
@@ -334,7 +334,7 @@ class ArticleRepositoryTest {
                 baseDate.minusDays(19),
                 "트래픽 폭주 대응 전략",
                 false,
-                baseInstant.plusMillis(190),
+                baseInstant.plusSeconds(190),
                 List.of(infra)
         );
 
@@ -344,6 +344,8 @@ class ArticleRepositoryTest {
                 article11, article12, article13, article14, article15,
                 article16, article17, article18, article19, article20
         ));
+
+        em.flush();
 
         // 조회수 데이터 생성
         List<ArticleView> articleViews = new ArrayList<>();
