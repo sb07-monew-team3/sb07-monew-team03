@@ -128,7 +128,7 @@ class ArticleRepositoryTest {
                 "Spring Boot 3 성능 개선",
                 false,
                 baseInstant,
-                List.of(backend)
+                new ArrayList<>(List.of(backend))
         );
 
         article2 = new Article(
@@ -139,7 +139,7 @@ class ArticleRepositoryTest {
                 "서버 CPU 선택 가이드",
                 false,
                 baseInstant.plusSeconds(10),
-                List.of(hardware)
+                new ArrayList<>(List.of(hardware))
         );
 
         article3 = new Article(
@@ -150,7 +150,7 @@ class ArticleRepositoryTest {
                 "Spring MVC vs WebFlux",
                 false,
                 baseInstant.plusSeconds(20),
-                List.of(infra)
+                new ArrayList<>(List.of(backend))
         );
 
         article4 = new Article(

@@ -44,6 +44,19 @@ public class Article extends BaseCreatableEntity {
     @Column(name="sort_timestamp", nullable = false, updatable = false, unique = true)
     private Instant sortTimestamp;
 
+    @OneToMany
+    @JoinTable(
+            name = "articles_interests",
+            joinColumns = @JoinColumn(name = "article_id"),
+            inverseJoinColumns = @JoinColumn(name = "interest_id"))
+    private List<Interest> interests;
+
+    @Override
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY) // 백업 시에는 id까지 저장, 복구 시에는 id를 가져오지 않는다.(물리 삭제 데이터 복구 위함)
+    public UUID getId() {
+        return super.getId();
+    }
+
     public void setSortTimestamp(Instant sortTimestamp) {
         this.sortTimestamp = sortTimestamp;
     }
@@ -57,19 +70,6 @@ public class Article extends BaseCreatableEntity {
             }
         }
     }
-
-    @Override
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY) // 백업 시에는 id까지 저장, 복구 시에는 id를 가져오지 않는다.(물리 삭제 데이터 복구 위함)
-    public UUID getId() {
-        return super.getId();
-    }
-
-    @OneToMany
-    @JoinTable(
-            name = "articles_interests",
-            joinColumns = @JoinColumn(name = "article_id"),
-            inverseJoinColumns = @JoinColumn(name = "interest_id"))
-    private List<Interest> interests;
 
     public void deleteLogic() {
         this.isDeleted = true;
