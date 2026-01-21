@@ -10,7 +10,9 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -37,9 +39,9 @@ public class InterestRepositoryImpl implements InterestRepositoryCustom {
                 .leftJoin(qSubscription).on(qSubscription.interest.id.eq(qInterest.id))
                 .where(
                         containsKeyword(keyword),
-                        nameCursor(orderBy, direction, cursor, after))
+                        nameCursor(orderBy, direction, cursor))
                 .groupBy(qInterest.id)
-                .having(subscriberCountCursor(orderBy, direction, cursor, after))
+                .having(subscriberCountCursor(orderBy, direction, cursor))
                 .orderBy(orderCondition(orderBy, direction))
                 .limit(limit + 1)
                 .fetch();
@@ -55,29 +57,49 @@ public class InterestRepositoryImpl implements InterestRepositoryCustom {
     }
 
     // 이름 커서
-    private BooleanExpression nameCursor(String orderBy, String direction, String cursor, Instant after) {
-        if (!"name".equals(orderBy) || cursor == null || after == null) return null;
+    private BooleanExpression nameCursor(String orderBy, String direction, String cursor) {
+        if (!"name".equals(orderBy) || cursor == null) return null;
+
+        try {
+            String decoded = new String(Base64.getDecoder().decode(cursor), StandardCharsets.UTF_8);
+            String[] parts = decoded.split("\\|");
+
+            String name = parts[0];
+            Instant after = Instant.parse(parts[1]);
 
         QInterest qInterest = QInterest.interest;
 
         return "ASC".equalsIgnoreCase(direction)
-                ? qInterest.name.gt(cursor).or(qInterest.name.eq(cursor).and(qInterest.createdAt.gt(after)))
-                : qInterest.name.lt(cursor).or(qInterest.name.eq(cursor).and(qInterest.createdAt.lt(after)));
+                ? qInterest.name.gt(name).or(qInterest.name.eq(name).and(qInterest.createdAt.gt(after)))
+                : qInterest.name.lt(name).or(qInterest.name.eq(name).and(qInterest.createdAt.lt(after)));
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     // 구독자수 커서
-    private BooleanExpression subscriberCountCursor(String orderBy, String direction, String cursor, Instant after) {
-        if (!"subscriberCount".equals(orderBy) || cursor == null || after == null) return null;
+    private BooleanExpression subscriberCountCursor(String orderBy, String direction, String cursor) {
+        if (!"subscriberCount".equals(orderBy) || cursor == null) return null;
 
-        long cursorCount = Long.parseLong(cursor);
-        QInterest qInterest = QInterest.interest;
-        QSubscription qSubscription = QSubscription.subscription;
+        try {
+            String decoded = new String(Base64.getDecoder().decode(cursor), StandardCharsets.UTF_8);
+            String[] parts = decoded.split("\\|");
 
-        return "ASC".equalsIgnoreCase(direction)
-                ? qSubscription.id.countDistinct().gt(cursorCount)
-                .or(qSubscription.id.countDistinct().eq(cursorCount).and(qInterest.createdAt.gt(after)))
-                : qSubscription.id.countDistinct().lt(cursorCount)
-                .or(qSubscription.id.countDistinct().eq(cursorCount).and(qInterest.createdAt.lt(after)));
+            long cursorCount = Long.parseLong(parts[0]);
+            Instant after = Instant.parse(parts[1]);
+
+            QInterest qInterest = QInterest.interest;
+            QSubscription qSubscription = QSubscription.subscription;
+
+            return "ASC".equalsIgnoreCase(direction)
+                    ? qSubscription.id.countDistinct().gt(cursorCount)
+                    .or(qSubscription.id.countDistinct().eq(cursorCount).and(qInterest.createdAt.gt(after)))
+                    : qSubscription.id.countDistinct().lt(cursorCount)
+                    .or(qSubscription.id.countDistinct().eq(cursorCount).and(qInterest.createdAt.lt(after)));
+
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     // 정렬
