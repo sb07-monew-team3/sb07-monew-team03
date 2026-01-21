@@ -376,16 +376,31 @@ public class IMongoDbService implements MongoDbService {
                     return;
                 }
         );
+        List<UserActivitySubscriptionDto> subscriptionResult = subscriptionDtos.stream()
+                .sorted(Comparator.comparing(UserActivitySubscriptionDto::createdAt).reversed())
+                .toList();
+        List<UserActivityCommentDto> commentResult = commentDtos.stream()
+                .sorted(Comparator.comparing(UserActivityCommentDto::createdAt).reversed())
+                .limit(10)
+                .toList();
+        List<UserActivityCommentLikeDto> commentLikeResult = commentLikeDtos.stream()
+                .sorted(Comparator.comparing(UserActivityCommentLikeDto::createdAt).reversed())
+                .limit(10)
+                .toList();
+        List<UserActivityArticleViewDto> articleViewResult = articleViewDtos.stream()
+                .sorted(Comparator.comparing(UserActivityArticleViewDto::createdAt).reversed())
+                .limit(10)
+                .toList();
 
         return new UserActivityDto(
                 userId,
                 userActivityTarget.getString("email"),
                 userActivityTarget.getString("nickname"),
                 Instant.parse(userActivityTarget.getString("createdAt")),
-                subscriptionDtos.toArray(new UserActivitySubscriptionDto[0]),
-                commentDtos.toArray(new UserActivityCommentDto[0]),
-                commentLikeDtos.toArray(new UserActivityCommentLikeDto[0]),
-                articleViewDtos.toArray(new UserActivityArticleViewDto[0])
+                subscriptionResult.toArray(new UserActivitySubscriptionDto[0]),
+                commentResult.toArray(new UserActivityCommentDto[0]),
+                commentLikeResult.toArray(new UserActivityCommentLikeDto[0]),
+                articleViewResult.toArray(new UserActivityArticleViewDto[0])
         );
     }
 
