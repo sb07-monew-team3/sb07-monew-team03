@@ -21,12 +21,13 @@ public class UserActivityMapper {
         Document articleViewDoc = (Document) document.get("articleViews");
         Document commentDoc = (Document) document.get("comments");
         Document subscriptionDoc = (Document) document.get("subscriptions");
-        Document commentLikeDoc = (Document) document.get("commentLikes");
+        Document commentLikeDoc = (Document) document.get("commentsLikes");
         List<UserActivityArticleViewDto> userActivityArticleViewDtos = new ArrayList<>();
         List<UserActivityCommentLikeDto> userActivityCommentLikeDtos = new ArrayList<>();
         List<UserActivityCommentDto> userActivityCommentDtos = new ArrayList<>();
         List<UserActivitySubscriptionDto> userActivitySubscriptionDtos= new ArrayList<>();
         for (String key : articleViewDoc.keySet()) {
+            if (key == null || key.isBlank()) continue;
             Document subDoc = (Document) articleViewDoc.get(key);
             UserActivityArticleViewDto userActivityArticleViewDto = new UserActivityArticleViewDto(
                     UUID.fromString(key),
@@ -45,28 +46,34 @@ public class UserActivityMapper {
         }
 
         for (String key : commentDoc.keySet()) {
+            if (key == null || key.isBlank()) continue;
             Document subDoc = (Document) commentDoc.get(key);
             UserActivityCommentDto userActivityCommentDto = new UserActivityCommentDto(
                     UUID.fromString(key),
                     UUID.fromString(subDoc.getString("articleId")),
                     subDoc.getString("articleTitle"),
-                    UUID.fromString(subDoc.getString("commentedById")),
-                    subDoc.getString("commentedByNickName"),
-                    subDoc.getString("commentContent"),
-                    subDoc.getInteger("commentLikeCount"),
-                    Instant.parse(subDoc.getString("commentCreatedAt"))
+                    UUID.fromString(subDoc.getString("userId")),
+                    subDoc.getString("userNickname"),
+                    subDoc.getString("content"),
+                    subDoc.getInteger("likeCount"),
+                    Instant.parse(subDoc.getString("createdAt"))
 
             );
             userActivityCommentDtos.add(userActivityCommentDto);
         }
 
         for (String key : subscriptionDoc.keySet()) {
+            if (key == null || key.isBlank()) continue;
             Document subDoc = (Document) subscriptionDoc.get(key);
+            List<String> interestKeywords =
+                    subDoc.get("interestKeywords") == null
+                            ? new ArrayList<>()
+                            : (List<String>) subDoc.get("interestKeywords");
             UserActivitySubscriptionDto userActivitySubscriptionDto = new UserActivitySubscriptionDto(
                     UUID.fromString(key),
                     UUID.fromString(subDoc.getString("interestId")),
                     subDoc.getString("interestName"),
-                    subDoc.get("interestKeywords", String[].class),
+                    interestKeywords.toArray(new String[0]),
                     subDoc.getInteger("interestSubscriberCount"),
                     Instant.parse(subDoc.getString("createdAt"))
             );
@@ -74,6 +81,7 @@ public class UserActivityMapper {
         }
 
         for(String key : commentLikeDoc.keySet()){
+            if (key == null || key.isBlank()) continue;
             Document subDoc = (Document) commentLikeDoc.get(key);
             UserActivityCommentLikeDto userActivityCommentLikeDto = new UserActivityCommentLikeDto(
                     UUID.fromString(key),

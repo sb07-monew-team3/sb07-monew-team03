@@ -186,31 +186,36 @@ public class IMongoDbService implements MongoDbService{
     }
 
     @Override
-    public void updateWhenCommentLike(UUID commentId){
+    public void updateWhenCommentLike(UUID commentId,List<UUID> commentLikesIds){
         MongoCollection<Document> collection = getCollection("userActivity");
         collection.updateMany(
                 Filters.exists("comments."+ commentId.toString()),
-                Updates.inc("comments."+ commentId.toString() +".commentLikeCount", 1)
+                Updates.inc("comments."+ commentId.toString() +".likeCount", 1)
         );
-        collection.updateMany(
-                Filters.eq("commentsLikes.commentId", commentId.toString()),
-                Updates.inc("commentsLikes.$[element].commentLikeCount", 1),
-                new UpdateOptions().arrayFilters(List.of(Filters.eq("commentId", commentId.toString())))
-        );
+        commentLikesIds.stream().forEach(x->
+                collection.updateOne(
+
+                        Filters.exists("commentsLikes."+ x.toString()),
+                        Updates.inc("commentsLikes."+ x.toString()+".commentLikeCount", 1)
+                )
+                );
+
 
     }
 
     @Override
-    public void updateWhenUnCommentLike(UUID commentId){
+    public void updateWhenUnCommentLike(UUID commentId,List<UUID> commentLikesIds){
         MongoCollection<Document> collection = getCollection("userActivity");
         collection.updateMany(
                 Filters.exists("comments."+ commentId.toString()),
-                Updates.inc("comments." + commentId+".commentLikeCount", -1)
+                Updates.inc("comments." + commentId+".likeCount", -1)
         );
-        collection.updateMany(
-                Filters.eq("commentsLikes.commentId", commentId.toString()),
-                Updates.inc("commentsLikes.$[element].commentLikeCount", -1),
-                new UpdateOptions().arrayFilters(List.of(Filters.eq("commentId", commentId.toString())))
+        commentLikesIds.stream().forEach(x->
+                collection.updateOne(
+
+                        Filters.exists("commentsLikes."+ x.toString()),
+                        Updates.inc("commentsLikes."+ x.toString()+".commentLikeCount", -1)
+                )
         );
     }
 
@@ -228,17 +233,6 @@ public class IMongoDbService implements MongoDbService{
     public void updateWhenCommentDelete(UUID commentId,UUID articleId,List<UUID> commentLikesIds){
 
         MongoCollection<Document> collection = getCollection("userActivity");
-        collection.updateMany(
-                Filters.exists("comments."+ commentId.toString()),
-                Updates.unset("comments."+ commentId.toString())
-        );
-        commentLikesIds.stream().forEach(
-                x-> collection.updateOne(
-                        Filters.exists("commentsLikes."+ x.toString()),
-                        Updates.unset("commentsLikes."+ x.toString())
-                )
-        );
-
         collection.updateMany(
                 Filters.exists("articleViews."+ articleId.toString()),
                 Updates.inc("articleViews."+ articleId.toString()+".articleCommentCount", -1)

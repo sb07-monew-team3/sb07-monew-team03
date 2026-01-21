@@ -41,8 +41,11 @@ public class CommentLikeService {
         }
 
         CommentLikes result = commentLikesRepository.save(new CommentLikes(user, comment));
+        List<CommentLikes> commentLikes = commentLikesRepository.findAllByCommentId(commentId);
+        List<UUID> commentLikeIds = commentLikes.stream().map(CommentLikes::getId).toList();
+
         mongoDbService.insertUserActivityCommentLike(userId, userActivityCommentLikeMapper.toUserActivityCommentDto(result));
-        mongoDbService.updateWhenCommentLike(result.getComment().getId());
+        mongoDbService.updateWhenCommentLike(result.getComment().getId(),commentLikeIds);
 
         UUID receiverId = comment.getUser().getId();
         if (!receiverId.equals(userId)) {
@@ -59,9 +62,12 @@ public class CommentLikeService {
             return;
         }
 
-        CommentLikes commentLikes = commentLikesRepository.findByCommentIdAndUserId(commentId, userId).orElseThrow();
-        mongoDbService.deleteWhenUnCommentLike(commentLikes.getId(),userId);
-        mongoDbService.updateWhenUnCommentLike(commentId);
+        CommentLikes commentLikesFromTarget = commentLikesRepository.findByCommentIdAndUserId(commentId, userId).orElseThrow();
+        List<CommentLikes> allCommentLikesFromComment = commentLikesRepository.findAllByCommentId(commentId);
+        List<UUID> allCommentLikesIds = allCommentLikesFromComment.stream().map(CommentLikes::getId).toList();
+
+        mongoDbService.deleteWhenUnCommentLike(commentLikesFromTarget.getId(),userId);
+        mongoDbService.updateWhenUnCommentLike(commentId,allCommentLikesIds);
 
         commentLikesRepository.deleteByUserIdAndCommentId(userId, commentId);
     }

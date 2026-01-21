@@ -22,8 +22,8 @@ public interface MongoDbService {
      void updateWhenArticleView(UUID articleId);
      void updateWhenArticleComment(UUID articleId);
      UserActivityDto getUserActivity(UUID userId);
-     void updateWhenCommentLike(UUID commentId);
-     void updateWhenUnCommentLike(UUID commentId);
+     void updateWhenCommentLike(UUID commentId,List<UUID> commentLikesIds);
+     void updateWhenUnCommentLike(UUID commentId,List<UUID> commentLikesIds);
      void deleteWhenUnCommentLike(UUID commentId,UUID userId);
      void updateWhenCommentDelete(UUID commentId, UUID articleId, List<UUID> commentLikesIds);
      void deleteWhenUnSubscription(UUID subscriptionId,UUID userId);
