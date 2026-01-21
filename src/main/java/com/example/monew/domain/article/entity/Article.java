@@ -44,7 +44,7 @@ public class Article extends BaseCreatableEntity {
     @Column(name="sort_timestamp", nullable = false, updatable = false, unique = true)
     private Instant sortTimestamp;
 
-    @OneToMany
+    @ManyToMany
     @JoinTable(
             name = "articles_interests",
             joinColumns = @JoinColumn(name = "article_id"),
