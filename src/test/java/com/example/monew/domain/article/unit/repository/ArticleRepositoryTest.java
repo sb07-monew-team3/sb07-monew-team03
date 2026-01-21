@@ -131,16 +131,16 @@ class ArticleRepositoryTest {
                 List.of(backend)
         );
 
-//        article2 = new Article(
-//                "NAVER",
-//                "https://devnews.com/cpu-guide",
-//                "백엔드 서버를 위한 CPU 선택 기준",
-//                baseDate.minusDays(1),
-//                "서버 CPU 선택 가이드",
-//                false,
-//                baseInstant.plusSeconds(10),
-//                List.of(hardware)
-//        );
+        article2 = new Article(
+                "NAVER",
+                "https://devnews.com/cpu-guide",
+                "백엔드 서버를 위한 CPU 선택 기준",
+                baseDate.minusDays(1),
+                "서버 CPU 선택 가이드",
+                false,
+                baseInstant.plusSeconds(10),
+                List.of(hardware)
+        );
 //
 //        article3 = new Article(
 //                "NAVER",
@@ -348,6 +348,7 @@ class ArticleRepositoryTest {
 //        ));
 
         articleRepository.save(article1);
+        articleRepository.save(article2);
 
         em.flush();
 
