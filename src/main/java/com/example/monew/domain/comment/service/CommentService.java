@@ -1,8 +1,12 @@
 package com.example.monew.domain.comment.service;
 
+import com.example.monew.domain.activity.mapper.UserActivityCommentMapper;
+import com.example.monew.domain.activity.service.MongoDbService;
 import com.example.monew.domain.article.entity.Article;
+import com.example.monew.domain.base.BaseEntity;
 import com.example.monew.domain.comment.dto.CommentResponse;
 import com.example.monew.domain.comment.entity.Comment;
+import com.example.monew.domain.comment.entity.CommentLikes;
 import com.example.monew.domain.comment.repository.CommentLikesRepository;
 import com.example.monew.domain.comment.repository.CommentRepository;
 import com.example.monew.domain.comment.repository.CommentWithLikeCount;
@@ -30,6 +34,8 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final CommentLikesRepository commentLikesRepository;
     private final EntityManager entityManager;
+    private final MongoDbService mongoDbService;
+    private final UserActivityCommentMapper userActivityCommentMapper;
 
     @Transactional(readOnly = true)
     public Page<CommentResponse> list(
@@ -117,6 +123,8 @@ public class CommentService {
         Article article = findArticleOrThrow(articleId);
 
         Comment saved = commentRepository.save(new Comment(user, article, normalized, false));
+        mongoDbService.insertUserActivityComment(userId, userActivityCommentMapper.toUserActivityCommentDto(saved));
+        mongoDbService.updateWhenArticleComment(articleId);
 
         return toResponse(saved, userId);
     }
@@ -132,8 +140,9 @@ public class CommentService {
         }
 
         comment.updateContent(normalized);
-
-        return toResponse(comment, userId);
+        CommentResponse result = toResponse(comment, userId);
+        mongoDbService.updateUserActivityComment(result);
+        return result;
     }
 
     public void softDelete(UUID userId, UUID commentId) {
@@ -145,6 +154,9 @@ public class CommentService {
         }
 
         comment.delete();
+        List<CommentLikes> commentLikes = commentLikesRepository.findAllByCommentId(commentId);
+        List<UUID> commentLikeIds = commentLikes.stream().map(BaseEntity::getId).toList();
+        mongoDbService.updateWhenCommentDelete(commentId,comment.getArticle().getId(),commentLikeIds);
     }
 
     public void hardDelete(UUID userId, UUID commentId) {

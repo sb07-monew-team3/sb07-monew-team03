@@ -3,8 +3,11 @@ package com.example.monew.domain.activity.controller;
 
 import com.example.monew.domain.activity.docs.UserActivityControllerDocs;
 import com.example.monew.domain.activity.dto.UserActivityDto;
+import com.example.monew.domain.activity.service.MongoDbService;
 import com.example.monew.domain.activity.service.UserActivityService;
+import com.example.monew.global.config.MongoConfig;
 import lombok.RequiredArgsConstructor;
+import org.bson.Document;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,12 +22,12 @@ import java.util.UUID;
 @RequestMapping("/api/user-activities")
 public class UserActivityController implements UserActivityControllerDocs {
 
-    private final UserActivityService userActivityService;
+    private final MongoDbService mongoDbService;
 
     @GetMapping("/{userId}")
     public ResponseEntity<UserActivityDto> getUserActivity(@PathVariable("userId") UUID userId){
 
-        UserActivityDto userActivity = userActivityService.getUserActivity(userId);
+        UserActivityDto userActivity = mongoDbService.getUserActivity(userId);
         return new ResponseEntity<>(userActivity, HttpStatus.OK);
     }
 }

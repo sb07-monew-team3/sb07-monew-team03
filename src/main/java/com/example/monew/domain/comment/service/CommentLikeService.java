@@ -1,5 +1,9 @@
 package com.example.monew.domain.comment.service;
 
+import com.example.monew.domain.activity.dto.UserActivityCommentLikeDto;
+import com.example.monew.domain.activity.mapper.UserActivityCommentLikeMapper;
+import com.example.monew.domain.activity.service.MongoDbService;
+import com.example.monew.domain.article.entity.Article;
 import com.example.monew.domain.comment.entity.Comment;
 import com.example.monew.domain.comment.entity.CommentLikes;
 import com.example.monew.domain.comment.repository.CommentLikesRepository;
@@ -13,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -24,6 +29,8 @@ public class CommentLikeService {
     private final CommentRepository commentRepository;
     private final EntityManager entityManager;
     private final NotificationService notificationService;
+    private final MongoDbService mongoDbService;
+    private final UserActivityCommentLikeMapper userActivityCommentLikeMapper;
 
     public void like(UUID userId, UUID commentId) {
         Comment comment = getCommentOrThrow(commentId);
@@ -33,7 +40,9 @@ public class CommentLikeService {
             return;
         }
 
-        commentLikesRepository.save(new CommentLikes(user, comment));
+        CommentLikes result = commentLikesRepository.save(new CommentLikes(user, comment));
+        mongoDbService.insertUserActivityCommentLike(userId, userActivityCommentLikeMapper.toUserActivityCommentDto(result));
+        mongoDbService.updateWhenCommentLike(result.getComment().getId());
 
         UUID receiverId = comment.getUser().getId();
         if (!receiverId.equals(userId)) {
@@ -45,9 +54,14 @@ public class CommentLikeService {
         getCommentOrThrow(commentId);
         getUserOrThrow(userId);
 
+
         if (!commentLikesRepository.existsByUserIdAndCommentId(userId, commentId)) {
             return;
         }
+
+        CommentLikes commentLikes = commentLikesRepository.findByCommentIdAndUserId(commentId, userId).orElseThrow();
+        mongoDbService.deleteWhenUnCommentLike(commentLikes.getId(),userId);
+        mongoDbService.updateWhenUnCommentLike(commentId);
 
         commentLikesRepository.deleteByUserIdAndCommentId(userId, commentId);
     }
@@ -64,4 +78,5 @@ public class CommentLikeService {
         }
         return user;
     }
+
 }

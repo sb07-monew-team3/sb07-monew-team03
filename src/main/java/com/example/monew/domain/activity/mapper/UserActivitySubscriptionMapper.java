@@ -34,4 +34,22 @@ public class UserActivitySubscriptionMapper {
                 subscription.getCreatedAt()
         );
     }
+
+    public UserActivitySubscriptionDto toUserActivitySubscriptionDto(Subscription subscription){
+
+        Interest interest = subscription.getInterest();
+        String[] keywords = keywordRepository.findAllByInterestId(interest.getId())
+                .stream()
+                .map(Keyword::getKeyword)
+                .toArray(String[]::new);
+
+        return new UserActivitySubscriptionDto(
+                subscription.getId(),
+                interest.getId(),
+                interest.getName(),
+                keywords,
+                0,
+                subscription.getCreatedAt()
+        );
+    }
 }

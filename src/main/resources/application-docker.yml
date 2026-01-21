@@ -15,7 +15,7 @@ spring:
 
   batch:
     jdbc:
-      initialize-schema: always
+      initialize-schema: never
       table-prefix: batch.BATCH_
     job:
       enabled: false

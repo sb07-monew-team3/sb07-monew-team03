@@ -15,4 +15,4 @@ s3:
   bucket: ${AWS_S3_BUCKET}
 
 mongodb:
-  connection-uri: ${MONGODB_CONNECTION_URI}
+  connection-url: ${MONGODB_CONNECTION_URL}

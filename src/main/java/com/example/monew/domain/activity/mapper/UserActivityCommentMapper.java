@@ -24,4 +24,17 @@ public class UserActivityCommentMapper {
                 comment.getCreatedAt()
         );
     }
+
+    public UserActivityCommentDto toUserActivityCommentDto(Comment comment){
+        return new UserActivityCommentDto(
+                comment.getId(),
+                comment.getArticle().getId(),
+                comment.getArticle().getTitle(),
+                comment.getUser().getId(),
+                comment.getUser().getNickName(),
+                comment.getContent(),
+                0,
+                comment.getCreatedAt()
+        );
+    }
 }
