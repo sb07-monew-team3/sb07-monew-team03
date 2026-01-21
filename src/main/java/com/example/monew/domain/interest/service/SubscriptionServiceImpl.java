@@ -64,7 +64,7 @@ public class SubscriptionServiceImpl implements SubscriptionService{
     public void unsubscribe(UUID interestId, UUID userId) {
         Subscription subscription = subscriptionRepository.findSubscription(userId, interestId)
                 .orElseThrow(() -> new SubscriptionNotExistException(userId, interestId));
-        mongoDbService.deleteWhenUnSubscription(subscription.getId(),userId);
+        mongoDbService.updateWhenUnSubscription(interestId,userId);
         subscriptionRepository.delete(subscription);
     }
 

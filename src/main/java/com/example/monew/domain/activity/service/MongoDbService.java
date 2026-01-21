@@ -16,15 +16,13 @@ public interface MongoDbService {
      void insertUserActivityComment(UUID userId, UserActivityCommentDto commentDto);
      void insertUserActivitySubscription(UUID userId, UserActivitySubscriptionDto subscriptionDto);
      void insertUserActivityArticleView(UUID userId, UserActivityArticleViewDto articleViewDto);
-     void updateUserActivity(UUID userId, UserDto userDto);
+     void updateUserActivity(UserDto userDto);
      void updateUserActivityComment(CommentResponse commentResponse );
-     void updateUserActivitySubscription(InterestDto interestDto);
-     void updateWhenArticleView(UUID articleId);
-     void updateWhenArticleComment(UUID articleId);
+     void updateWhenUnCommentLike(UUID userId,UUID commentId);
+     void updateWhenCommentDelete(UUID articleId);
+     void updateSubscription(InterestDto interestDto);
+     void updateWhenUnSubscription(UUID subscriptionId,UUID userId);
+     void updateWhenSubscriptionDelete(UUID interestId, List<UUID> userIds);
      UserActivityDto getUserActivity(UUID userId);
-     void updateWhenCommentLike(UUID commentId,List<UUID> commentLikesIds);
-     void updateWhenUnCommentLike(UUID commentId,List<UUID> commentLikesIds);
-     void deleteWhenUnCommentLike(UUID commentId,UUID userId);
-     void updateWhenCommentDelete(UUID commentId, UUID articleId, List<UUID> commentLikesIds);
-     void deleteWhenUnSubscription(UUID subscriptionId,UUID userId);
+
 }

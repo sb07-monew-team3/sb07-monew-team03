@@ -130,7 +130,6 @@ public class ArticleService {
 
         log.info("Article view recorded: articleId={}, userId={}", articleId, userId);
         mongoDbService.insertUserActivityArticleView(userId, userActivityArticleViewMapper.toUserActivityArticleViewDto(saved));
-        mongoDbService.updateWhenArticleView(articleId);
         return articleViewMapper.toResponseDto(saved);
     }
 

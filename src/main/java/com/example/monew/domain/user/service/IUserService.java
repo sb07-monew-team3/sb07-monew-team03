@@ -70,7 +70,7 @@ public class IUserService implements UserService{
         if(user.getDeletedAt()!=null) throw new UserNotExistException(userId);
         user.updateNickName(newNickName);
         UserDto result = userMapper.toDto(user);
-        mongoDbService.updateUserActivity(userId, result);
+        mongoDbService.updateUserActivity(result);
         return result;
     }
 

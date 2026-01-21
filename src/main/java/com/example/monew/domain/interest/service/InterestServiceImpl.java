@@ -71,7 +71,8 @@ public class InterestServiceImpl implements InterestService {
 
         Long count = subscriptionRepository.countByInterestId(interestId);
         InterestDto result = interestMapper.toDto(interest, request.keywords(), count, null);
-        mongoDbService.updateUserActivitySubscription(result);
+        System.out.println("interest update : " + result );
+        mongoDbService.updateSubscription(result);
         return result;
     }
 
@@ -79,7 +80,9 @@ public class InterestServiceImpl implements InterestService {
     public void delete(UUID interestId) {
         Interest interest = interestRepository.findById(interestId)
                 .orElseThrow(() -> new InterestNotExistException(interestId));
-
+        List<UUID> userIds = subscriptionRepository.findAllByInterestId(interestId).stream()
+                .map(x -> x.getUser().getId()).toList();
+        mongoDbService.updateWhenSubscriptionDelete(interestId,userIds);
         interestRepository.delete(interest);
     }
 

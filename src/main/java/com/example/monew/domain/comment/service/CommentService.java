@@ -124,7 +124,6 @@ public class CommentService {
 
         Comment saved = commentRepository.save(new Comment(user, article, normalized, false));
         mongoDbService.insertUserActivityComment(userId, userActivityCommentMapper.toUserActivityCommentDto(saved));
-        mongoDbService.updateWhenArticleComment(articleId);
 
         return toResponse(saved, userId);
     }
@@ -156,7 +155,7 @@ public class CommentService {
         comment.delete();
         List<CommentLikes> commentLikes = commentLikesRepository.findAllByCommentId(commentId);
         List<UUID> commentLikeIds = commentLikes.stream().map(BaseEntity::getId).toList();
-        mongoDbService.updateWhenCommentDelete(commentId,comment.getArticle().getId(),commentLikeIds);
+        mongoDbService.updateWhenCommentDelete(comment.getArticle().getId());
     }
 
     public void hardDelete(UUID userId, UUID commentId) {
