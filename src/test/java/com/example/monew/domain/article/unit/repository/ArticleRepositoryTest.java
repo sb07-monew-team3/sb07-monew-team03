@@ -124,7 +124,7 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/spring-boot",
                 "Spring Boot 3에서 개선된 성능 분석",
-                baseDate.minusDays(2),
+                baseDate,
                 "Spring Boot 3 성능 개선",
                 false,
                 baseInstant,
@@ -142,17 +142,17 @@ class ArticleRepositoryTest {
                 List.of(hardware)
         );
 
-//        article3 = new Article(
-//                "NAVER",
-//                "https://devnews.com/webflux",
-//                "동시성 처리 관점에서 비교",
-//                baseDate,
-//                "Spring MVC vs WebFlux",
-//                false,
-//                baseInstant.plusSeconds(20),
-//                List.of(backend)
-//        );
-//
+        article3 = new Article(
+                "NAVER",
+                "https://devnews.com/webflux",
+                "동시성 처리 관점에서 비교",
+                baseDate.minusDays(2),
+                "Spring MVC vs WebFlux",
+                false,
+                baseInstant.plusSeconds(20),
+                List.of(backend)
+        );
+
         article4 = new Article(
                 "NAVER",
                 "https://devnews.com/jpa-batch",
@@ -348,7 +348,7 @@ class ArticleRepositoryTest {
 //        ));
 
         articleRepository.saveAll(List.of(
-                article1,article2
+                article1,article2, article3
         ));
 
         em.flush();
