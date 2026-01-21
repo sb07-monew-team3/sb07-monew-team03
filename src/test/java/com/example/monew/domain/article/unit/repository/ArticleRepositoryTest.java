@@ -347,9 +347,9 @@ class ArticleRepositoryTest {
 //                article16, article17, article18, article19, article20
 //        ));
 
-        articleRepository.save(article1);
-        articleRepository.save(article2);
-        articleRepository.save(article4);
+        articleRepository.saveAll(List.of(
+                article1,article2
+        ));
 
         em.flush();
 
