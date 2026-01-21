@@ -131,221 +131,223 @@ class ArticleRepositoryTest {
                 List.of(backend)
         );
 
-        article2 = new Article(
-                "NAVER",
-                "https://devnews.com/cpu-guide",
-                "백엔드 서버를 위한 CPU 선택 기준",
-                baseDate.minusDays(1),
-                "서버 CPU 선택 가이드",
-                false,
-                baseInstant.plusSeconds(10),
-                List.of(hardware)
-        );
+//        article2 = new Article(
+//                "NAVER",
+//                "https://devnews.com/cpu-guide",
+//                "백엔드 서버를 위한 CPU 선택 기준",
+//                baseDate.minusDays(1),
+//                "서버 CPU 선택 가이드",
+//                false,
+//                baseInstant.plusSeconds(10),
+//                List.of(hardware)
+//        );
+//
+//        article3 = new Article(
+//                "NAVER",
+//                "https://devnews.com/webflux",
+//                "동시성 처리 관점에서 비교",
+//                baseDate,
+//                "Spring MVC vs WebFlux",
+//                false,
+//                baseInstant.plusSeconds(20),
+//                List.of(backend)
+//        );
+//
+//        article4 = new Article(
+//                "NAVER",
+//                "https://devnews.com/jpa-batch",
+//                "JPA 배치 처리 성능 튜닝 방법",
+//                baseDate.minusDays(3),
+//                "Hibernate batch size 최적화",
+//                false,
+//                baseInstant.plusSeconds(30),
+//                List.of(backend)
+//        );
+//
+//        article5 = new Article(
+//                "NAVER",
+//                "https://devnews.com/querydsl",
+//                "QueryDSL 동적 쿼리 설계 패턴",
+//                baseDate.minusDays(4),
+//                "BooleanExpression 활용법",
+//                false,
+//                baseInstant.plusSeconds(40),
+//                List.of(backend)
+//        );
+//
+//        article6 = new Article(
+//                "NAVER",
+//                "https://devnews.com/gc",
+//                "Java GC 로그 분석 실전 가이드",
+//                baseDate.minusDays(5),
+//                "G1 GC 튜닝 포인트",
+//                false,
+//                baseInstant.plusSeconds(50),
+//                List.of(backend)
+//        );
+//
+//        article7 = new Article(
+//                "NAVER",
+//                "https://devnews.com/memory",
+//                "JVM 메모리 구조와 힙 최적화",
+//                baseDate.minusDays(6),
+//                "Young / Old 영역 분석",
+//                false,
+//                baseInstant.plusSeconds(60),
+//                List.of(backend)
+//        );
+//
+//        article8 = new Article(
+//                "NAVER",
+//                "https://devnews.com/docker",
+//                "Docker 컨테이너 리소스 제한 전략",
+//                baseDate.minusDays(7),
+//                "CPU / Memory 제한 설정",
+//                false,
+//                baseInstant.plusSeconds(70),
+//                List.of(infra)
+//        );
+//
+//        article9 = new Article(
+//                "NAVER",
+//                "https://devnews.com/kubernetes",
+//                "Kubernetes 파드 스케줄링 원리",
+//                baseDate.minusDays(8),
+//                "노드 리소스 관리",
+//                false,
+//                baseInstant.plusSeconds(80),
+//                List.of(infra)
+//        );
+//
+//        article10 = new Article(
+//                "NAVER",
+//                "https://devnews.com/mysql-index",
+//                "MySQL 인덱스 설계 전략",
+//                baseDate.minusDays(9),
+//                "복합 인덱스 활용법",
+//                false,
+//                baseInstant.plusSeconds(90),
+//                List.of(database)
+//        );
+//
+//        article11 = new Article(
+//                "NAVER",
+//                "https://devnews.com/redis",
+//                "Redis 캐시 전략과 TTL 설계",
+//                baseDate.minusDays(10),
+//                "캐시 일관성 유지",
+//                false,
+//                baseInstant.plusSeconds(100),
+//                List.of(database)
+//        );
+//
+//        article12 = new Article(
+//                "NAVER",
+//                "https://devnews.com/elasticsearch",
+//                "Elasticsearch 검색 성능 최적화",
+//                baseDate.minusDays(11),
+//                "Analyzer 선택 기준",
+//                false,
+//                baseInstant.plusSeconds(110),
+//                List.of(database)
+//        );
+//
+//        article13 = new Article(
+//                "NAVER",
+//                "https://devnews.com/netty",
+//                "Netty 기반 비동기 서버 구조",
+//                baseDate.minusDays(12),
+//                "이벤트 루프 모델",
+//                false,
+//                baseInstant.plusSeconds(120),
+//                List.of(backend)
+//        );
+//
+//        article14 = new Article(
+//                "NAVER",
+//                "https://devnews.com/security-jwt",
+//                "JWT 인증 구조 설계 시 주의점",
+//                baseDate.minusDays(13),
+//                "Access Token 만료 전략",
+//                false,
+//                baseInstant.plusSeconds(130),
+//                List.of(security)
+//        );
+//
+//        article15 = new Article(
+//                "NAVER",
+//                "https://devnews.com/oauth2",
+//                "OAuth2 인증 플로우 정리",
+//                baseDate.minusDays(14),
+//                "Authorization Code Flow",
+//                false,
+//                baseInstant.plusSeconds(140),
+//                List.of(security)
+//        );
+//
+//        article16 = new Article(
+//                "NAVER",
+//                "https://devnews.com/cloud-cost",
+//                "클라우드 비용 최적화 방법",
+//                baseDate.minusDays(15),
+//                "AWS 비용 절감 전략",
+//                false,
+//                baseInstant.plusSeconds(150),
+//                List.of(cloud)
+//        );
+//
+//        article17 = new Article(
+//                "NAVER",
+//                "https://devnews.com/ec2",
+//                "EC2 인스턴스 타입 선택 가이드",
+//                baseDate.minusDays(16),
+//                "워크로드별 인스턴스 추천",
+//                false,
+//                baseInstant.plusSeconds(160),
+//                List.of(cloud)
+//        );
+//
+//        article18 = new Article(
+//                "NAVER",
+//                "https://devnews.com/cicd",
+//                "CI/CD 파이프라인 설계 베스트 프랙티스",
+//                baseDate.minusDays(17),
+//                "GitHub Actions 활용",
+//                false,
+//                baseInstant.plusSeconds(170),
+//                List.of(infra)
+//        );
+//
+//        article19 = new Article(
+//                "NAVER",
+//                "https://devnews.com/monitoring",
+//                "서버 모니터링 지표 설계",
+//                baseDate.minusDays(18),
+//                "Prometheus & Grafana",
+//                false,
+//                baseInstant.plusSeconds(180),
+//                List.of(infra)
+//        );
+//
+//        article20 = new Article(
+//                "NAVER",
+//                "https://devnews.com/troubleshooting",
+//                "대규모 장애 대응 사례 분석",
+//                baseDate.minusDays(19),
+//                "트래픽 폭주 대응 전략",
+//                false,
+//                baseInstant.plusSeconds(190),
+//                List.of(infra)
+//        );
+//
+//        articleRepository.saveAll(List.of(
+//                article1, article2, article3, article4, article5,
+//                article6, article7, article8, article9, article10,
+//                article11, article12, article13, article14, article15,
+//                article16, article17, article18, article19, article20
+//        ));
 
-        article3 = new Article(
-                "NAVER",
-                "https://devnews.com/webflux",
-                "동시성 처리 관점에서 비교",
-                baseDate,
-                "Spring MVC vs WebFlux",
-                false,
-                baseInstant.plusSeconds(20),
-                List.of(backend)
-        );
-
-        article4 = new Article(
-                "NAVER",
-                "https://devnews.com/jpa-batch",
-                "JPA 배치 처리 성능 튜닝 방법",
-                baseDate.minusDays(3),
-                "Hibernate batch size 최적화",
-                false,
-                baseInstant.plusSeconds(30),
-                List.of(backend)
-        );
-
-        article5 = new Article(
-                "NAVER",
-                "https://devnews.com/querydsl",
-                "QueryDSL 동적 쿼리 설계 패턴",
-                baseDate.minusDays(4),
-                "BooleanExpression 활용법",
-                false,
-                baseInstant.plusSeconds(40),
-                List.of(backend)
-        );
-
-        article6 = new Article(
-                "NAVER",
-                "https://devnews.com/gc",
-                "Java GC 로그 분석 실전 가이드",
-                baseDate.minusDays(5),
-                "G1 GC 튜닝 포인트",
-                false,
-                baseInstant.plusSeconds(50),
-                List.of(backend)
-        );
-
-        article7 = new Article(
-                "NAVER",
-                "https://devnews.com/memory",
-                "JVM 메모리 구조와 힙 최적화",
-                baseDate.minusDays(6),
-                "Young / Old 영역 분석",
-                false,
-                baseInstant.plusSeconds(60),
-                List.of(backend)
-        );
-
-        article8 = new Article(
-                "NAVER",
-                "https://devnews.com/docker",
-                "Docker 컨테이너 리소스 제한 전략",
-                baseDate.minusDays(7),
-                "CPU / Memory 제한 설정",
-                false,
-                baseInstant.plusSeconds(70),
-                List.of(infra)
-        );
-
-        article9 = new Article(
-                "NAVER",
-                "https://devnews.com/kubernetes",
-                "Kubernetes 파드 스케줄링 원리",
-                baseDate.minusDays(8),
-                "노드 리소스 관리",
-                false,
-                baseInstant.plusSeconds(80),
-                List.of(infra)
-        );
-
-        article10 = new Article(
-                "NAVER",
-                "https://devnews.com/mysql-index",
-                "MySQL 인덱스 설계 전략",
-                baseDate.minusDays(9),
-                "복합 인덱스 활용법",
-                false,
-                baseInstant.plusSeconds(90),
-                List.of(database)
-        );
-
-        article11 = new Article(
-                "NAVER",
-                "https://devnews.com/redis",
-                "Redis 캐시 전략과 TTL 설계",
-                baseDate.minusDays(10),
-                "캐시 일관성 유지",
-                false,
-                baseInstant.plusSeconds(100),
-                List.of(database)
-        );
-
-        article12 = new Article(
-                "NAVER",
-                "https://devnews.com/elasticsearch",
-                "Elasticsearch 검색 성능 최적화",
-                baseDate.minusDays(11),
-                "Analyzer 선택 기준",
-                false,
-                baseInstant.plusSeconds(110),
-                List.of(database)
-        );
-
-        article13 = new Article(
-                "NAVER",
-                "https://devnews.com/netty",
-                "Netty 기반 비동기 서버 구조",
-                baseDate.minusDays(12),
-                "이벤트 루프 모델",
-                false,
-                baseInstant.plusSeconds(120),
-                List.of(backend)
-        );
-
-        article14 = new Article(
-                "NAVER",
-                "https://devnews.com/security-jwt",
-                "JWT 인증 구조 설계 시 주의점",
-                baseDate.minusDays(13),
-                "Access Token 만료 전략",
-                false,
-                baseInstant.plusSeconds(130),
-                List.of(security)
-        );
-
-        article15 = new Article(
-                "NAVER",
-                "https://devnews.com/oauth2",
-                "OAuth2 인증 플로우 정리",
-                baseDate.minusDays(14),
-                "Authorization Code Flow",
-                false,
-                baseInstant.plusSeconds(140),
-                List.of(security)
-        );
-
-        article16 = new Article(
-                "NAVER",
-                "https://devnews.com/cloud-cost",
-                "클라우드 비용 최적화 방법",
-                baseDate.minusDays(15),
-                "AWS 비용 절감 전략",
-                false,
-                baseInstant.plusSeconds(150),
-                List.of(cloud)
-        );
-
-        article17 = new Article(
-                "NAVER",
-                "https://devnews.com/ec2",
-                "EC2 인스턴스 타입 선택 가이드",
-                baseDate.minusDays(16),
-                "워크로드별 인스턴스 추천",
-                false,
-                baseInstant.plusSeconds(160),
-                List.of(cloud)
-        );
-
-        article18 = new Article(
-                "NAVER",
-                "https://devnews.com/cicd",
-                "CI/CD 파이프라인 설계 베스트 프랙티스",
-                baseDate.minusDays(17),
-                "GitHub Actions 활용",
-                false,
-                baseInstant.plusSeconds(170),
-                List.of(infra)
-        );
-
-        article19 = new Article(
-                "NAVER",
-                "https://devnews.com/monitoring",
-                "서버 모니터링 지표 설계",
-                baseDate.minusDays(18),
-                "Prometheus & Grafana",
-                false,
-                baseInstant.plusSeconds(180),
-                List.of(infra)
-        );
-
-        article20 = new Article(
-                "NAVER",
-                "https://devnews.com/troubleshooting",
-                "대규모 장애 대응 사례 분석",
-                baseDate.minusDays(19),
-                "트래픽 폭주 대응 전략",
-                false,
-                baseInstant.plusSeconds(190),
-                List.of(infra)
-        );
-
-        articleRepository.saveAll(List.of(
-                article1, article2, article3, article4, article5,
-                article6, article7, article8, article9, article10,
-                article11, article12, article13, article14, article15,
-                article16, article17, article18, article19, article20
-        ));
+        articleRepository.save(article1);
 
         em.flush();
 
