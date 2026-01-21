@@ -40,7 +40,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE) // 테스트에서도 설정된 DB 사용
 @Import({QueryDslConfig.class, JpaAuditingConfig.class}) // Bean 수동 등록
 @DisplayName("뉴스 기사 레포지토리 슬라이스 테스트")
-@Transactional
 class ArticleRepositoryTest {
 
     @Autowired
@@ -64,7 +63,6 @@ class ArticleRepositoryTest {
     @Autowired
     private EntityManager em;
 
-    private boolean alreadySetup = false;
     private List<User> users;
     private Interest backend, hardware, infra, database, security, cloud;
     private Article article1, article2, article3, article4, article5,
@@ -74,8 +72,6 @@ class ArticleRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        if(alreadySetup) return;
-
         notificationRepository.deleteAll();
         articleViewRepository.deleteAll();
         userRepository.deleteAll();
@@ -390,8 +386,6 @@ class ArticleRepositoryTest {
 
         em.flush();
         em.clear();
-
-        alreadySetup = true;
     }
 
     private List<Comment> createComments(
