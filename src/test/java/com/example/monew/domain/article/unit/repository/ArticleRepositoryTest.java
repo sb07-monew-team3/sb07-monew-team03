@@ -141,17 +141,17 @@ class ArticleRepositoryTest {
                 baseInstant.plusSeconds(10),
                 List.of(hardware)
         );
-//
-//        article3 = new Article(
-//                "NAVER",
-//                "https://devnews.com/webflux",
-//                "동시성 처리 관점에서 비교",
-//                baseDate,
-//                "Spring MVC vs WebFlux",
-//                false,
-//                baseInstant.plusSeconds(20),
-//                List.of(backend)
-//        );
+
+        article3 = new Article(
+                "NAVER",
+                "https://devnews.com/webflux",
+                "동시성 처리 관점에서 비교",
+                baseDate,
+                "Spring MVC vs WebFlux",
+                false,
+                baseInstant.plusSeconds(20),
+                List.of(backend)
+        );
 //
 //        article4 = new Article(
 //                "NAVER",
@@ -347,8 +347,12 @@ class ArticleRepositoryTest {
 //                article16, article17, article18, article19, article20
 //        ));
 
-        articleRepository.save(article1);
-        articleRepository.save(article2);
+//        articleRepository.save(article1);
+//        articleRepository.save(article2);
+
+        articleRepository.saveAll(List.of(
+                article1, article2, article3
+        ));
 
         em.flush();
 
