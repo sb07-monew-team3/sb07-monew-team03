@@ -40,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE) // 테스트에서도 설정된 DB 사용
 @Import({QueryDslConfig.class, JpaAuditingConfig.class}) // Bean 수동 등록
 @DisplayName("뉴스 기사 레포지토리 슬라이스 테스트")
+@Transactional
 class ArticleRepositoryTest {
 
     @Autowired
@@ -63,6 +64,7 @@ class ArticleRepositoryTest {
     @Autowired
     private EntityManager em;
 
+    private boolean alreadySetup = false;
     private List<User> users;
     private Interest backend, hardware, infra, database, security, cloud;
     private Article article1, article2, article3, article4, article5,
@@ -70,8 +72,14 @@ class ArticleRepositoryTest {
             article11, article12, article13, article14, article15,
             article16, article17, article18, article19, article20;
 
+    private final LocalDateTime baseDate = LocalDateTime.of(2026, 1, 1, 0, 0);
+    private final Instant baseInstant = Instant.parse("2026-01-01T00:00:00Z");
+
+
     @BeforeEach
     void setUp() {
+        if(alreadySetup) return;
+
         notificationRepository.deleteAll();
         articleViewRepository.deleteAll();
         userRepository.deleteAll();
@@ -114,10 +122,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/spring-boot",
                 "Spring Boot 3에서 개선된 성능 분석",
-                LocalDateTime.now().minusDays(2),
+                baseDate.minusDays(2),
                 "Spring Boot 3 성능 개선",
                 false,
-                Instant.now(),
+                baseInstant,
                 List.of(backend)
         );
 
@@ -125,10 +133,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/cpu-guide",
                 "백엔드 서버를 위한 CPU 선택 기준",
-                LocalDateTime.now().minusDays(1),
+                baseDate.minusDays(1),
                 "서버 CPU 선택 가이드",
                 false,
-                Instant.now().plusMillis(10),
+                baseInstant.plusMillis(10),
                 List.of(hardware)
         );
 
@@ -136,10 +144,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/webflux",
                 "동시성 처리 관점에서 비교",
-                LocalDateTime.now(),
+                baseDate,
                 "Spring MVC vs WebFlux",
                 false,
-                Instant.now().plusMillis(20),
+                baseInstant.plusMillis(20),
                 List.of(backend)
         );
 
@@ -147,10 +155,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/jpa-batch",
                 "JPA 배치 처리 성능 튜닝 방법",
-                LocalDateTime.now().minusDays(3),
+                baseDate.minusDays(3),
                 "Hibernate batch size 최적화",
                 false,
-                Instant.now().plusMillis(30),
+                baseInstant.plusMillis(30),
                 List.of(backend)
         );
 
@@ -158,10 +166,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/querydsl",
                 "QueryDSL 동적 쿼리 설계 패턴",
-                LocalDateTime.now().minusDays(4),
+                baseDate.minusDays(4),
                 "BooleanExpression 활용법",
                 false,
-                Instant.now().plusMillis(40),
+                baseInstant.plusMillis(40),
                 List.of(backend)
         );
 
@@ -169,10 +177,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/gc",
                 "Java GC 로그 분석 실전 가이드",
-                LocalDateTime.now().minusDays(5),
+                baseDate.minusDays(5),
                 "G1 GC 튜닝 포인트",
                 false,
-                Instant.now().plusMillis(50),
+                baseInstant.plusMillis(50),
                 List.of(backend)
         );
 
@@ -180,10 +188,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/memory",
                 "JVM 메모리 구조와 힙 최적화",
-                LocalDateTime.now().minusDays(6),
+                baseDate.minusDays(6),
                 "Young / Old 영역 분석",
                 false,
-                Instant.now().plusMillis(60),
+                baseInstant.plusMillis(60),
                 List.of(backend)
         );
 
@@ -191,10 +199,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/docker",
                 "Docker 컨테이너 리소스 제한 전략",
-                LocalDateTime.now().minusDays(7),
+                baseDate.minusDays(7),
                 "CPU / Memory 제한 설정",
                 false,
-                Instant.now().plusMillis(70),
+                baseInstant.plusMillis(70),
                 List.of(infra)
         );
 
@@ -202,10 +210,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/kubernetes",
                 "Kubernetes 파드 스케줄링 원리",
-                LocalDateTime.now().minusDays(8),
+                baseDate.minusDays(8),
                 "노드 리소스 관리",
                 false,
-                Instant.now().plusMillis(80),
+                baseInstant.plusMillis(80),
                 List.of(infra)
         );
 
@@ -213,10 +221,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/mysql-index",
                 "MySQL 인덱스 설계 전략",
-                LocalDateTime.now().minusDays(9),
+                baseDate.minusDays(9),
                 "복합 인덱스 활용법",
                 false,
-                Instant.now().plusMillis(90),
+                baseInstant.plusMillis(90),
                 List.of(database)
         );
 
@@ -224,10 +232,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/redis",
                 "Redis 캐시 전략과 TTL 설계",
-                LocalDateTime.now().minusDays(10),
+                baseDate.minusDays(10),
                 "캐시 일관성 유지",
                 false,
-                Instant.now().plusMillis(100),
+                baseInstant.plusMillis(100),
                 List.of(database)
         );
 
@@ -235,10 +243,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/elasticsearch",
                 "Elasticsearch 검색 성능 최적화",
-                LocalDateTime.now().minusDays(11),
+                baseDate.minusDays(11),
                 "Analyzer 선택 기준",
                 false,
-                Instant.now().plusMillis(110),
+                baseInstant.plusMillis(110),
                 List.of(database)
         );
 
@@ -246,10 +254,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/netty",
                 "Netty 기반 비동기 서버 구조",
-                LocalDateTime.now().minusDays(12),
+                baseDate.minusDays(12),
                 "이벤트 루프 모델",
                 false,
-                Instant.now().plusMillis(120),
+                baseInstant.plusMillis(120),
                 List.of(backend)
         );
 
@@ -257,10 +265,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/security-jwt",
                 "JWT 인증 구조 설계 시 주의점",
-                LocalDateTime.now().minusDays(13),
+                baseDate.minusDays(13),
                 "Access Token 만료 전략",
                 false,
-                Instant.now().plusMillis(130),
+                baseInstant.plusMillis(130),
                 List.of(security)
         );
 
@@ -268,10 +276,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/oauth2",
                 "OAuth2 인증 플로우 정리",
-                LocalDateTime.now().minusDays(14),
+                baseDate.minusDays(14),
                 "Authorization Code Flow",
                 false,
-                Instant.now().plusMillis(140),
+                baseInstant.plusMillis(140),
                 List.of(security)
         );
 
@@ -279,10 +287,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/cloud-cost",
                 "클라우드 비용 최적화 방법",
-                LocalDateTime.now().minusDays(15),
+                baseDate.minusDays(15),
                 "AWS 비용 절감 전략",
                 false,
-                Instant.now().plusMillis(150),
+                baseInstant.plusMillis(150),
                 List.of(cloud)
         );
 
@@ -290,10 +298,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/ec2",
                 "EC2 인스턴스 타입 선택 가이드",
-                LocalDateTime.now().minusDays(16),
+                baseDate.minusDays(16),
                 "워크로드별 인스턴스 추천",
                 false,
-                Instant.now().plusMillis(160),
+                baseInstant.plusMillis(160),
                 List.of(cloud)
         );
 
@@ -301,10 +309,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/cicd",
                 "CI/CD 파이프라인 설계 베스트 프랙티스",
-                LocalDateTime.now().minusDays(17),
+                baseDate.minusDays(17),
                 "GitHub Actions 활용",
                 false,
-                Instant.now().plusMillis(170),
+                baseInstant.plusMillis(170),
                 List.of(infra)
         );
 
@@ -312,10 +320,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/monitoring",
                 "서버 모니터링 지표 설계",
-                LocalDateTime.now().minusDays(18),
+                baseDate.minusDays(18),
                 "Prometheus & Grafana",
                 false,
-                Instant.now().plusMillis(180),
+                baseInstant.plusMillis(180),
                 List.of(infra)
         );
 
@@ -323,10 +331,10 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/troubleshooting",
                 "대규모 장애 대응 사례 분석",
-                LocalDateTime.now().minusDays(19),
+                baseDate.minusDays(19),
                 "트래픽 폭주 대응 전략",
                 false,
-                Instant.now().plusMillis(190),
+                baseInstant.plusMillis(190),
                 List.of(infra)
         );
 
@@ -386,6 +394,8 @@ class ArticleRepositoryTest {
 
         em.flush();
         em.clear();
+
+        alreadySetup = true;
     }
 
     private List<Comment> createComments(
@@ -480,7 +490,7 @@ class ArticleRepositoryTest {
         void findArticleSlice_publishDateFrom_only() {
 
             // given
-            LocalDateTime start = LocalDateTime.now().minusDays(3);
+            LocalDateTime start = baseDate.minusDays(2);
 
             ArticleRequestDto request = new ArticleRequestDto(
                     null,
@@ -517,7 +527,7 @@ class ArticleRepositoryTest {
         void findArticleSlice_publishDateTo_only() {
 
             // given
-            LocalDateTime end = LocalDateTime.now().minusDays(10);
+            LocalDateTime end = baseDate.minusDays(10);
 
             ArticleRequestDto request = new ArticleRequestDto(
                     null,
@@ -561,8 +571,8 @@ class ArticleRepositoryTest {
         void findArticleSlice_publishDateBetween() {
 
             // given
-            LocalDateTime start = LocalDateTime.now().minusDays(20);
-            LocalDateTime end = LocalDateTime.now().minusDays(15);
+            LocalDateTime start = baseDate.minusDays(20);
+            LocalDateTime end = baseDate.minusDays(15);
 
             ArticleRequestDto request = new ArticleRequestDto(
                     null,
@@ -925,7 +935,7 @@ class ArticleRepositoryTest {
         void findArticleSlice_cursorViewCount_desc() {
             // given
             long cursor = 15;
-            Instant after = Instant.now();
+            Instant after = baseInstant;
             ArticleRequestDto request = new ArticleRequestDto(
                     null,
                     null,
@@ -957,7 +967,7 @@ class ArticleRepositoryTest {
         void findArticleSlice_cursorViewCount_asc() {
             // given
             long cursor = 5;
-            Instant after = Instant.now();
+            Instant after = baseInstant;
             ArticleRequestDto request = new ArticleRequestDto(
                     null,
                     null,
@@ -987,7 +997,7 @@ class ArticleRepositoryTest {
         void findArticleSlice_cursorCommentCount_desc() {
             // given
             long cursor = 10;
-            Instant after = Instant.now();
+            Instant after = baseInstant;
             ArticleRequestDto request = new ArticleRequestDto(
                     null,
                     null,
@@ -1019,7 +1029,7 @@ class ArticleRepositoryTest {
         void findArticleSlice_cursorCommentCount_asc() {
             // given
             long cursor = 5;
-            Instant after = Instant.now();
+            Instant after = baseInstant;
             ArticleRequestDto request = new ArticleRequestDto(
                     null,
                     null,
@@ -1077,8 +1087,8 @@ class ArticleRepositoryTest {
     @DisplayName("발행일 기준 기간 내 기사만 조회한다")
     void findAllByPublishDateBetween_success() {
         // given
-        LocalDateTime start = LocalDateTime.now().minusDays(2);
-        LocalDateTime end = LocalDateTime.now().minusHours(12);
+        LocalDateTime start = baseDate.minusDays(1);
+        LocalDateTime end = baseDate.minusDays(1);
 
         // when
         List<Article> articles =
