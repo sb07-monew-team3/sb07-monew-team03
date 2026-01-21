@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -97,16 +98,31 @@ public class UserActivityMapper {
             );
             userActivityCommentLikeDtos.add(userActivityCommentLikeDto);
         }
+        UserActivitySubscriptionDto[] subscriptionArray = userActivitySubscriptionDtos.stream()
+                .sorted(Comparator.comparing(UserActivitySubscriptionDto::createdAt, Comparator.reverseOrder()))
+                .toArray(UserActivitySubscriptionDto[]::new);
+        UserActivityCommentDto[] commentArray = userActivityCommentDtos.stream()
+                .sorted(Comparator.comparing(UserActivityCommentDto::createdAt, Comparator.reverseOrder()))
+                .limit(10)
+                .toArray(UserActivityCommentDto[]::new);
+        UserActivityCommentLikeDto[] commentLikesArray = userActivityCommentLikeDtos.stream()
+                .sorted(Comparator.comparing(UserActivityCommentLikeDto::createdAt, Comparator.reverseOrder()))
+                .limit(10)
+                .toArray(UserActivityCommentLikeDto[]::new);
+        UserActivityArticleViewDto[] articleViewArray = userActivityArticleViewDtos.stream()
+                .sorted(Comparator.comparing(UserActivityArticleViewDto::createdAt, Comparator.reverseOrder()))
+                .limit(10)
+                .toArray(UserActivityArticleViewDto[]::new);
 
         return new UserActivityDto(
                 UUID.fromString(document.getString("id")),
                 document.getString("email"),
                 document.getString("nickname"),
                 Instant.parse(document.getString("createdAt")),
-                userActivitySubscriptionDtos.toArray(new UserActivitySubscriptionDto[0]),
-                userActivityCommentDtos.toArray(new UserActivityCommentDto[0]),
-                userActivityCommentLikeDtos.toArray(new UserActivityCommentLikeDto[0]),
-                userActivityArticleViewDtos.toArray(new UserActivityArticleViewDto[0])
+                subscriptionArray,
+                commentArray,
+                commentLikesArray,
+                articleViewArray
         );
     }
 }
