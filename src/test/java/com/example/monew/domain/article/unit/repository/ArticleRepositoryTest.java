@@ -124,7 +124,7 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/spring-boot",
                 "Spring Boot 3에서 개선된 성능 분석",
-                baseDate,
+                baseDate.minusDays(2),
                 "Spring Boot 3 성능 개선",
                 false,
                 baseInstant,
@@ -146,11 +146,11 @@ class ArticleRepositoryTest {
                 "NAVER",
                 "https://devnews.com/webflux",
                 "동시성 처리 관점에서 비교",
-                baseDate.minusDays(2),
+                baseDate,
                 "Spring MVC vs WebFlux",
                 false,
                 baseInstant.plusSeconds(20),
-                List.of(backend)
+                List.of(infra)
         );
 
         article4 = new Article(
