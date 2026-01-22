@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.Instant;
@@ -25,8 +27,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class Notifications extends BaseCreatableEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", columnDefinition = "uuid", nullable = false)
-//    @Column(name = "user_id", columnDefinition = "uuid", nullable = false)
+    @JoinColumn(name = "user_id", columnDefinition = "uuid")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 
     @Column(name="content",nullable = false)
