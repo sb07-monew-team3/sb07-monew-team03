@@ -17,11 +17,9 @@ import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -115,9 +113,11 @@ public class InterestServiceImpl implements InterestService {
             Interest lastInterest = interestList.get(interestList.size() - 1);
 
             if ("name".equals(orderBy)) {
-                nextCursor = interestDto.name();
+                String combined = interestDto.name() + "|" + lastInterest.getCreatedAt().toString();
+                nextCursor = Base64.getEncoder().encodeToString(combined.getBytes(StandardCharsets.UTF_8));
             } else if ("subscriberCount".equals(orderBy)) {
-                nextCursor = String.valueOf(interestDto.subscriberCount());
+                String combined = interestDto.subscriberCount() + "|" + lastInterest.getCreatedAt().toString();
+                nextCursor = Base64.getEncoder().encodeToString(combined.getBytes(StandardCharsets.UTF_8));
             }
 
             nextAfter = lastInterest.getCreatedAt();
