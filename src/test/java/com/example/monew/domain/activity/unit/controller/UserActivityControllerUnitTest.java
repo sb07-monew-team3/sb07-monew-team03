@@ -3,7 +3,6 @@ package com.example.monew.domain.activity.unit.controller;
 import com.example.monew.domain.activity.controller.UserActivityController;
 import com.example.monew.domain.activity.dto.UserActivityDto;
 import com.example.monew.domain.activity.service.IMongoDbService;
-import com.example.monew.domain.activity.service.UserActivityService;
 import com.example.monew.domain.user.util.TestFixture;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
