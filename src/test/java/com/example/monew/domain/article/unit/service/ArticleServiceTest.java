@@ -1,26 +1,33 @@
 package com.example.monew.domain.article.unit.service;
 
+import com.example.monew.domain.activity.dto.UserActivityArticleViewDto;
+import com.example.monew.domain.activity.mapper.UserActivityArticleViewMapper;
+import com.example.monew.domain.activity.service.MongoDbService;
 import com.example.monew.domain.article.client.naver.NaverNewsClient;
 import com.example.monew.domain.article.client.naver.NaverNewsResponse;
+import com.example.monew.domain.article.client.rss.RssClient;
 import com.example.monew.domain.article.dto.*;
 import com.example.monew.domain.article.entity.Article;
 import com.example.monew.domain.article.entity.ArticleView;
 import com.example.monew.domain.article.mapper.ArticleMapper;
 import com.example.monew.domain.article.mapper.ArticleViewMapper;
 import com.example.monew.domain.article.mapper.CursorPageMapper;
-import com.example.monew.domain.article.mapper.NaverArticleMapper;
+import com.example.monew.domain.article.mapper.ApiArticleMapper;
 import com.example.monew.domain.article.repository.ArticleRepository;
 import com.example.monew.domain.article.repository.ArticleViewRepository;
 import com.example.monew.domain.article.service.ArticleCollectionScheduler;
 import com.example.monew.domain.article.service.ArticleService;
-import com.example.monew.domain.comment.repository.CommentRepository;
+import com.example.monew.domain.article.storage.S3ArticleStorage;
 import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.entity.Keyword;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
+import com.example.monew.domain.notification.service.NotificationService;
 import com.example.monew.domain.user.entity.User;
 import com.example.monew.domain.user.repository.UserRepository;
 import com.example.monew.global.exception.domain.article.ArticleNotExistException;
+import com.rometools.rome.feed.synd.SyndEntry;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -28,7 +35,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
@@ -62,13 +72,13 @@ class ArticleServiceTest {
     private KeywordRepository keywordRepository;
 
     @Mock
-    private CommentRepository commentRepository;
-
-    @Mock
     private NaverNewsClient naverNewsClient;
 
     @Mock
-    private NaverArticleMapper naverArticleMapper;
+    private RssClient rssClient;
+
+    @Mock
+    private ApiArticleMapper apiArticleMapper;
 
     @Mock
     private ArticleMapper articleMapper;
@@ -79,11 +89,23 @@ class ArticleServiceTest {
     @Mock
     private ArticleViewMapper articleViewMapper;
 
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private S3ArticleStorage s3ArticleStorage;
+
     @InjectMocks
     private ArticleService articleService;
 
     @InjectMocks
     private ArticleCollectionScheduler articleCollectionScheduler;
+
+    @Mock
+    private MongoDbService mongoDbService;
+
+    @Mock
+    private UserActivityArticleViewMapper userActivityArticleViewMapper;
 
 
     @Nested
@@ -101,7 +123,7 @@ class ArticleServiceTest {
 
             Article article = new Article(
                     "",
-                    "",
+                    "http://www.example1@naver.com",
                     "",
                     LocalDateTime.now(),
                     "",
@@ -112,7 +134,7 @@ class ArticleServiceTest {
 
             Article article2 = new Article(
                     "",
-                    "",
+                    "http://www.example2@naver.com",
                     "",
                     LocalDateTime.now().minusDays(1),
                     "",
@@ -120,6 +142,34 @@ class ArticleServiceTest {
                     Instant.now(),
                     List.of(interest)
             );
+
+            Article article3 = new Article(
+                    "",
+                    "http://www.example3@naver.com",
+                    "",
+                    LocalDateTime.now().minusDays(2),
+                    "",
+                    false,
+                    Instant.now(),
+                    List.of(interest)
+            );
+
+            String validRss = """
+                            <?xml version="1.0" encoding="UTF-8"?>
+                            <rss version="2.0">
+                              <channel>
+                                <title>Test RSS</title>
+                                <link>https://example.com</link>
+                                <description>Test RSS Feed</description>
+                                <item>
+                                  <title>Test Article</title>
+                                  <link>https://example.com/article1</link>
+                                  <pubDate>Mon, 20 Jan 2026 10:00:00 GMT</pubDate>
+                                  <description>test</description>
+                                </item>
+                              </channel>
+                            </rss>
+                            """;
 
             NaverNewsResponse response = mock(NaverNewsResponse.class);
 
@@ -132,14 +182,20 @@ class ArticleServiceTest {
             when(naverNewsClient.search("비트코인"))
                     .thenReturn(response);
 
-            when(naverArticleMapper.toArticleList(any(), anyList()))
+            when(rssClient.fetch(anyString()))
+                    .thenReturn(validRss);
+
+            when(apiArticleMapper.toArticleList(anyList(), anyList()))
                     .thenReturn(List.of(article, article2));
+
+            when(apiArticleMapper.toArticle(any(SyndEntry.class), any(Source.class)))
+                    .thenReturn(article3);
 
             when(articleRepository.findAllBySourceUrlIn(anySet()))
-                    .thenReturn(List.of());
+                    .thenReturn(List.of(article2));
 
             when(articleRepository.saveAll(anyList()))
-                    .thenReturn(List.of(article, article2));
+                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             //when
             articleCollectionScheduler.collectArticles();
@@ -149,10 +205,12 @@ class ArticleServiceTest {
             verify(keywordRepository, times(1)).findAllByInterestId(any());
 
             verify(naverNewsClient, times(1)).search(anyString());
-            verify(naverArticleMapper, times(1)).toArticleList(any(), anyList());
+            verify(apiArticleMapper, times(1)).toArticleList(any(), anyList());
 
             verify(articleRepository, times(1)).findAllBySourceUrlIn(anySet());
-            verify(articleRepository, times(1)).saveAll(anyList());
+
+            verify(notificationService, times(1)).createInterestAlarm(any());
+            verify(articleRepository, times(2)).saveAll(anyList());
         }
     }
 
@@ -264,13 +322,13 @@ class ArticleServiceTest {
         }
 
         @Test
-        @DisplayName("정상적으로 기사 목록을 조회할 수 있다")
-        void findArticleList_success() {
+        @DisplayName("정상적으로 키워드로 기사 목록을 조회할 수 있다")
+        void getArticleList_withKeyword_success() {
             // given
             UUID userId = UUID.randomUUID();
 
             ArticleRequestDto articleRequestDto = new ArticleRequestDto(
-                    null,
+                    "비트코인",
                     null,
                     List.of(Source.NAVER),
                     null,
@@ -282,6 +340,19 @@ class ArticleServiceTest {
                     10
             );
 
+            List<ArticleQueryDto> contents = List.of(
+                    mock(ArticleQueryDto.class)
+            );
+
+            Slice<ArticleQueryDto> slice =
+                    new SliceImpl<>(contents, PageRequest.of(0, 10), false);
+
+            when(articleRepository.findArticleSlice(any(ArticleRequestDto.class), any(UUID.class), anyList(), any(Pageable.class)))
+                    .thenReturn(slice);
+
+            when(articleRepository.countArticleSlice(any(ArticleRequestDto.class), anyList()))
+                    .thenReturn(1L);
+
             when(cursorPageMapper.toResponseDto(any(), anyString(), anyLong()))
                     .thenReturn(mock(CursorPageResponseArticleDto.class));
 
@@ -292,6 +363,58 @@ class ArticleServiceTest {
             assertThat(response).isNotNull();
 
             verify(keywordRepository, never()).findAllByInterestId(any(UUID.class));
+            verify(articleRepository, times(1)).findArticleSlice(any(ArticleRequestDto.class), any(UUID.class), anyList(), any(Pageable.class));
+        }
+
+        @Test
+        @DisplayName("정상적으로 관심사로 기사 목록을 조회할 수 있다")
+        void getArticleList_withInterest_success() {
+            // given
+            UUID userId = UUID.randomUUID();
+            UUID interestId = UUID.randomUUID();
+
+            Interest interest = new Interest("코인");
+            ReflectionTestUtils.setField(interest, "id", interestId);
+
+            ArticleRequestDto articleRequestDto = new ArticleRequestDto(
+                    "",
+                    interestId,
+                    List.of(Source.NAVER),
+                    null,
+                    null,
+                    "publishDate",
+                    "DESC",
+                    null,
+                    null,
+                    10
+            );
+
+            List<ArticleQueryDto> contents = List.of(
+                    mock(ArticleQueryDto.class)
+            );
+
+            Slice<ArticleQueryDto> slice =
+                    new SliceImpl<>(contents, PageRequest.of(0, 10), false);
+
+            when(keywordRepository.findAllByInterestId(any(UUID.class)))
+                    .thenReturn(List.of(new Keyword("비트코인", interest)));
+
+            when(articleRepository.findArticleSlice(any(ArticleRequestDto.class), any(UUID.class), anyList(), any(Pageable.class)))
+                    .thenReturn(slice);
+
+            when(articleRepository.countArticleSlice(any(ArticleRequestDto.class), anyList()))
+                    .thenReturn(1L);
+
+            when(cursorPageMapper.toResponseDto(any(), anyString(), anyLong()))
+                    .thenReturn(mock(CursorPageResponseArticleDto.class));
+
+            // when
+            CursorPageResponseArticleDto response = articleService.getArticleList(articleRequestDto, userId);
+
+            // then
+            assertThat(response).isNotNull();
+
+            verify(keywordRepository, times(1)).findAllByInterestId(any(UUID.class));
             verify(articleRepository, times(1)).findArticleSlice(any(ArticleRequestDto.class), any(UUID.class), anyList(), any(Pageable.class));
         }
     }
@@ -317,6 +440,11 @@ class ArticleServiceTest {
 
             when(articleViewMapper.toResponseDto(any(ArticleView.class)))
                     .thenReturn(mock(ArticleViewDto.class));
+            when(userActivityArticleViewMapper.toUserActivityArticleViewDto(any())).thenReturn(
+
+                    mock(UserActivityArticleViewDto.class)
+            );
+            doNothing().when(mongoDbService).insertUserActivityArticleView(any(),any());
 
             // when
             ArticleViewDto response = articleService.recordArticleView(articleId, userId);
@@ -328,6 +456,155 @@ class ArticleServiceTest {
             verify(userRepository, times(1)).findById(userId);
             verify(articleViewRepository, times(1)).save(any(ArticleView.class));
             verify(articleViewMapper, times(1)).toResponseDto(any(ArticleView.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("기사 복구 테스트")
+    class ArticleRestoreTest {
+        @Test
+        @DisplayName("정상적으로 물리 삭제 된 기사를 복구할 수 있다")
+        void restoreArticle_whenHardDeleted_success() {
+            // given
+            LocalDateTime from = LocalDateTime.now().minusDays(1);
+            LocalDateTime to = LocalDateTime.now();
+
+            UUID articleId = UUID.randomUUID();
+            UUID articleId2 = UUID.randomUUID();
+            UUID articleId3 = UUID.randomUUID();
+
+            Article article = new Article(
+                    "",
+                    "http://www.example1@naver.com",
+                    "",
+                    LocalDateTime.now(),
+                    "",
+                    false,
+                    Instant.now(),
+                    List.of(mock(Interest.class))
+            );
+            ReflectionTestUtils.setField(article, "id", articleId);
+
+            Article article2 = new Article(
+                    "",
+                    "http://www.example2@naver.com",
+                    "",
+                    LocalDateTime.now().minusDays(1),
+                    "",
+                    false,
+                    Instant.now(),
+                    List.of(mock(Interest.class))
+            );
+            ReflectionTestUtils.setField(article2, "id", articleId2);
+
+            Article article3 = new Article(
+                    "",
+                    "http://www.example3@naver.com",
+                    "",
+                    LocalDateTime.now().minusDays(2),
+                    "",
+                    true,
+                    Instant.now(),
+                    List.of(mock(Interest.class))
+            );
+            ReflectionTestUtils.setField(article3, "id", articleId3);
+
+            when(s3ArticleStorage.loadArticlesFromBackup(from, to))
+                    .thenReturn(List.of(article, article2, article3));
+
+            when(articleRepository.findBySourceUrl(anyString()))
+                    .thenReturn(Optional.empty());
+
+            when(articleRepository.save(any(Article.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            when(articleMapper.toRestoreResultDto(anyList()))
+                    .thenReturn(mock(ArticleRestoreResultDto.class));
+
+            // when
+            ArticleRestoreResultDto response = articleService.restoreArticles(from, to);
+
+            // then
+            assertThat(response).isNotNull();
+
+            verify(s3ArticleStorage, times(1)).loadArticlesFromBackup(from, to);
+            verify(articleRepository, times(3)).findBySourceUrl(anyString());
+            verify(articleRepository, times(3)).save(any(Article.class));
+            verify(articleMapper, times(1)).toRestoreResultDto(anyList());
+        }
+        
+        @Test
+        @DisplayName("정상적으로 논리 삭제된 기사를 복구할 수 있다")
+        void restoreArticle_whenSoftDeleted_success() {
+            // given
+            LocalDateTime from = LocalDateTime.now().minusDays(1);
+            LocalDateTime to = LocalDateTime.now();
+
+            UUID articleId = UUID.randomUUID();
+            UUID articleId2 = UUID.randomUUID();
+            UUID articleId3 = UUID.randomUUID();
+
+            Article article = new Article(
+                    "",
+                    "http://www.example1@naver.com",
+                    "",
+                    LocalDateTime.now(),
+                    "",
+                    true,
+                    Instant.now(),
+                    List.of(mock(Interest.class))
+            );
+            ReflectionTestUtils.setField(article, "id", articleId);
+
+            Article article2 = new Article(
+                    "",
+                    "http://www.example2@naver.com",
+                    "",
+                    LocalDateTime.now().minusDays(1),
+                    "",
+                    true,
+                    Instant.now(),
+                    List.of(mock(Interest.class))
+            );
+            ReflectionTestUtils.setField(article2, "id", articleId2);
+
+            Article article3 = new Article(
+                    "",
+                    "http://www.example3@naver.com",
+                    "",
+                    LocalDateTime.now().minusDays(2),
+                    "",
+                    true,
+                    Instant.now(),
+                    List.of(mock(Interest.class))
+            );
+            ReflectionTestUtils.setField(article3, "id", articleId3);
+
+            when(s3ArticleStorage.loadArticlesFromBackup(from, to))
+                    .thenReturn(List.of(article, article2, article3));
+
+            when(articleRepository.findBySourceUrl(article.getSourceUrl()))
+                    .thenReturn(Optional.of(article));
+
+            when(articleRepository.findBySourceUrl(article2.getSourceUrl()))
+                    .thenReturn(Optional.of(article2));
+
+            when(articleRepository.findBySourceUrl(article3.getSourceUrl()))
+                    .thenReturn(Optional.of(article3));
+
+            when(articleMapper.toRestoreResultDto(anyList()))
+                    .thenReturn(mock(ArticleRestoreResultDto.class));
+
+            // when
+            ArticleRestoreResultDto response = articleService.restoreArticles(from, to);
+
+            // then
+            assertThat(response).isNotNull();
+
+            verify(s3ArticleStorage, times(1)).loadArticlesFromBackup(from, to);
+            verify(articleRepository, times(3)).findBySourceUrl(anyString());
+            verify(articleRepository, never()).save(any(Article.class));
+            verify(articleMapper, times(1)).toRestoreResultDto(anyList());
         }
     }
 }

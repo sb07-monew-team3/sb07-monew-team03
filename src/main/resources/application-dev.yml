@@ -4,6 +4,12 @@ spring:
     username: monew_user
     password: monew_password
     driver-class-name: org.postgresql.Driver
+  batch:
+    jdbc:
+      initialize-schema: never
+      table-prefix: batch.BATCH_
+    job:
+      enabled: false
   jpa:
     hibernate:
       ddl-auto: update
@@ -14,9 +20,6 @@ spring:
         show_sql: true
     open-in-view: false
 
-  logging:
-    level:
-      org.hibernate.SQL: debug
 server:
   port: 8080
 
@@ -29,6 +32,10 @@ springdoc:
     path: /api-docs
 
 logging:
+  level:
+    root: info
+    org.hibernate.SQL: debug
+    com.example.monew: debug
   file:
     path: logs
 
@@ -58,8 +65,11 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics
+
   endpoint:
+    metrics:
+      enabled: true
     health:
       show-details: always
   info:

@@ -1,5 +1,7 @@
 package com.example.monew.domain.interest.service;
 
+import com.example.monew.domain.activity.mapper.UserActivitySubscriptionMapper;
+import com.example.monew.domain.activity.service.MongoDbService;
 import com.example.monew.domain.interest.dto.SubscriptionDto;
 import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.entity.Keyword;
@@ -32,6 +34,8 @@ public class SubscriptionServiceImpl implements SubscriptionService{
     private final UserRepository userRepository;
     private final KeywordRepository keywordRepository;
     private final SubscriptionMapper subscriptionMapper;
+    private final MongoDbService mongoDbService;
+    private final UserActivitySubscriptionMapper userActivitySubscriptionMapper;
 
     @Override
     public SubscriptionDto subscribe(UUID interestId, UUID userId) {
@@ -51,6 +55,7 @@ public class SubscriptionServiceImpl implements SubscriptionService{
                 .toList();
 
         Long count = subscriptionRepository.countByInterestId(interestId);
+        mongoDbService.insertUserActivitySubscription(userId,userActivitySubscriptionMapper.toUserActivitySubscriptionDto(saved));
 
         return subscriptionMapper.toDto(saved, keywords, count);
     }
@@ -59,7 +64,7 @@ public class SubscriptionServiceImpl implements SubscriptionService{
     public void unsubscribe(UUID interestId, UUID userId) {
         Subscription subscription = subscriptionRepository.findSubscription(userId, interestId)
                 .orElseThrow(() -> new SubscriptionNotExistException(userId, interestId));
-
+        mongoDbService.updateWhenUnSubscription(interestId,userId);
         subscriptionRepository.delete(subscription);
     }
 

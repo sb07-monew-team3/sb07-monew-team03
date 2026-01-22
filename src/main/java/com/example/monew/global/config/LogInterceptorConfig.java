@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.util.UUID;
@@ -14,24 +15,38 @@ import java.util.UUID;
 public class LogInterceptorConfig implements HandlerInterceptor {
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String requestUserId;
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+
         String requestId = UUID.randomUUID().toString();
 
-        requestUserId=request.getHeader("Monew-Request-User-Id")==null
-                ? UUID.randomUUID().toString()
-                :request.getHeader("Monew-Request-User-Id");
+        String requestUserId = (request.getHeader("Monew-Request-User-Id") == null)
+                ? "anonymous"
+                : request.getHeader("Monew-Request-User-Id");
 
-        response.setHeader("MoNew-Request-Id",requestId);
-        MDC.put("requestId",requestId);
-        MDC.put("requestUserId",requestUserId);
-        MDC.put("requestIp",getClientIpv4(request));
-        MDC.put("requestUri",request.getRequestURI());
+        // MDC 세팅
+        MDC.put("requestId", requestId);
+        MDC.put("requestUserId", requestUserId);
+        MDC.put("requestIp", getClientIpv4(request));
+        MDC.put("requestUri", request.getRequestURI());
+
+        // 응답 헤더 설정
+        response.setHeader("Monew-Request-Id", requestId);
+
+        // 컨트롤러 진입 로그
+        if (handler instanceof HandlerMethod handlerMethod) {
+            log.info("[{}] {}.{}",
+                    request.getMethod(),
+                    handlerMethod.getBeanType().getSimpleName(),
+                    handlerMethod.getMethod().getName()
+            );
+        }
+
         return true;
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+        log.info("Request completed with status={}", response.getStatus());
         MDC.clear();
     }
 

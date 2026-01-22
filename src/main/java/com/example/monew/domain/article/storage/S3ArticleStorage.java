@@ -62,7 +62,6 @@ public class S3ArticleStorage {
                 .build();
     }
 
-    @Scheduled(fixedRate = BATCH_INTERVAL)
     @Transactional
     public void backupArticles() {
         try {

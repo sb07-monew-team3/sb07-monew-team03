@@ -26,7 +26,6 @@ public class CommentController implements CommentControllerDocs {
     private final CommentService commentService;
     private final CommentQueryService commentQueryService;
 
-    // ✅ Docs 시그니처와 동일하게 유지 (프론트 커서 방식)
     @Override
     @GetMapping
     public CommentCursorPageResponse<CommentResponse> list(

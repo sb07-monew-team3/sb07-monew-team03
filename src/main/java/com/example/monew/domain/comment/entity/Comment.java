@@ -26,6 +26,7 @@ public class Comment  extends BaseCreatableEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)

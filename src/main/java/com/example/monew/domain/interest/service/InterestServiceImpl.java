@@ -1,5 +1,6 @@
 package com.example.monew.domain.interest.service;
 
+import com.example.monew.domain.activity.service.MongoDbService;
 import com.example.monew.domain.interest.dto.CursorPageResponseInterestDto;
 import com.example.monew.domain.interest.dto.InterestDto;
 import com.example.monew.domain.interest.dto.InterestRegisterRequest;
@@ -17,11 +18,9 @@ import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +31,7 @@ public class InterestServiceImpl implements InterestService {
     private final KeywordRepository keywordRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final InterestMapper interestMapper;
+    private final MongoDbService mongoDbService;
 
     private static final double SIMILARITY_THRESHOLD = 0.8;
 
@@ -67,15 +67,18 @@ public class InterestServiceImpl implements InterestService {
         keywordRepository.saveAll(keywords);
 
         Long count = subscriptionRepository.countByInterestId(interestId);
-
-        return interestMapper.toDto(interest, request.keywords(), count, null);
+        InterestDto result = interestMapper.toDto(interest, request.keywords(), count, null);
+        mongoDbService.updateSubscription(result);
+        return result;
     }
 
     @Override
     public void delete(UUID interestId) {
         Interest interest = interestRepository.findById(interestId)
                 .orElseThrow(() -> new InterestNotExistException(interestId));
-
+        List<UUID> userIds = subscriptionRepository.findAllByInterestId(interestId).stream()
+                .map(x -> x.getUser().getId()).toList();
+        mongoDbService.updateWhenSubscriptionDelete(interestId,userIds);
         interestRepository.delete(interest);
     }
 
@@ -115,9 +118,11 @@ public class InterestServiceImpl implements InterestService {
             Interest lastInterest = interestList.get(interestList.size() - 1);
 
             if ("name".equals(orderBy)) {
-                nextCursor = interestDto.name();
+                String combined = interestDto.name() + "|" + lastInterest.getCreatedAt().toString();
+                nextCursor = Base64.getEncoder().encodeToString(combined.getBytes(StandardCharsets.UTF_8));
             } else if ("subscriberCount".equals(orderBy)) {
-                nextCursor = String.valueOf(interestDto.subscriberCount());
+                String combined = interestDto.subscriberCount() + "|" + lastInterest.getCreatedAt().toString();
+                nextCursor = Base64.getEncoder().encodeToString(combined.getBytes(StandardCharsets.UTF_8));
             }
 
             nextAfter = lastInterest.getCreatedAt();

@@ -1,5 +1,6 @@
 package com.example.monew.domain.interest.unit.service;
 
+import com.example.monew.domain.activity.service.MongoDbService;
 import com.example.monew.domain.interest.dto.CursorPageResponseInterestDto;
 import com.example.monew.domain.interest.dto.InterestDto;
 import com.example.monew.domain.interest.dto.InterestRegisterRequest;
@@ -17,6 +18,7 @@ import com.example.monew.domain.user.entity.User;
 import com.example.monew.domain.user.repository.UserRepository;
 import com.example.monew.global.exception.domain.interest.InterestDuplicateNameException;
 import com.example.monew.global.exception.domain.interest.InterestNotExistException;
+import com.mongodb.client.MongoClient;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -51,6 +53,10 @@ public class InterestServiceTest {
 
     @Mock
     private InterestMapper interestMapper;
+
+    @Mock
+    private MongoDbService mongoDbService;
+
 
     @InjectMocks
     private InterestServiceImpl interestService;
@@ -226,7 +232,7 @@ public class InterestServiceTest {
             when(interestRepository.findById(interest.getId()))
                     .thenReturn(Optional.of(interest));
             doNothing().when(keywordRepository).deleteByInterestId(interest.getId());
-
+            doNothing().when(mongoDbService).updateSubscription(any());
             when(subscriptionRepository.countByInterestId(interest.getId()))
                     .thenReturn(1L);
 
@@ -290,6 +296,7 @@ public class InterestServiceTest {
 
             when(interestRepository.findById(interest.getId()))
                     .thenReturn(Optional.of(interest));
+            doNothing().when(mongoDbService).updateWhenSubscriptionDelete(any(),any());
             // when
             interestService.delete(interest.getId());
 

@@ -20,4 +20,5 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, UUID
     boolean isSubscribed(@Param("userId") UUID userId,
                          @Param("interestId") UUID interestId);
 
+    List<Subscription> findAllByInterestId(UUID interestId);
 }
