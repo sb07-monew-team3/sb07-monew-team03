@@ -4,6 +4,9 @@ on:
   pull_request:
     branches: [develop]
 
+  push:
+    branches: [release]
+
 jobs:
   build:
     name: IntegrationTest
@@ -20,6 +23,7 @@ jobs:
       AWS_S3_SECRET_KEY: ${{secrets.AWS_S3_SECRET_KEY}}
       AWS_S3_REGION: ${{secrets.AWS_S3_REGION}}
       AWS_S3_BUCKET: ${{secrets.AWS_S3_BUCKET}}
+      MONGODB_CONNECTION_URL: ${{secrets.MONGODB_CONNECTION_URL}}
 
     services:
       postgres:
