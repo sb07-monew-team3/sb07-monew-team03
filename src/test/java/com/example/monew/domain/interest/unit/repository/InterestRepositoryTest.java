@@ -6,6 +6,7 @@ import com.example.monew.domain.interest.entity.Subscription;
 import com.example.monew.domain.interest.repository.InterestRepository;
 import com.example.monew.domain.interest.repository.KeywordRepository;
 import com.example.monew.domain.interest.repository.SubscriptionRepository;
+import com.example.monew.domain.notification.repository.NotificationRepository;
 import com.example.monew.domain.user.entity.User;
 import com.example.monew.domain.user.repository.UserRepository;
 import com.example.monew.global.config.JpaAuditingConfig;
@@ -21,7 +22,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,18 +48,27 @@ public class InterestRepositoryTest {
     private SubscriptionRepository subscriptionRepository;
 
     @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
     private EntityManager em;
 
     private Interest coding;
     private Interest hardware;
     private Interest finance;
 
+    private String createCursor(String value, Instant after) {
+        String combined = value + "|" + after.toString();
+        return Base64.getEncoder().encodeToString(combined.getBytes(StandardCharsets.UTF_8));
+    }
 
     @BeforeEach
     void setUp() {
 
         subscriptionRepository.deleteAll();
         keywordRepository.deleteAll();
+        notificationRepository.deleteAll();
+        userRepository.deleteAll();
         interestRepository.deleteAll();
 
         em.flush();
@@ -192,8 +204,8 @@ public class InterestRepositoryTest {
         String keyword = null; //전체 조회하기
         String orderBy = "name";
         String direction = "asc";
-        String cursor = "코딩";
-        Instant after = coding.getCreatedAt();
+        String cursor = createCursor("코딩", coding.getCreatedAt());
+        Instant after = null;
         int limit = 10;
 
         // when
@@ -214,8 +226,8 @@ public class InterestRepositoryTest {
         String keyword = null; //전체 조회하기
         String orderBy = "subscriberCount";
         String direction = "desc";
-        String cursor = "3";
-        Instant after = coding.getCreatedAt();
+        String cursor = createCursor("3", coding.getCreatedAt());
+        Instant after = null;
         int limit = 10;
 
         // when
