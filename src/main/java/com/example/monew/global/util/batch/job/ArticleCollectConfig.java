@@ -1,6 +1,7 @@
 package com.example.monew.global.util.batch.job;
 
 import com.example.monew.global.util.batch.JobStatus;
+import com.example.monew.global.util.batch.metrics.JobMetricsListener;
 import com.example.monew.global.util.batch.tasklet.ArticleCollectTasklet;
 import com.example.monew.global.util.batch.tasklet.NotificationDeleteTasklet;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +20,13 @@ public class ArticleCollectConfig {
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
     private final ArticleCollectTasklet articleCollectTasklet;
+    private final JobMetricsListener jobMetricsListener;
 
     @Bean
     public Job articleCollectJob(){
         return new JobBuilder(JobStatus.ARTICLE_COLLECT.getJobName(), jobRepository)
                 .start(articleCollectStep())
+                .listener(jobMetricsListener)
                 .build();
     }
 

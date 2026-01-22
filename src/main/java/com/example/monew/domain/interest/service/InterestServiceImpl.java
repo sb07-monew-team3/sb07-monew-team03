@@ -66,10 +66,8 @@ public class InterestServiceImpl implements InterestService {
 
         keywordRepository.saveAll(keywords);
 
-
         Long count = subscriptionRepository.countByInterestId(interestId);
         InterestDto result = interestMapper.toDto(interest, request.keywords(), count, null);
-        System.out.println("interest update : " + result );
         mongoDbService.updateSubscription(result);
         return result;
     }

@@ -1,6 +1,7 @@
 package com.example.monew.global.util.batch.job;
 
 import com.example.monew.global.util.batch.JobStatus;
+import com.example.monew.global.util.batch.metrics.JobMetricsListener;
 import com.example.monew.global.util.batch.tasklet.NotificationDeleteTasklet;
 import com.example.monew.global.util.batch.tasklet.UserDeleteTasklet;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +20,13 @@ public class NotificationDeleteConfig {
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
     private final NotificationDeleteTasklet notificationDeleteTasklet;
+    private final JobMetricsListener jobMetricsListener;
 
     @Bean
     public Job notificationDeleteJob(){
         return new JobBuilder(JobStatus.NOTIFICATION_DELETE.getJobName(), jobRepository)
                 .start(notificationDeleteStep())
+                .listener(jobMetricsListener)
                 .build();
     }
 
