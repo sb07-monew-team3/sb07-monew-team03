@@ -1,5 +1,7 @@
 package com.example.monew.domain.article.service;
 
+import com.example.monew.domain.activity.mapper.UserActivityArticleViewMapper;
+import com.example.monew.domain.activity.service.MongoDbService;
 import com.example.monew.domain.article.dto.*;
 import com.example.monew.domain.article.entity.Article;
 import com.example.monew.domain.article.entity.ArticleView;
@@ -42,6 +44,8 @@ public class ArticleService {
     private final ArticleViewMapper articleViewMapper;
 
     private final S3ArticleStorage s3ArticleStorage;
+    private final MongoDbService mongoDbService;
+    private final UserActivityArticleViewMapper userActivityArticleViewMapper;
 
     @Transactional
     public void deleteArticleSoft(UUID articleId) {
@@ -125,6 +129,7 @@ public class ArticleService {
         ArticleView saved = articleViewRepository.save(articleView);
 
         log.info("Article view recorded: articleId={}, userId={}", articleId, userId);
+        mongoDbService.insertUserActivityArticleView(userId, userActivityArticleViewMapper.toUserActivityArticleViewDto(saved));
         return articleViewMapper.toResponseDto(saved);
     }
 

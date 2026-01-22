@@ -1,6 +1,7 @@
 package com.example.monew.global.util.batch.job;
 
 import com.example.monew.global.util.batch.JobStatus;
+import com.example.monew.global.util.batch.metrics.JobMetricsListener;
 import com.example.monew.global.util.batch.tasklet.UserDeleteTasklet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
@@ -18,11 +19,13 @@ public class UserDeleteJobConfig {
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
     private final UserDeleteTasklet userDeleteTasklet;
+    private final JobMetricsListener jobMetricsListener;
 
     @Bean
     public Job userDeleteJob(){
         return new JobBuilder(JobStatus.USER_DELETE.getJobName(), jobRepository)
                 .start(userDeleteStep())
+                .listener(jobMetricsListener)
                 .build();
     }
 

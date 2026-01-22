@@ -46,4 +46,25 @@ public class UserActivityArticleViewMapper {
         );
 
     }
+
+    public UserActivityArticleViewDto toUserActivityArticleViewDto(ArticleView articleView){
+
+        Article article = articleView.getArticle();
+        User user = articleView.getUser();
+
+        return new UserActivityArticleViewDto(
+                articleView.getId(),
+                user.getId(),
+                articleView.getCreatedAt(),
+                article.getId(),
+                article.getSource(),
+                article.getSourceUrl(),
+                article.getTitle(),
+                article.getPublishDate(),
+                article.getSummary(),
+                0,
+                0
+        );
+
+    }
 }

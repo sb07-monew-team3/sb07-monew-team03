@@ -1,5 +1,6 @@
 package com.example.monew.domain.user.service;
 
+import com.example.monew.domain.activity.service.MongoDbService;
 import com.example.monew.domain.user.dto.UserDto;
 import com.example.monew.domain.user.dto.UserLoginRequest;
 import com.example.monew.domain.user.dto.UserRegisterRequest;
@@ -25,14 +26,16 @@ public class IUserService implements UserService{
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-
+    private final MongoDbService mongoDbService;
     @Override
     @Transactional
     public UserDto createUser(UserRegisterRequest request) {
         String email = request.email();
         if( userRepository.isEmailExist(email)) throw new UserEmailExistException(email);
         User save = userRepository.save(new User(request.email(), request.nickname(), request.password(), null));
-        return userMapper.toDto(save);
+        UserDto result = userMapper.toDto(save);
+        mongoDbService.insertUserActivity(result);
+        return result;
     }
 
     @Override
@@ -66,7 +69,9 @@ public class IUserService implements UserService{
         User user = userRepository.findById(userId).orElseThrow(()-> new UserNotExistException(userId));
         if(user.getDeletedAt()!=null) throw new UserNotExistException(userId);
         user.updateNickName(newNickName);
-        return userMapper.toDto(user);
+        UserDto result = userMapper.toDto(user);
+        mongoDbService.updateUserActivity(result);
+        return result;
     }
 
     @Override

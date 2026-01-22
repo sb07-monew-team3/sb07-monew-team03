@@ -34,4 +34,22 @@ public class UserActivityCommentLikeMapper {
         );
 
     }
+
+    public UserActivityCommentLikeDto toUserActivityCommentDto(CommentLikes commentLikes) {
+        Comment comment = commentLikes.getComment();
+        Article article = comment.getArticle();
+        User commentUser = comment.getUser();
+        return new UserActivityCommentLikeDto(
+                commentLikes.getId(),
+                commentLikes.getCreatedAt(),
+                comment.getId(),
+                article.getId(),
+                article.getTitle(),
+                commentUser.getId(),
+                commentUser.getNickName(),
+                comment.getContent(),
+                0,
+                comment.getCreatedAt()
+        );
+    }
 }

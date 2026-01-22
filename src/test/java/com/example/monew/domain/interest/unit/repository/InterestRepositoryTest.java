@@ -1,5 +1,7 @@
 package com.example.monew.domain.interest.unit.repository;
 
+import com.example.monew.domain.article.repository.ArticleViewRepository;
+import com.example.monew.domain.comment.repository.CommentRepository;
 import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.entity.Keyword;
 import com.example.monew.domain.interest.entity.Subscription;
@@ -51,6 +53,12 @@ public class InterestRepositoryTest {
     private NotificationRepository notificationRepository;
 
     @Autowired
+    private ArticleViewRepository articleViewRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
     private EntityManager em;
 
     private Interest coding;
@@ -65,6 +73,8 @@ public class InterestRepositoryTest {
     @BeforeEach
     void setUp() {
 
+        commentRepository.deleteAll();
+        articleViewRepository.deleteAll();
         subscriptionRepository.deleteAll();
         keywordRepository.deleteAll();
         notificationRepository.deleteAll();

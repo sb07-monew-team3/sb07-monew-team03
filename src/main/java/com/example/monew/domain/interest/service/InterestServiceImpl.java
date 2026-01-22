@@ -1,5 +1,6 @@
 package com.example.monew.domain.interest.service;
 
+import com.example.monew.domain.activity.service.MongoDbService;
 import com.example.monew.domain.interest.dto.CursorPageResponseInterestDto;
 import com.example.monew.domain.interest.dto.InterestDto;
 import com.example.monew.domain.interest.dto.InterestRegisterRequest;
@@ -30,6 +31,7 @@ public class InterestServiceImpl implements InterestService {
     private final KeywordRepository keywordRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final InterestMapper interestMapper;
+    private final MongoDbService mongoDbService;
 
     private static final double SIMILARITY_THRESHOLD = 0.8;
 
@@ -65,15 +67,18 @@ public class InterestServiceImpl implements InterestService {
         keywordRepository.saveAll(keywords);
 
         Long count = subscriptionRepository.countByInterestId(interestId);
-
-        return interestMapper.toDto(interest, request.keywords(), count, null);
+        InterestDto result = interestMapper.toDto(interest, request.keywords(), count, null);
+        mongoDbService.updateSubscription(result);
+        return result;
     }
 
     @Override
     public void delete(UUID interestId) {
         Interest interest = interestRepository.findById(interestId)
                 .orElseThrow(() -> new InterestNotExistException(interestId));
-
+        List<UUID> userIds = subscriptionRepository.findAllByInterestId(interestId).stream()
+                .map(x -> x.getUser().getId()).toList();
+        mongoDbService.updateWhenSubscriptionDelete(interestId,userIds);
         interestRepository.delete(interest);
     }
 
