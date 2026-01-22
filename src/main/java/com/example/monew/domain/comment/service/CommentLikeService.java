@@ -53,15 +53,14 @@ public class CommentLikeService {
     }
 
     public void unlike(UUID userId, UUID commentId) {
+        mongoDbService.updateWhenUnCommentLike(userId,commentId);
         getCommentOrThrow(commentId);
         getUserOrThrow(userId);
-
-
         if (!commentLikesRepository.existsByUserIdAndCommentId(userId, commentId)) {
             return;
         }
 
-        mongoDbService.updateWhenUnCommentLike(userId,commentId);
+
 
         commentLikesRepository.deleteByUserIdAndCommentId(userId, commentId);
     }
