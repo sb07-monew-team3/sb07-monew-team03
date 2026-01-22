@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -22,6 +23,7 @@ import java.util.*;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class IMongoDbService implements MongoDbService {
 
     private final MongoClient mongoClient;
@@ -116,7 +118,10 @@ public class IMongoDbService implements MongoDbService {
                 .append("likeCount", commentDto.likeCount())
                 .append("createdAt", commentDto.createdAt().toString());
         collection.updateOne(
-                Filters.exists("Comment"),
+                Filters.and(
+                        Filters.exists("Comment"),
+                        Filters.not(Filters.exists("Comment." + commentKey))
+                ),
                 Updates.set("Comment." + commentKey, comment)
         );
         collection.updateOne(
@@ -207,8 +212,8 @@ public class IMongoDbService implements MongoDbService {
         );
 
         collection.updateOne(
-                Filters.exists("comment." + commentId.toString()),
-                Updates.inc("comment." + commentId.toString() + ".likeCount", -1)
+                Filters.exists("Comment." + commentId.toString()),
+                Updates.inc("Comment." + commentId.toString() + ".likeCount", -1)
         );
 
         collection.updateOne(
