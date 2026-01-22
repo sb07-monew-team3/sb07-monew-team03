@@ -1,6 +1,7 @@
 package com.example.monew.domain.user.unit.service;
 
 
+import com.example.monew.domain.activity.service.MongoDbService;
 import com.example.monew.domain.user.dto.UserDto;
 import com.example.monew.domain.user.dto.UserLoginRequest;
 import com.example.monew.domain.user.dto.UserRegisterRequest;
@@ -38,6 +39,9 @@ public class UserServiceUnitTest {
     @Mock
     private UserMapper userMapper;
 
+    @Mock
+    private MongoDbService mongoDbService;
+
     @InjectMocks
     private IUserService userService;
 
@@ -62,6 +66,7 @@ public class UserServiceUnitTest {
         given(userRepository.save(any(User.class))).willAnswer(invocation -> invocation.getArgument(0));
         given(userRepository.isEmailExist(any(String.class))).willReturn(false);
         given(userMapper.toDto(any(User.class))).willReturn(userDto);
+        willDoNothing().given(mongoDbService).insertUserActivity(any(UserDto.class));
 
         UserRegisterRequest request = new UserRegisterRequest(user.getEmail(),user.getNickName(),user.getPassword());
 
@@ -74,6 +79,7 @@ public class UserServiceUnitTest {
         then(userRepository).should(times(1)).save(userArgumentCaptor.capture());
         then(userRepository).should(times(1)).isEmailExist(emailArgumentCaptor.capture());
         then(userMapper).should(times(1)).toDto(any(User.class));
+        then(mongoDbService).should(times(1)).insertUserActivity(any(UserDto.class));
 
         var isEmailExist = emailArgumentCaptor.getValue();
         var saveUser = userArgumentCaptor.getValue();
@@ -163,6 +169,7 @@ public class UserServiceUnitTest {
 
         given(userRepository.findById(any(UUID.class))).willReturn(Optional.of(user));
         given(userMapper.toDto(any(User.class))).willReturn(expectedDto);
+        willDoNothing().given(mongoDbService).updateUserActivity(any(UserDto.class));
 
         //when
         userService.updateUser(userId, request);
@@ -172,6 +179,7 @@ public class UserServiceUnitTest {
         //then
         then(userRepository).should(times(1)).findById(idArgumentCaptor.capture());
         then(userMapper).should(times(1)).toDto(userArgumentCaptor.capture());
+        then(mongoDbService).should(times(1)).updateUserActivity(any(UserDto.class));
 
         assertThat(actualResult).isEqualTo(newNickName);
         assertThat(idArgumentCaptor.getValue()).isEqualTo(userId);

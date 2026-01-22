@@ -153,8 +153,6 @@ public class CommentService {
         }
 
         comment.delete();
-        List<CommentLikes> commentLikes = commentLikesRepository.findAllByCommentId(commentId);
-        List<UUID> commentLikeIds = commentLikes.stream().map(BaseEntity::getId).toList();
         mongoDbService.updateWhenCommentDelete(comment.getArticle().getId());
     }
 

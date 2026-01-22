@@ -1,5 +1,8 @@
 package com.example.monew.domain.article.unit.service;
 
+import com.example.monew.domain.activity.dto.UserActivityArticleViewDto;
+import com.example.monew.domain.activity.mapper.UserActivityArticleViewMapper;
+import com.example.monew.domain.activity.service.MongoDbService;
 import com.example.monew.domain.article.client.naver.NaverNewsClient;
 import com.example.monew.domain.article.client.naver.NaverNewsResponse;
 import com.example.monew.domain.article.client.rss.RssClient;
@@ -97,6 +100,12 @@ class ArticleServiceTest {
 
     @InjectMocks
     private ArticleCollectionScheduler articleCollectionScheduler;
+
+    @Mock
+    private MongoDbService mongoDbService;
+
+    @Mock
+    private UserActivityArticleViewMapper userActivityArticleViewMapper;
 
 
     @Nested
@@ -431,6 +440,11 @@ class ArticleServiceTest {
 
             when(articleViewMapper.toResponseDto(any(ArticleView.class)))
                     .thenReturn(mock(ArticleViewDto.class));
+            when(userActivityArticleViewMapper.toUserActivityArticleViewDto(any())).thenReturn(
+
+                    mock(UserActivityArticleViewDto.class)
+            );
+            doNothing().when(mongoDbService).insertUserActivityArticleView(any(),any());
 
             // when
             ArticleViewDto response = articleService.recordArticleView(articleId, userId);

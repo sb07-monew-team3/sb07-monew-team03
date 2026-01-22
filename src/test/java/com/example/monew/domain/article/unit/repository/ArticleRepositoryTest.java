@@ -78,10 +78,10 @@ class ArticleRepositoryTest {
 
         notificationRepository.deleteAll();
         articleViewRepository.deleteAll();
+        commentRepository.deleteAll();
         userRepository.deleteAll();
         articleRepository.deleteAll();
         interestRepository.deleteAll();
-        commentRepository.deleteAll();
 
         em.flush();
         em.clear();

@@ -2,6 +2,7 @@ package com.example.monew.domain.activity.unit.controller;
 
 import com.example.monew.domain.activity.controller.UserActivityController;
 import com.example.monew.domain.activity.dto.UserActivityDto;
+import com.example.monew.domain.activity.service.IMongoDbService;
 import com.example.monew.domain.activity.service.UserActivityService;
 import com.example.monew.domain.user.util.TestFixture;
 import org.assertj.core.api.Assertions;
@@ -32,7 +33,7 @@ public class UserActivityControllerUnitTest {
 
     private static final Logger log = LoggerFactory.getLogger(UserActivityControllerUnitTest.class);
     @MockitoBean
-    UserActivityService userActivityService;
+    IMongoDbService mongoDbService;
 
     @Autowired
     MockMvc mockMvc;
@@ -44,7 +45,7 @@ public class UserActivityControllerUnitTest {
     void getUserActivity_validUserActivity_success() throws Exception {
         UUID expectedId = UUID.randomUUID();
         UserActivityDto userActivityDto = testFixture.userActivityDtoFactory();
-        given(userActivityService.getUserActivity(eq(expectedId)))
+        given(mongoDbService.getUserActivity(eq(expectedId)))
                 .willReturn(userActivityDto);
 
         mockMvc.perform(get("/api/user-activities/"+ expectedId.toString()))
@@ -52,7 +53,7 @@ public class UserActivityControllerUnitTest {
                 .andDo(result -> log.info(result.getResponse().getContentAsString()));
 
         ArgumentCaptor<UUID> idArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
-        then(userActivityService).should(times(1)).getUserActivity(idArgumentCaptor.capture());
+        then(mongoDbService).should(times(1)).getUserActivity(idArgumentCaptor.capture());
         assertThat(idArgumentCaptor.getValue()).isEqualTo(expectedId);
 
     }

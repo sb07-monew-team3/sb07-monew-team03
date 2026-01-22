@@ -1,5 +1,8 @@
 package com.example.monew.domain.interest.unit.service;
 
+import com.example.monew.domain.activity.dto.UserActivitySubscriptionDto;
+import com.example.monew.domain.activity.mapper.UserActivitySubscriptionMapper;
+import com.example.monew.domain.activity.service.MongoDbService;
 import com.example.monew.domain.interest.dto.SubscriptionDto;
 import com.example.monew.domain.interest.entity.Interest;
 import com.example.monew.domain.interest.entity.Keyword;
@@ -28,8 +31,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class subscriptionServiceTest {
@@ -51,6 +53,12 @@ public class subscriptionServiceTest {
 
     @InjectMocks
     private SubscriptionServiceImpl subscriptionService;
+
+    @Mock
+    private UserActivitySubscriptionMapper userActivitySubscriptionMapper;
+
+    @Mock
+    private MongoDbService mongoDbService;
 
     @Nested
     @DisplayName("관심사 구독")
@@ -91,6 +99,17 @@ public class subscriptionServiceTest {
 
             when(subscriptionRepository.countByInterestId(interestId))
                     .thenReturn(1L);
+            when(userActivitySubscriptionMapper.toUserActivitySubscriptionDto(any(Subscription.class))).thenReturn(
+                    new UserActivitySubscriptionDto(
+                            interestId,
+                            interestId,
+                            "hi",
+                            new String[]{"hello"},
+                            1,
+                            Instant.now()
+                    )
+            );
+            doNothing().when(mongoDbService).insertUserActivitySubscription(any(),any());
 
             SubscriptionDto subscriptionDto = new SubscriptionDto(
                     subscription.getId(),
@@ -130,6 +149,7 @@ public class subscriptionServiceTest {
 
             when(subscriptionRepository.findSubscription(userId, interestId))
                     .thenReturn(Optional.of(subscription));
+            doNothing().when(mongoDbService).updateWhenUnSubscription(any(),any());
 
             // when
             subscriptionService.unsubscribe(interestId, userId);

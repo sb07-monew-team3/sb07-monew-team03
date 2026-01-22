@@ -1,5 +1,8 @@
 package com.example.monew.domain.comment.unit.service;
 
+import com.example.monew.domain.activity.dto.UserActivityCommentDto;
+import com.example.monew.domain.activity.mapper.UserActivityCommentMapper;
+import com.example.monew.domain.activity.service.MongoDbService;
 import com.example.monew.domain.article.entity.Article;
 import com.example.monew.domain.comment.dto.CommentResponse;
 import com.example.monew.domain.comment.entity.Comment;
@@ -13,6 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
@@ -41,6 +46,13 @@ class CommentServiceTest {
 
     @InjectMocks
     CommentService commentService;
+
+    @Mock
+    MongoDbService mongoDbService;
+
+    @Mock
+    UserActivityCommentMapper userActivityCommentMapper;
+
 
     @Test
     @DisplayName("list(Pageable): createdAt 정렬")
@@ -218,6 +230,16 @@ class CommentServiceTest {
 
         when(entityManager.find(User.class, userId)).thenReturn(user);
         when(entityManager.find(Article.class, articleId)).thenReturn(article);
+        doNothing().when(mongoDbService)
+                .insertUserActivityComment(any(UUID.class),any(UserActivityCommentDto.class));
+        when(userActivityCommentMapper.toUserActivityCommentDto(any(Comment.class))).thenReturn(
+                new UserActivityCommentDto(
+                        userId, articleId, "hi", userId,"hi",
+                        "hi",
+                        3,
+                        Instant.now()
+                )
+        );
 
         Comment saved = new Comment(user, article, "hi", false);
         UUID savedId = UUID.randomUUID();
@@ -261,7 +283,7 @@ class CommentServiceTest {
         when(commentRepository.findByIdAndIsDeletedFalse(commentId)).thenReturn(Optional.of(comment));
         when(commentLikesRepository.countByComment_Id(commentId)).thenReturn(0L);
         when(commentLikesRepository.existsByUserIdAndCommentId(userId, commentId)).thenReturn(false);
-
+        doNothing().when(mongoDbService).updateUserActivityComment(any(CommentResponse.class));
         CommentResponse res = commentService.update(userId, commentId, " new ");
 
         assertThat(res).isNotNull();
@@ -300,6 +322,7 @@ class CommentServiceTest {
         ReflectionTestUtils.setField(comment, "id", commentId);
 
         when(commentRepository.findByIdAndIsDeletedFalse(commentId)).thenReturn(Optional.of(comment));
+        doNothing().when(mongoDbService).updateWhenCommentDelete(any());
 
         commentService.softDelete(null, commentId);
 
