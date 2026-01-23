@@ -64,7 +64,13 @@ jobs:
           SPRING_DATASOURCE_USERNAME: monew_user
           SPRING_DATASOURCE_PASSWORD: monew_password
           SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+
         run: ./gradlew test
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./build/reports/jacoco/test/jacocoTestReport.xml
 
       - name: Upload jacoco report to PR
         uses: madrapps/jacoco-report@v1.6.1
