@@ -13,28 +13,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserActivityCommentLikeMapper {
 
-    private final CommentLikesRepository commentLikesRepository;
-
-    public UserActivityCommentLikeDto toDto(CommentLikes commentLike){
-        Comment comment = commentLike.getComment();
-        Article article = comment.getArticle();
-        User commentUser = commentLike.getUser();
-        int likeCount = Math.toIntExact(commentLikesRepository.countByCommentId(comment.getId()));
-        return new UserActivityCommentLikeDto(
-                commentLike.getId(),
-                commentLike.getCreatedAt(),
-                comment.getId(),
-                article.getId(),
-                article.getTitle(),
-                commentUser.getId(),
-                commentUser.getNickName(),
-                comment.getContent(),
-                likeCount,
-                comment.getCreatedAt()
-        );
-
-    }
-
     public UserActivityCommentLikeDto toUserActivityCommentDto(CommentLikes commentLikes) {
         Comment comment = commentLikes.getComment();
         Article article = comment.getArticle();

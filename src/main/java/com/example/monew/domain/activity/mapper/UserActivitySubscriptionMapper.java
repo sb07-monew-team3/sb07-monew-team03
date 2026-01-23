@@ -13,27 +13,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserActivitySubscriptionMapper {
 
-    private final SubscriptionRepository subscriptionRepository;
     private final KeywordRepository keywordRepository;
-
-    public UserActivitySubscriptionDto toDto(Subscription subscription){
-
-        Interest interest = subscription.getInterest();
-        int subscriptionCount = Math.toIntExact(subscriptionRepository.countByInterestId(interest.getId()));
-        String[] keywords = keywordRepository.findAllByInterestId(interest.getId())
-                .stream()
-                .map(Keyword::getKeyword)
-                .toArray(String[]::new);
-
-        return new UserActivitySubscriptionDto(
-                subscription.getId(),
-                interest.getId(),
-                interest.getName(),
-                keywords,
-                subscriptionCount,
-                subscription.getCreatedAt()
-        );
-    }
 
     public UserActivitySubscriptionDto toUserActivitySubscriptionDto(Subscription subscription){
 
