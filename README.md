@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/sb07-monew-team3/sb07-monew-team03/branch/feature%2FCD-hjy/graph/badge.svg?token=6PE3IV96TS)](https://codecov.io/gh/sb07-monew-team3/sb07-monew-team03)
+
 ## 📰 모두의 뉴스를 모은팀 
 ### 📒 팀 협업 문서 링크
 https://www.notion.so/monew-2de7885bebca8048a324dcb10c6e8315
@@ -122,4 +124,3 @@ https://www.notion.so/monew-2de7885bebca8048a324dcb10c6e8315
 ## 프로젝트 회고록 
 <img width="1716" height="792" alt="image" src="https://github.com/user-attachments/assets/d191c902-de55-4282-9430-fecc5fa7cb3b" />
 
-[![codecov](https://codecov.io/gh/sb07-monew-team3/sb07-monew-team03/branch/feature%2FCD-hjy/graph/badge.svg?token=6PE3IV96TS)](https://codecov.io/gh/sb07-monew-team3/sb07-monew-team03)
