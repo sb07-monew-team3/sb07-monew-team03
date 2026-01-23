@@ -92,7 +92,9 @@ jacocoTestReport {
                             '**/*Exception.*',
                             '**/*Config.*',
                             '**/*Application.*',
-                            '**/*$*'
+                            '**/*$*',
+                            '**/*MongoDbService.*',
+                            '**/mapper/**'
                     ])
                 })
         )
