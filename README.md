@@ -124,11 +124,17 @@ https://www.notion.so/monew-2de7885bebca8048a324dcb10c6e8315
 ## 프로젝트 회고록 
 ### 팀 발표 영상 및 발표 자료
 **팀 영상** : https://www.youtube.com/watch?v=Q4xXD5uUGGE
+
 **팀 발표자료** : 
 
 ### 개인 페이지
+
 **김진우** :
+
 **장미연** :
+
 **조성만** :
+
 **최태훈** : https://www.notion.so/HR-Bank-_-2bf844450e228043a132c2cd49313db6
+
 **황준영** :
