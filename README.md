@@ -122,5 +122,13 @@ https://www.notion.so/monew-2de7885bebca8048a324dcb10c6e8315
 ## 구현 홈페이지
 **http://ec2-13-125-235-192.ap-northeast-2.compute.amazonaws.com/#/interests?direction=DESC**
 ## 프로젝트 회고록 
-<img width="1716" height="792" alt="image" src="https://github.com/user-attachments/assets/d191c902-de55-4282-9430-fecc5fa7cb3b" />
+### 팀 발표 영상 및 발표 자료
+**팀 영상** : https://www.youtube.com/watch?v=Q4xXD5uUGGE
+**팀 발표자료** : 
 
+### 개인 페이지
+**김진우** :
+**장미연** :
+**조성만** :
+**최태훈** : https://www.notion.so/HR-Bank-_-2bf844450e228043a132c2cd49313db6
+**황준영** :
