@@ -205,6 +205,7 @@ public class IMongoDbService implements MongoDbService {
 
     @Override
     public void updateWhenUnCommentLike(UUID userId, UUID commentId) {
+
         MongoCollection<Document> collection = getCollection("userActivity");
         collection.updateOne(
                 Filters.exists("UserActivity." + userId.toString()),

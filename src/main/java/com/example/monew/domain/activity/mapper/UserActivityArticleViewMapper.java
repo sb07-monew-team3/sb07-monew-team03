@@ -16,37 +16,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserActivityArticleViewMapper {
 
-    private final CommentRepository commentRepository;
-    private final ArticleViewRepository articleViewRepository;
-
-    public UserActivityArticleViewDto toDto(ArticleView articleView){
-
-        Article article = articleView.getArticle();
-        User user = articleView.getUser();
-        long validCommentCount = commentRepository.findByArticle_Id(article.getId()).stream()
-                .filter(x -> !x.isDeleted())
-                .count();
-
-        int articleCommentCount = Math.toIntExact(validCommentCount);
-        int articleViewCount = Math.toIntExact(articleViewRepository.countByArticleId(article.getId()));
-
-
-        return new UserActivityArticleViewDto(
-                articleView.getId(),
-                user.getId(),
-                articleView.getCreatedAt(),
-                article.getId(),
-                article.getSource(),
-                article.getSourceUrl(),
-                article.getTitle(),
-                article.getPublishDate(),
-                article.getSummary(),
-                articleCommentCount,
-                articleViewCount
-        );
-
-    }
-
     public UserActivityArticleViewDto toUserActivityArticleViewDto(ArticleView articleView){
 
         Article article = articleView.getArticle();

@@ -92,7 +92,8 @@ jacocoTestReport {
                             '**/*Exception.*',
                             '**/*Config.*',
                             '**/*Application.*',
-                            '**/*$*'
+                            '**/*$*',
+                            '**/mapper/**'
                     ])
                 })
         )
