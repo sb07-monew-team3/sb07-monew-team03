@@ -155,4 +155,4 @@ https://www.notion.so/monew-2de7885bebca8048a324dcb10c6e8315
 
 **최태훈** : https://www.notion.so/HR-Bank-_-2bf844450e228043a132c2cd49313db6
 
-**황준영** :
+**황준영** : https://officialhwempire.github.io/posts/monew/
