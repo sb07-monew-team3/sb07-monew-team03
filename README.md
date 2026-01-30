@@ -127,90 +127,8 @@ https://www.notion.so/monew-2de7885bebca8048a324dcb10c6e8315
 
 ## 파일 구조 
 ```
-C:.
-|   .env
-|   .gitattributes
-|   .gitignore
-|   build.gradle
-|   docker-compose.yml
-|   Dockerfile
-|   gradlew
-|   gradlew.bat
-|   LICENSE
-|   loki-config.yml
-|   prometheus.yml
-|   promtail-config.yml
-|   settings.gradle
-|   
-|           
-+---.gradle
-|   
-|     
-|   
-|  
-|                                          
-|   +---generated
-|   |   +---querydsl
-|   |   |   \---com
-|   |   |       \---example
-|   |   |           \---monew
-|   |   |               \---domain
-|   |   |                   +---article
-|   |   |                   |   \---entity
-|   |   |                   |           QArticle.java
-|   |   |                   |           QArticleView.java
-|   |   |                   |           
-|   |   |                   +---base
-|   |   |                   |       QBaseCreatableEntity.java
-|   |   |                   |       QBaseEntity.java
-|   |   |                   |       
-|   |   |                   +---comment
-|   |   |                   |   \---entity
-|   |   |                   |           QComment.java
-|   |   |                   |           QCommentLikes.java
-|   |   |                   |           
-|   |   |                   +---interest
-|   |   |                   |   \---entity
-|   |   |                   |           QInterest.java
-|   |   |                   |           QKeyword.java
-|   |   |                   |           QSubscription.java
-|   |   |                   |           
-|   |   |                   +---notification
-|   |   |                   |   \---entity
-|   |   |                   |           QNotifications.java
-|   |   |                   |           
-|   |   |                   \---user
-|   |   |                       \---entity
-|   |   |                               QUser.java
-|   |   |                               
-|   |   \---sources
-|   |       \---headers
-|   |           \---java
-|   |               +---main
-|   |               \---test
-|   +---jacoco
-|   |       test.exec
-|   |       
-|   +---reports
-|   |   +---jacoco
-|   |   +---problems
-|   |   |       problems-report.html
-|   |   |       
-|   |   \---tests
-|   |       \---test
-|   |              index.html
-|   |              
-|   |                   
-|   +---resources
-|      \---main
-|             application-dev.yml
-|             application-docker.yml
-|             application.yml
-|             logback-spring.xml
-|   
-|           
-|       
-\---src
+C:.      
+|---src
     +---main
     |   +---java
     |   |   \---com
@@ -506,7 +424,7 @@ C:.
     |   |                                   NotificationDeleteTasklet.java
     |   |                                   UserDeleteTasklet.java
     |   |                                   
-    |   \---resources
+       \---resources
               application-dev.yml
               application-docker.yml
               application.yml
