@@ -448,63 +448,15 @@ C:.
 ### 팀 발표 영상 및 발표 자료
 **팀 영상** : https://www.youtube.com/watch?v=Q4xXD5uUGGE
 
-**팀 발표자료** : 
-
-### 개인 개발리포트- 자동 배포 및 코드 커버리지 테스트 구현
-
-**로그 모니터링 구현**
- - 운영 서버 로그 S3에 저장
- - 요청마다 요청 url,엔드 포인트 , 요청 사용자 ID 로깅 구
-
-## ✨ 주요 기능
-### 📰 뉴스 기사
-- 정기 배치 작업을 통한 뉴스 기사 수집
-
-- 기사 백업 및 복구 기능
-
-- 기사 조회 및 목록 제공
-### 💬 댓글 & 좋아요
-- 기사별 댓글 등록 / 수정 / 삭제
-
-- 좋아요 등록 및 취소 (중복 요청에도 안전)
-
-- 등록순 / 좋아요순 정렬 지원
-
-- 커서 기반 페이지네이션으로 중복·누락 없는 조회
-### 💡 관심사
-### 🙍 유저 & 유저 활동 내역
-- 유저 등록
-- 로그인 유효성 검사 
-- 댓글 작성 / 좋아요 / 기사 조회 활동 기록
-### 🚨 알림
-
-## 파일 구조 
-< 나중에 넣을 예정>
-
-## ERD 다이어 그램
-<img width="1590" height="1093" alt="image" src="https://github.com/user-attachments/assets/b109c82f-b481-4d24-8e85-d58ea309cb67" />
-
-## 클래스 다이어그램
-<img width="1660" height="821" alt="image" src="https://github.com/user-attachments/assets/b6b21331-193b-4e46-a42e-495f2edf2d11" />
-
-## 배포 다이어그램
-<img width="1751" height="810" alt="image" src="https://github.com/user-attachments/assets/9e4b1265-454e-4ca3-9588-42a5d151141f" />
-
-## 구현 홈페이지
-**http://ec2-13-125-235-192.ap-northeast-2.compute.amazonaws.com/#/interests?direction=DESC**
-## 프로젝트 회고록 
-### 팀 발표 영상 및 발표 자료
-**팀 영상** : https://www.youtube.com/watch?v=Q4xXD5uUGGE
-
-**팀 발표자료** : 
+**팀 발표자료** : [3팀_monew_발표자료.pdf](https://github.com/user-attachments/files/24951881/3._monew_.pdf)
 
 ### 개인 개발리포트
 
-**김진우** :
+**김진우** : https://www.notion.so/2f27885bebca80ac8e61cdf155628669?source=copy_link
 
-**장미연** :
+**장미연** : https://www.notion.so/2f40e41ef6048050b5b5f469968d003a?source=copy_link
 
-**조성만** :
+**조성만** : [https://smjoe0302.tistory.com/29](https://smjoe0302.tistory.com/29)
 
 **최태훈** : https://www.notion.so/MONEW-2ea844450e22802cbdc2fcb94a19a99f?source=copy_link
 
