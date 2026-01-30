@@ -6,7 +6,7 @@ https://www.notion.so/monew-2de7885bebca8048a324dcb10c6e8315
 
 ## 🤝 팀원 구성
 #### 김진우 https://github.com/jinwo-o
-#### 장미연 https://github.com/pring7th
+#### 장미연 https://github.com/spring7th
 #### 조성만 https://github.com/BetterCodings
 #### 최태훈 https://github.com/Tae705
 #### 황준영 https://github.com/OfficialHwempire
